@@ -4,7 +4,6 @@ import (
 	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/websocket"
-	"log"
 	"time"
 )
 
