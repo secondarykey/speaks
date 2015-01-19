@@ -2,12 +2,10 @@ var ws = new WebSocket("ws://" + location.host + "/ws/");
 
 ws.onmessage = function(e) {
 	var msg = $.parseJSON(e.data);
-console.log(e.data)
-console.log(msg)
 	var linkTag = $('<a/>');
 	linkTag.text(msg.Content);
 	linkTag.addClass('list-group-item');
-	$('#speakTitle').after(linkTag);
+	$('#speakArea').after(linkTag);
 }
 
 $(document).ready(function() {
