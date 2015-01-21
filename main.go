@@ -9,9 +9,13 @@ import (
 )
 
 func main() {
+	var err error
 
 	log.Println("############### start DBServer")
-	db.Listen("db/data/SpeakAll.db")
+	err = db.Listen("db/data/SpeakAll.db")
+	if err != nil {
+		panic(err)
+	}
 
 	log.Println("############### start WSServer")
 	server := ws.NewServer()

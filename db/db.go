@@ -12,11 +12,15 @@ var inst *sql.DB
 func Listen(path string) error {
 	var err error
 	inst, err = sql.Open("sqlite3", path)
+	if err != nil {
+		return err
+	}
+	err = createInitTable()
+	if err != nil {
+		return err
+	}
 
-	createInitTable()
-	insertInitTable()
-
-	return err
+	return insertInitTable()
 }
 
 func Exec(sql string) (sql.Result, error) {
@@ -32,7 +36,7 @@ func createInitTable() {
 	log.Println(err)
 }
 
-func insertInitTable() {
+func insertInitTable() error {
 	tx, err := inst.Begin()
 	if err != nil {
 		fmt.Println(err)
@@ -40,13 +44,20 @@ func insertInitTable() {
 	}
 
 	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@local.host", "password")
+	if err != nil {
+		return err
+	}
 	userId, _ := rslt.LastInsertId()
 
 	rslt, err = insertRole(tx, "管理者", "Admin")
-	log.Println(err)
+	if err != nil {
+		return err
+	}
 
 	rslt, err = insertUserRole(tx, int(userId), "Admin")
-	log.Println(err)
+	if err != nil {
+		return err
+	}
 
 	tx.Commit()
 }
