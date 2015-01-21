@@ -4,54 +4,52 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 )
 
 var inst *sql.DB
 
-func Listen(path string) {
+func Listen(path string) error {
 	var err error
 	inst, err = sql.Open("sqlite3", path)
-	if err != nil {
-		panic(err.Error())
-	}
+
+	createInitTable()
+	insertInitTable()
+
+	return err
 }
 
-/* create
-sqls := []string{
-	"create table foo (id integer not null primary key, name text)",
-	"delete from foo",
+func Exec(sql string) (sql.Result, error) {
+	return inst.Exec(sql)
 }
-for _, sql := range sqls {
-	_, err = db.Exec(sql)
-	if err != nil {
-		fmt.Printf("%q: %s\n", err, sql)
-		return
-	}
-}
-*/
 
-/* tx insert
-tx, err := db.Begin()
-if err != nil {
-	fmt.Println(err)
-	return
+func createInitTable() {
+	err := createUserTable()
+	log.Println(err)
+	err = createRoleTable()
+	log.Println(err)
+	err = createUserRoleTable()
+	log.Println(err)
 }
-stmt, err := tx.Prepare("insert into foo(id, name) values(?, ?)")
-if err != nil {
-	fmt.Println(err)
-	return
-}
-defer stmt.Close()
 
-for i := 0; i < 100; i++ {
-	_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%03d", i))
+func insertInitTable() {
+	tx, err := inst.Begin()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@local.host", "password")
+	userId, _ := rslt.LastInsertId()
+
+	rslt, err = insertRole(tx, "管理者", "Admin")
+	log.Println(err)
+
+	rslt, err = insertUserRole(tx, int(userId), "Admin")
+	log.Println(err)
+
+	tx.Commit()
 }
-tx.Commit()
-*/
 
 func Select() {
 
@@ -61,7 +59,6 @@ func Select() {
 		return
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var id int
 		var name string
