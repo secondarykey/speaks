@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
 )
 
 var inst *sql.DB
@@ -27,20 +26,22 @@ func Exec(sql string) (sql.Result, error) {
 	return inst.Exec(sql)
 }
 
-func createInitTable() {
+func createInitTable() error {
 	err := createUserTable()
-	log.Println(err)
+	if err != nil {
+		return nil
+	}
 	err = createRoleTable()
-	log.Println(err)
-	err = createUserRoleTable()
-	log.Println(err)
+	if err != nil {
+		return nil
+	}
+	return createUserRoleTable()
 }
 
 func insertInitTable() error {
 	tx, err := inst.Begin()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@local.host", "password")
@@ -60,6 +61,7 @@ func insertInitTable() error {
 	}
 
 	tx.Commit()
+	return nil
 }
 
 func Select() {

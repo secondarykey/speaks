@@ -3,14 +3,16 @@ package main
 import (
 	"./db"
 	ws "./discussion"
+	"github.com/gorilla/sessions"
 	"html/template"
 	"log"
 	"net/http"
 )
 
+var store = sessions.NewCookieStore([]byte("-secret-dao"))
+
 func main() {
 	var err error
-
 	log.Println("############### start DBServer")
 	err = db.Listen("db/data/SpeakAll.db")
 	if err != nil {
@@ -32,8 +34,14 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+	user := session.Values["User"]
+	tmplName := "webroot/templates/login.tmpl"
+	if user != nil {
+		tmplName = "webroot/templates/chat.tmpl"
+	}
 	tmpl := template.Must(
-		template.ParseFiles("webroot/templates/chat.tmpl"))
+		template.ParseFiles(tmplName))
 	tc := make(map[string]interface{})
 	if err := tmpl.Execute(w, tc); err != nil {
 		http.Error(w, err.Error(),
