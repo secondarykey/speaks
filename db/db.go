@@ -51,11 +51,17 @@ func insertInitTable() error {
 	userId, _ := rslt.LastInsertId()
 
 	rslt, err = insertRole(tx, "管理者", "Admin")
+	rslt, err = insertRole(tx, "議題編集者", "Chairman")
+
+	rslt, err = insertRole(tx, "発言者", "Speaker")
+	rslt, err = insertRole(tx, "閲覧者", "Viewer")
 	if err != nil {
 		return err
 	}
 
 	rslt, err = insertUserRole(tx, int(userId), "Admin")
+	rslt, err = insertUserRole(tx, int(userId), "Chairman")
+	rslt, err = insertUserRole(tx, int(userId), "Speaker")
 	if err != nil {
 		return err
 	}
