@@ -44,7 +44,7 @@ func insertInitTable() error {
 		return err
 	}
 
-	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@local.host", "password")
+	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@localhost", "password")
 	if err != nil {
 		return err
 	}

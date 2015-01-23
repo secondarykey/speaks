@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 )
 
 type User struct {
@@ -36,4 +37,19 @@ func createMD5(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func SelectUser(email, pswd string) (*User, error) {
+
+	user := &User{}
+	err := inst.QueryRow("select id, name ,email,password from user where email = ?", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Password == createMD5(pswd) {
+		return user, nil
+	}
+	return nil, errors.New("パスワードが違うよ")
+
 }
