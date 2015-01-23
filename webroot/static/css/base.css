@@ -125,3 +125,32 @@ placeholders {
   border-radius: 50%;
 }
 
+div.icon-block {
+	float:left;
+	margin-right:15px;
+}
+
+img.speak-icon {
+	width:64px;
+	height:64px;
+}
+
+div.speak-block {
+}
+
+pre.speak-me {
+}
+
+div.icon-block-me {
+	float:right;
+	margin-left:15px;
+}
+
+div.speak-block-me {
+	text-align:right;
+}
+
+pre.speak-me {
+	background-color:papayawhip;
+}
+

@@ -37,7 +37,7 @@
 
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">UserName</a></li>
+            <li><a href="#">{{.User.Name}}</a></li>
             <li><a href="/logout">Logout</a></li>
           </ul>
 
@@ -60,28 +60,43 @@
 
         <div class="col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2 main">
 
+          <div class="list-group" id="speakList">
+            <div id="speakTitle" class="list-group-item active">Dashboard</div>
+            <div class="form-group list-group-item" id="speakArea">
+              <textarea id="speakTxt" class="form-control" rows="3"></textarea>
+              <button id="speakBtn" type="button" class="btn btn-info form-control">Speak</button>
+            </div>
 
-<div class="list-group" id="speakList">
-  <div id="speakTitle" class="list-group-item active">Dashboard</div>
+            <div class="list-group-item">
+              <div class="icon-block">
+                <img class="speak-icon" src="/static/images/icon_test.jpeg">
+              </div>
+              <div class="speak-block"> Admin said...
+                <pre class="speak">そういうところあるんですよねー どうにかなりませんか？</pre>
+              </div> 
+              <footer class="text-right">2014-10-11 10:10:11</footer>
+            </div>
 
-<div class="form-group list-group-item" id="speakArea">
-<textarea id="speakTxt" class="form-control" rows="3"></textarea>
-<button id="speakBtn" type="button" class="btn btn-info form-control">Speak</button>
-</div>
+            <div class="list-group-item">
+              <div class="icon-block-me">
+                <img class="speak-icon" src="/static/images/icon_test.jpeg">
+              </div>
+              <div class="speak-block-me">
+                you said
+                <pre class="speak-me">そういうところあるんですよねー どうにかなりませんか？</pre>
+              </div> 
+              <footer class="text-right">2014-10-11 10:10:11</footer>
+            </div>
 
-  <a href="#" class="list-group-item">
-Vestibulum at eros
-2014-10-11 10:10:11
-  </a>
-</div>
-
+          </div>
         </div>
 
         <div class="col-sm-2 col-md-2 col-sm-offset-10 sidebar">
           <ul class="nav nav-sidebar">
-            <li><a href="#">Export</a></li>
+            <li><a href="#">設定メニューかな？</a></li>
           </ul>
         </div>
+
       </div>
     </div>
   </body>
