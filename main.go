@@ -41,6 +41,7 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+
 	url := r.URL.Path
 	if url == "/favicon.ico" {
 		http.Error(w, "", http.StatusNotFound)
@@ -49,12 +50,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	user := session.Values["User"]
 	tmplName := "webroot/templates/login.tmpl"
+	category := "Dashboard"
 	if user != nil {
 		tmplName = "webroot/templates/chat.tmpl"
 	}
+
 	tmpl := template.Must(
 		template.ParseFiles(tmplName))
+
 	tc := make(map[string]interface{})
+	tc["User"] = user
+	tc["Category"] = category
+
 	if err := tmpl.Execute(w, tc); err != nil {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)

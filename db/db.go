@@ -65,7 +65,6 @@ func insertInitTable() error {
 }
 
 func Select() {
-
 	rows, err := inst.Query("select id, name from foo")
 	if err != nil {
 		fmt.Println(err)
