@@ -3,11 +3,15 @@ package main
 import (
 	"./db"
 	ws "./discussion"
+	"bytes"
 	"encoding/gob"
 	"github.com/gorilla/sessions"
 	"html/template"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
 )
 
 var store = sessions.NewCookieStore([]byte("session-secret-dao"))
@@ -31,6 +35,7 @@ func main() {
 	log.Println("############### start HTTPServer")
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/", handler)
 
 	log.Println("############### start FileServer")
@@ -94,4 +99,30 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["User"] = nil
 	session.Save(r, w)
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	defer writer.Close()
+
+	part, err := writer.CreateFormFile("uploadFile", "data.txt")
+	if err != nil {
+		log.Println(err)
+	}
+
+	file, err := os.OpenFile("data.txt", os.O_CREATE, 0666)
+	if err != nil {
+		log.Println(err)
+	}
+	defer file.Close()
+
+	_, err = io.Copy(part, file)
+	log.Printf("%T\n", part)
+	if err != nil {
+		log.Println(err)
+	}
+	http.Redirect(w, r, "/", http.StatusFound)
+
 }

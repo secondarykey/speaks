@@ -12,7 +12,7 @@ ws.onmessage = function(e) {
 	iconBlockTag.addClass('icon-block' + suffix);
 	var iconTag = $('<img/>');
 	iconTag.addClass('speak-icon' + suffix);
-	iconTag.attr("src","/static/images/icon_test.jpeg");
+	iconTag.attr("src","/static/images/nobody.png");
 	iconBlockTag.append(iconTag);
 
 	var speakBlockTag = $('<div/>');
