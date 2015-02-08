@@ -3,13 +3,12 @@ package main
 import (
 	"./db"
 	ws "./discussion"
-	"bytes"
 	"encoding/gob"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"html/template"
 	"io"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
 )
@@ -103,26 +102,55 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	defer writer.Close()
+	path, _ := os.Getwd()
+	path += "/test.txt"
+	log.Println(path)
 
-	part, err := writer.CreateFormFile("uploadFile", "data.txt")
+	file, _, err := r.FormFile("uploadFile")
 	if err != nil {
-		log.Println(err)
-	}
-
-	file, err := os.OpenFile("data.txt", os.O_CREATE, 0666)
-	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
+		return
 	}
 	defer file.Close()
 
-	_, err = io.Copy(part, file)
-	log.Printf("%T\n", part)
+	out, err := os.Create(path)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
+		return
 	}
+	defer out.Close()
+	bit, err := io.Copy(out, file)
+
+	fmt.Println(bit)
+	fmt.Println(err)
+
+	/*
+		file, err := os.Create(path)
+		//file, err := os.OpenFile(path, os.O_CREATE, 0666)
+		if err != nil {
+			log.Println(err)
+		}
+		defer file.Close()
+
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		fw, err := writer.CreateFormFile("uploadFile", filepath.Base(path))
+		if err != nil {
+			log.Println(err)
+		}
+
+		_, err = io.Copy(fw, file)
+		if err != nil {
+			log.Println("copy")
+			log.Println(err)
+		}
+
+		err = writer.Close()
+		if err != nil {
+			log.Println("close")
+			log.Println(err)
+		}
+	*/
 	http.Redirect(w, r, "/", http.StatusFound)
 
 }
