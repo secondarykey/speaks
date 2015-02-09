@@ -1,7 +1,7 @@
 package discussion
 
 import (
-	"../db"
+	"db"
 	"golang.org/x/net/websocket"
 	"log"
 	"net/http"

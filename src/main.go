@@ -1,10 +1,11 @@
 package main
 
 import (
-	"./db"
-	ws "./discussion"
+	"db"
+	ws "discussion"
 	"encoding/gob"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/gorilla/sessions"
 	"html/template"
 	"io"
@@ -13,16 +14,25 @@ import (
 	"os"
 )
 
-var store = sessions.NewCookieStore([]byte("session-secret-dao"))
+var store *sessions.CookieStore
 
 func init() {
+
+	var tmp interface{}
+	md, err := toml.DecodeFile("SpeakAll.ini", &tmp)
+
+	log.Println(md)
+	log.Println(tmp)
+	log.Println(err)
+
 	gob.Register(&db.User{})
+	store = sessions.NewCookieStore([]byte("session-secret-dao"))
 }
 
 func main() {
 	var err error
 	log.Println("############### start DBServer")
-	err = db.Listen("db/data/SpeakAll.db")
+	err = db.Listen("data/db/SpeakAll.db")
 	if err != nil {
 		panic(err)
 	}
@@ -53,10 +63,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	session, _ := store.Get(r, "session-name")
 	user := session.Values["User"]
-	tmplName := "webroot/templates/login.tmpl"
+	tmplName := "templates/login.tmpl"
 	category := "Dashboard"
 	if user != nil {
-		tmplName = "webroot/templates/chat.tmpl"
+		tmplName = "templates/chat.tmpl"
 	}
 
 	tmpl := template.Must(
@@ -124,33 +134,5 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(bit)
 	fmt.Println(err)
 
-	/*
-		file, err := os.Create(path)
-		//file, err := os.OpenFile(path, os.O_CREATE, 0666)
-		if err != nil {
-			log.Println(err)
-		}
-		defer file.Close()
-
-		body := &bytes.Buffer{}
-		writer := multipart.NewWriter(body)
-		fw, err := writer.CreateFormFile("uploadFile", filepath.Base(path))
-		if err != nil {
-			log.Println(err)
-		}
-
-		_, err = io.Copy(fw, file)
-		if err != nil {
-			log.Println("copy")
-			log.Println(err)
-		}
-
-		err = writer.Close()
-		if err != nil {
-			log.Println("close")
-			log.Println(err)
-		}
-	*/
 	http.Redirect(w, r, "/", http.StatusFound)
-
 }
