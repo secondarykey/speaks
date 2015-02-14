@@ -1,7 +1,6 @@
 package discussion
 
 import (
-	"db"
 	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
@@ -42,7 +41,7 @@ func (s *Server) sendMessage(msg *message) {
 		}()
 	}
 
-	db.Select()
+	//db.Select()
 }
 
 func (s *Server) WebsocketHandler() http.Handler {

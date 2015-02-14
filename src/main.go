@@ -15,24 +15,19 @@ import (
 )
 
 var store *sessions.CookieStore
+var config setting
 
 func init() {
-
-	var tmp interface{}
-	md, err := toml.DecodeFile("SpeakAll.ini", &tmp)
-
-	log.Println(md)
-	log.Println(tmp)
-	log.Println(err)
-
 	gob.Register(&db.User{})
-	store = sessions.NewCookieStore([]byte("session-secret-dao"))
+	toml.DecodeFile("SpeakAll.ini", &config)
+	store = sessions.NewCookieStore([]byte(config.Session.Secret))
 }
 
 func main() {
+
 	var err error
 	log.Println("############### start DBServer")
-	err = db.Listen("data/db/SpeakAll.db")
+	err = db.Listen(config.Database.Path)
 	if err != nil {
 		panic(err)
 	}
@@ -45,13 +40,16 @@ func main() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/upload", uploadHandler)
+
 	http.HandleFunc("/", handler)
 
 	log.Println("############### start FileServer")
-	http.Handle("/static/", http.FileServer(http.Dir("webroot")))
+	http.Handle("/static/", http.FileServer(http.Dir(config.Web.Root)))
 
-	http.ListenAndServe(":5555", nil)
-
+	err = http.ListenAndServe(":"+(config.Web.Port), nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +59,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
-	session, _ := store.Get(r, "session-name")
+	session, _ := store.Get(r, config.Session.Name)
 	user := session.Values["User"]
 	tmplName := "templates/login.tmpl"
 	category := "Dashboard"
@@ -91,7 +89,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	session, _ := store.Get(r, "session-name")
+	session, _ := store.Get(r, config.Session.Name)
 	log.Println(session.ID)
 	log.Println(session.IsNew)
 	session.Values["User"] = user
@@ -99,12 +97,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session-name")
+	session, _ := store.Get(r, config.Session.Name)
 	session.Values["User"] = nil
 	session.Save(r, w)
 	http.Redirect(w, r, "/", http.StatusFound)
@@ -129,10 +126,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer out.Close()
-	bit, err := io.Copy(out, file)
-
-	fmt.Println(bit)
-	fmt.Println(err)
+	_, err = io.Copy(out, file)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }

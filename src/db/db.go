@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -70,6 +69,7 @@ func insertInitTable() error {
 	return nil
 }
 
+/*
 func Select() {
 	rows, err := inst.Query("select id, name from foo")
 	if err != nil {
@@ -84,3 +84,4 @@ func Select() {
 		println(id, name)
 	}
 }
+*/
