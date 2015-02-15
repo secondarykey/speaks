@@ -1,6 +1,8 @@
-draft...
-
+this document is still a draft.
 becouse still in development,the documents is appropriate.
+
+"SpeakAll" is Simple SNS.
+use of on-premises environment.
 
 environment :
 
