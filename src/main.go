@@ -1,8 +1,6 @@
 package main
 
 import (
-	"db"
-	ws "discussion"
 	"encoding/gob"
 	"fmt"
 	"github.com/BurntSushi/toml"
@@ -12,10 +10,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"speakall"
+	"speakall/db"
+	"speakall/ws"
 )
 
 var store *sessions.CookieStore
-var config setting
+var config speakall.Setting
 
 func init() {
 	gob.Register(&db.User{})

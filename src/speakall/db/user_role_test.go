@@ -11,7 +11,7 @@ func TestUserRole(t *testing.T) {
 	// Only pass t into top-level Convey calls
 	Convey("database listen", t, func() {
 
-		err = Listen("../../data/db/test.db")
+		err = Listen("../../../data/db/test.db")
 		So(err, ShouldBeNil)
 
 		Convey("create user role table", func() {

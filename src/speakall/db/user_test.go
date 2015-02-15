@@ -11,7 +11,7 @@ func TestUser(t *testing.T) {
 	// Only pass t into top-level Convey calls
 	Convey("create user table", t, func() {
 
-		err = Listen("../../data/db/test.db")
+		err = Listen("../../../data/db/test.db")
 		So(err, ShouldBeNil)
 
 		Convey("insert user table", func() {

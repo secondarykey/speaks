@@ -1,4 +1,4 @@
-package discussion
+package ws
 
 import (
 	"fmt"

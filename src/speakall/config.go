@@ -1,8 +1,8 @@
-package main
+package speakall
 
 import ()
 
-type setting struct {
+type Setting struct {
 	Database database
 	Web      web
 	Session  session
