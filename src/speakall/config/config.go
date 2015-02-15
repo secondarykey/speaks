@@ -1,8 +1,10 @@
-package speakall
+package config
 
-import ()
+import (
+	"github.com/BurntSushi/toml"
+)
 
-type Setting struct {
+type setting struct {
 	Database database
 	Web      web
 	Session  session
@@ -21,4 +23,10 @@ type web struct {
 type session struct {
 	Secret string
 	Name   string
+}
+
+var Config setting
+
+func init() {
+	toml.DecodeFile("SpeakAll.ini", &Config)
 }

@@ -13,16 +13,14 @@ type Server struct {
 	msgCh    chan *message
 }
 
-/**
- * Create Server
- **/
-func NewServer() *Server {
-	return &Server{
+func Listen(path string) {
+	server := &Server{
 		clients:  make(map[string]*client),
 		addCh:    make(chan *client),
 		removeCh: make(chan *client),
 		msgCh:    make(chan *message),
 	}
+	go server.Listen(path)
 }
 
 func (s *Server) add(c *client) {
@@ -40,8 +38,6 @@ func (s *Server) sendMessage(msg *message) {
 			client.send(msg)
 		}()
 	}
-
-	//db.Select()
 }
 
 func (s *Server) WebsocketHandler() http.Handler {
