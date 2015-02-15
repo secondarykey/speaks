@@ -6,16 +6,7 @@ use of on-premises environment.
 
 environment :
 
-  source activate
-  (GOPATH + pwd)
-  use thea 'deactive' command when ending.
-
-initialize :
-
-- http://localhost:5555
-- admin@localhost/password
-
-loading SpeakAll.ini
+  put the SpeakAll.ini the run dhirectory.
 
 using (go get):
 - golang.org/x/net/websocket
@@ -25,10 +16,18 @@ using (go get):
 - github.com/BurntSushi/toml
 - github.com/smartystreets/goconvey
 
-run :
+default setting :
+
+- http://localhost:5555
+- admin@localhost/password
+
+develop :
+
+  source activate
+  add GOPATH(root dhirectory)
+  use the 'deactive' command when ending.
+
 - go run ./src/*.go
 
 test :
 - goconvey(GOPATH/bin)
-
-
