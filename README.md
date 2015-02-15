@@ -27,7 +27,7 @@ develop :
   add GOPATH(root dhirectory)
   use the 'deactive' command when ending.
 
-- go run ./src/*.go
+- go run ./src/main.go
 
 test :
 - goconvey(GOPATH/bin)

@@ -62,14 +62,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	session, _ := store.Get(r, config.Session.Name)
 	user := session.Values["User"]
-	tmplName := "templates/login.tmpl"
+
+	templateDir := "templates/"
+	layoutName := templateDir + "layout.tmpl"
+
+	tmplName := templateDir + "login.tmpl"
 	category := "Dashboard"
 	if user != nil {
-		tmplName = "templates/chat.tmpl"
+		tmplName = templateDir + "chat.tmpl"
 	}
 
 	tmpl := template.Must(
-		template.ParseFiles(tmplName))
+		template.ParseFiles(layoutName, tmplName))
 
 	tc := make(map[string]interface{})
 	tc["User"] = user
