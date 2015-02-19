@@ -24,13 +24,21 @@ func Listen(path string) error {
 func createInitTable() error {
 	err := createUserTable()
 	if err != nil {
-		return nil
+		return err
 	}
 	err = createRoleTable()
 	if err != nil {
-		return nil
+		return err
 	}
-	return createUserRoleTable()
+	err = createUserRoleTable()
+	if err != nil {
+		return err
+	}
+	err = createMessageTable()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func insertInitTable() error {
