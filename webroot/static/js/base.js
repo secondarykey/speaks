@@ -1,9 +1,22 @@
 var ws = new WebSocket("ws://" + location.host + "/ws/");
+var clientId;
+
+ws.onopen = function(e) {
+}
 
 ws.onmessage = function(e) {
 	var msg = $.parseJSON(e.data);
-	//var suffix = "-me";
+    var cId = msg.ClientId;
+
+    if ( msg.Type == "Open" ) {
+        clientId = cId;
+        return;
+    }
+
 	var suffix = "";
+    if ( clientId == cId ) {
+	    suffix = "-me";
+    }
 
 	var itemTag = $('<div/>');
 	itemTag.addClass('list-group-item');
@@ -41,6 +54,7 @@ $(document).ready(function() {
 		var obj = new Object();
 	    obj.Content  = txt;
 	    obj.Category = "Dashboard";
+	    obj.ClientId = "Dashboard";
 
 		var json = JSON.stringify(obj);
 		ws.send(json);

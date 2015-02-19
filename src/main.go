@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	speakall.Listen()
+	speakall.Start()
 }

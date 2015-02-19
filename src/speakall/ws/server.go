@@ -32,6 +32,7 @@ func (s *Server) remove(c *client) {
 }
 
 func (s *Server) sendMessage(msg *message) {
+	log.Println("sendMessage()")
 	for _, c := range s.clients {
 		client := c
 		go func() {
@@ -45,7 +46,6 @@ func (s *Server) WebsocketHandler() http.Handler {
 		defer ws.Close()
 		c := NewClient(ws)
 		s.addCh <- c
-		log.Println("Client Start[" + c.Id + "]")
 		c.start(s.msgCh, s.removeCh)
 	})
 }

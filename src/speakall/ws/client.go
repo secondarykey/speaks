@@ -1,21 +1,15 @@
 package ws
 
 import (
-	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/websocket"
+	"log"
 	"time"
 )
 
 type client struct {
 	Id string
 	ws *websocket.Conn
-}
-
-type message struct {
-	Content  string
-	Category string
-	Date     string
 }
 
 func NewClient(ws *websocket.Conn) *client {
@@ -26,22 +20,25 @@ func NewClient(ws *websocket.Conn) *client {
 }
 
 func (c *client) start(msgCh chan *message, removeCh chan *client) {
+	c.send(createOpenMessage(c.Id))
 	for {
 		msg := &message{}
 		err := websocket.JSON.Receive(c.ws, msg)
 		if err == nil {
+			msg.ClientId = c.Id
 			msg.Date = time.Now().String()
 			msgCh <- msg
 		} else {
 			removeCh <- c
 			return
 		}
+		c.send(createOpenMessage(c.Id))
 	}
 }
 
 func (c *client) send(msg *message) {
 	err := websocket.JSON.Send(c.ws, msg)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }

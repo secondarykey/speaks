@@ -1,14 +1,9 @@
 package web
 
 import (
-	"fmt"
 	"html/template"
-	"io"
-	"log"
 	"net/http"
-	"os"
 	. "speakall/config"
-	"speakall/db"
 )
 
 func init() {
@@ -35,7 +30,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
-	session, _ := store.Get(r, Config.Session.Name)
+
+	session := getSession(r)
 	user := session.Values["User"]
 
 	templateDir := "templates/"
@@ -54,63 +50,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	tc["User"] = user
 	tc["Category"] = category
 
+	//template exec
 	if err := tmpl.Execute(w, tc); err != nil {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)
 	}
-}
-
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	pswd := r.FormValue("password")
-
-	user, err := db.SelectUser(email, pswd)
-	if err != nil {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-	session, _ := store.Get(r, Config.Session.Name)
-	log.Println(session.ID)
-	log.Println(session.IsNew)
-	session.Values["User"] = user
-	err = session.Save(r, w)
-	if err != nil {
-		log.Println(err)
-	}
-	http.Redirect(w, r, "/", http.StatusFound)
-}
-
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, Config.Session.Name)
-	session.Values["User"] = nil
-	session.Save(r, w)
-	http.Redirect(w, r, "/", http.StatusFound)
-}
-
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
-
-	path, _ := os.Getwd()
-	path += "/test.txt"
-	log.Println(path)
-
-	file, _, err := r.FormFile("uploadFile")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-
-	out, err := os.Create(path)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer out.Close()
-	_, err = io.Copy(out, file)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	http.Redirect(w, r, "/", http.StatusFound)
 }

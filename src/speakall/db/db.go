@@ -21,10 +21,6 @@ func Listen(path string) error {
 	return insertInitTable()
 }
 
-func Exec(sql string) (sql.Result, error) {
-	return inst.Exec(sql)
-}
-
 func createInitTable() error {
 	err := createUserTable()
 	if err != nil {
@@ -67,6 +63,10 @@ func insertInitTable() error {
 
 	tx.Commit()
 	return nil
+}
+
+func Exec(sql string) (sql.Result, error) {
+	return inst.Exec(sql)
 }
 
 /*
