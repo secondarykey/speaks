@@ -52,11 +52,16 @@ $(document).ready(function() {
 	$('#speakBtn').click(function() {
 	    var txt = $('#speakTxt').val()
 		var obj = new Object();
+
 	    obj.Content  = txt;
-	    obj.Category = "Dashboard";
-	    obj.ClientId = "Dashboard";
+	    obj.UserId   = Number($("#userId").val());
+	    obj.Category = $("#category").val();
+	    obj.ClientId = clientId;
+
+        console.log(obj);
 
 		var json = JSON.stringify(obj);
+        console.log(json);
 		ws.send(json);
 	    $('#speakTxt').val('')
 	});

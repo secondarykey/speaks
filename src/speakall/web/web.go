@@ -2,6 +2,7 @@ package web
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 	. "speakall/config"
 )
@@ -33,6 +34,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	session := getSession(r)
 	user := session.Values["User"]
+
+	log.Println(user)
 
 	templateDir := "templates/"
 	layoutName := templateDir + "layout.tmpl"

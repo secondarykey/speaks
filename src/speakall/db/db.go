@@ -2,10 +2,12 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var inst *sql.DB
+var tx *sql.Tx
 
 func Listen(path string) error {
 	var err error
@@ -41,8 +43,34 @@ func createInitTable() error {
 	return nil
 }
 
+func begin() error {
+	var err error
+	tx, err = inst.Begin()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func rollback() error {
+	if tx != nil {
+		err := tx.Rollback()
+		tx = nil
+		return err
+	}
+	return errors.New("not use Tx")
+}
+
+func commit() error {
+	err := tx.Commit()
+	tx = nil
+	return err
+}
+
 func insertInitTable() error {
-	tx, err := inst.Begin()
+
+	err := begin()
+	defer rollback()
 	if err != nil {
 		return err
 	}
@@ -54,22 +82,39 @@ func insertInitTable() error {
 	userId, _ := rslt.LastInsertId()
 
 	rslt, err = insertRole(tx, "管理者", "Admin")
+	if err != nil {
+		return err
+	}
 	rslt, err = insertRole(tx, "議題編集者", "Chairman")
+	if err != nil {
+		return err
+	}
 
 	rslt, err = insertRole(tx, "発言者", "Speaker")
+	if err != nil {
+		return err
+	}
 	rslt, err = insertRole(tx, "閲覧者", "Viewer")
 	if err != nil {
 		return err
 	}
 
 	rslt, err = insertUserRole(tx, int(userId), "Admin")
+	if err != nil {
+		return err
+	}
+
 	rslt, err = insertUserRole(tx, int(userId), "Chairman")
+	if err != nil {
+		return err
+	}
+
 	rslt, err = insertUserRole(tx, int(userId), "Speaker")
 	if err != nil {
 		return err
 	}
 
-	tx.Commit()
+	commit()
 	return nil
 }
 
