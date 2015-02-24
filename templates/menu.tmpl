@@ -1,0 +1,43 @@
+{{define "menu"}}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+
+          <a class="navbar-brand" href="/dashboard">SpeakAll</a>
+
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/me">{{.User.Name}}</a></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-2 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Speak<span class="sr-only">(current)</span></a></li>
+            <li><a href="/settings">setting</a></li>
+          </ul>
+        </div>
+
+        <div class="col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2 main">
+{{template "content" .}}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{{end}}

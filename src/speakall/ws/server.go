@@ -2,7 +2,6 @@ package ws
 
 import (
 	"golang.org/x/net/websocket"
-	"log"
 	"net/http"
 )
 
@@ -20,7 +19,7 @@ func Listen(path string) {
 		removeCh: make(chan *client),
 		msgCh:    make(chan *message),
 	}
-	go server.Listen(path)
+	go server.listen(path)
 }
 
 func (s *Server) add(c *client) {
@@ -32,7 +31,6 @@ func (s *Server) remove(c *client) {
 }
 
 func (s *Server) sendMessage(msg *message) {
-	log.Println("sendMessage()")
 	for _, c := range s.clients {
 		client := c
 		go func() {
@@ -41,17 +39,17 @@ func (s *Server) sendMessage(msg *message) {
 	}
 }
 
-func (s *Server) WebsocketHandler() http.Handler {
+func (s *Server) websocketHandler() http.Handler {
 	return websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
-		c := NewClient(ws)
+		c := newClient(ws)
 		s.addCh <- c
 		c.start(s.msgCh, s.removeCh)
 	})
 }
 
-func (s *Server) Listen(pattern string) {
-	http.Handle(pattern, s.WebsocketHandler())
+func (s *Server) listen(pattern string) {
+	http.Handle(pattern, s.websocketHandler())
 	for {
 		select {
 		case c := <-s.addCh:

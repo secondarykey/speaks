@@ -13,7 +13,7 @@ type client struct {
 	ws *websocket.Conn
 }
 
-func NewClient(ws *websocket.Conn) *client {
+func newClient(ws *websocket.Conn) *client {
 	return &client{
 		Id: uuid.NewV4().String(),
 		ws: ws,

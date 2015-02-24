@@ -8,9 +8,11 @@ import (
 )
 
 func init() {
+	http.HandleFunc("/me", meHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/upload", uploadHandler)
+	http.HandleFunc("/store/", storeHandler)
 
 	http.HandleFunc("/", handler)
 }
@@ -34,26 +36,47 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	session := getSession(r)
 	user := session.Values["User"]
+	category := "Dashboard"
 
 	log.Println(user)
 
 	templateDir := "templates/"
-	layoutName := templateDir + "layout.tmpl"
+	tmpls := make([]string, 0)
+	tmpls = append(tmpls, templateDir+"layout.tmpl")
 
-	tmplName := templateDir + "login.tmpl"
-	category := "Dashboard"
-	if user != nil {
-		tmplName = templateDir + "chat.tmpl"
+	if user == nil {
+		tmpls = append(tmpls, templateDir+"login.tmpl")
+	} else {
+		tmpls = append(tmpls, templateDir+"menu.tmpl")
+		tmpls = append(tmpls, templateDir+"chat.tmpl")
 	}
 
-	tmpl := template.Must(
-		template.ParseFiles(layoutName, tmplName))
+	tmpl := template.Must(template.ParseFiles(tmpls...))
 
 	tc := make(map[string]interface{})
 	tc["User"] = user
 	tc["Category"] = category
 
 	//template exec
+	if err := tmpl.Execute(w, tc); err != nil {
+		http.Error(w, err.Error(),
+			http.StatusInternalServerError)
+	}
+}
+
+func meHandler(w http.ResponseWriter, r *http.Request) {
+
+	templateDir := "templates/"
+	tmpls := make([]string, 0)
+	tmpls = append(tmpls, templateDir+"layout.tmpl")
+	tmpls = append(tmpls, templateDir+"menu.tmpl")
+	tmpls = append(tmpls, templateDir+"me.tmpl")
+	tmpl := template.Must(template.ParseFiles(tmpls...))
+	tc := make(map[string]interface{})
+
+	//tc["User"] = user
+	//tc["Category"] = category
+
 	if err := tmpl.Execute(w, tc); err != nil {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)

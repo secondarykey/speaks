@@ -13,6 +13,7 @@ func Start() error {
 	log.Println("############### start DBServer")
 	err := db.Listen(Config.Database.Path)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 

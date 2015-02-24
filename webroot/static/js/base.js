@@ -48,23 +48,44 @@ ws.onmessage = function(e) {
 	$('#speakArea').after(itemTag);
 }
 
+function createMessage(msg) {
+	var obj = new Object();
+    obj.Content  = msg;
+    obj.UserId   = Number($("#userId").val());
+    obj.Category = $("#category").val();
+    obj.ClientId = clientId;
+	var json = JSON.stringify(obj);
+    return json;
+}
+
 $(document).ready(function() {
 	$('#speakBtn').click(function() {
 	    var txt = $('#speakTxt').val()
-		var obj = new Object();
-
-	    obj.Content  = txt;
-	    obj.UserId   = Number($("#userId").val());
-	    obj.Category = $("#category").val();
-	    obj.ClientId = clientId;
-
-        console.log(obj);
-
-		var json = JSON.stringify(obj);
-        console.log(json);
-		ws.send(json);
+		ws.send(createMessage(txt));
 	    $('#speakTxt').val('')
 	});
 
+    $('#uploadFile').change(function() {
+        var fd = new FormData();
+        var files = this.files;
+        $.each(files, function(i, file){
+            fd.append('uploadFile', file);
+        });
+
+        $.ajax({
+           url: "upload",
+           type: 'POST',
+           data: fd,
+           processData:false,
+           contentType:false,
+           dataType: 'json'
+        }).success(function( data ) {
+           var msg = "http://" + location.host + "/" + data.FileName;
+		   ws.send(createMessage(msg));
+        }).error(function() {
+            alert("Error!");
+        });
+        $("#uploadModal").modal("hide");
+    });
 });
 

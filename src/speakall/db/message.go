@@ -42,7 +42,7 @@ func selectMessage(category string) ([]Message, error) {
 
 func InsertMessage(userId int, category string, content string) (sql.Result, error) {
 	created := time.Now()
-	countMessage()
+	//countMessage()
 
 	return inst.Exec("insert into Message(user_id,category,content,created) values(?, ?, ?, ?)", userId, category, content, created)
 }

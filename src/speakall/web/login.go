@@ -21,6 +21,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
+
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
