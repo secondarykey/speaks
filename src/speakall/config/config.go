@@ -11,7 +11,8 @@ type setting struct {
 }
 
 type database struct {
-	Path string
+	Path    string
+	Version string
 }
 
 type web struct {
