@@ -8,6 +8,7 @@ import (
 )
 
 func init() {
+	http.HandleFunc("/markdown", markdownHandler)
 	http.HandleFunc("/me", meHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
@@ -77,6 +78,18 @@ func meHandler(w http.ResponseWriter, r *http.Request) {
 	//tc["User"] = user
 	//tc["Category"] = category
 
+	if err := tmpl.Execute(w, tc); err != nil {
+		http.Error(w, err.Error(),
+			http.StatusInternalServerError)
+	}
+}
+
+func markdownHandler(w http.ResponseWriter, r *http.Request) {
+	templateDir := "templates/"
+	tmpls := make([]string, 0)
+	tmpls = append(tmpls, templateDir+"markdown.tmpl")
+	tmpl := template.Must(template.ParseFiles(tmpls...))
+	tc := make(map[string]interface{})
 	if err := tmpl.Execute(w, tc); err != nil {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)
