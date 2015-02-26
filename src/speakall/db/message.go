@@ -23,8 +23,8 @@ func createMessageTable() error {
 	return err
 }
 
-func selectMessage(category string) ([]Message, error) {
-	rows, err := inst.Query("select id,user_id,category,content,created from Message Where category = ?", category)
+func SelectMessage(category, lastedId string) ([]Message, error) {
+	rows, err := inst.Query("select id,user_id,category,content,created from Message Where category = ? ORDER BY created DESC", category)
 	if err != nil {
 		return nil, err
 	}

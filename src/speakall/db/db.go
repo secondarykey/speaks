@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
 	"os"
 	"strings"
 )
@@ -40,12 +39,11 @@ func check(path, ver string) (string, *schemaError) {
 	}
 
 	rpath := fmt.Sprintf(path, schemaVersion)
-	log.Println(rpath)
 
 	//存在するか？
 	_, err := os.Stat(rpath)
 	//versionが一緒か？
-	if ver == schemaVersion {
+	if ver == schemaVersion || ver == "test" {
 		if err == nil {
 			return rpath, nil
 		}

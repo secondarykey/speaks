@@ -87,5 +87,22 @@ $(document).ready(function() {
         });
         $("#uploadModal").modal("hide");
     });
+
+    function getMessage(cat,lastedId) {
+        $.ajax({
+           url: "message/" + cat,
+           type: 'POST',
+           data: {
+               "lastedId" : lastedId
+           },
+           dataType: 'json'
+        }).success(function( data ) {
+           //var msg = "http://" + location.host + "/" + data.FileName;
+           alert("Success!");
+        }).error(function() {
+            alert("Error!");
+        });
+    }
+    getMessage("Public","");
 });
 

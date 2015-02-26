@@ -11,7 +11,7 @@ func TestDB(t *testing.T) {
 	// Only pass t into top-level Convey calls
 	Convey("database listen", t, func() {
 
-		err = Listen("../../../data/db/test-%s.db", "0.0")
+		err = Listen("../../../data/db/SpeakAll-%s.db", "test")
 		So(err, ShouldBeNil)
 
 		Convey("Exec", func() {

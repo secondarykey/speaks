@@ -1,15 +1,20 @@
 package web
 
 import (
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
 	. "speakall/config"
+	"speakall/db"
+	"strings"
 )
 
 func init() {
 	http.HandleFunc("/markdown", markdownHandler)
 	http.HandleFunc("/me", meHandler)
+
+	http.HandleFunc("/message/", messageHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/upload", uploadHandler)
@@ -94,4 +99,36 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)
 	}
+}
+
+type messages []db.Message
+
+func messageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		http.Error(w, "GETしないで><", http.StatusBadRequest)
+		return
+	}
+	url := r.URL.Path
+	catS := strings.Split(url, "/")
+	if len(catS) > 3 {
+		http.Error(w, "存在しません", http.StatusNotFound)
+		return
+	}
+	cat := catS[2]
+	id := r.FormValue("lastedId")
+
+	msgs, err := db.SelectMessage(cat, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	setJson(msgs, w)
+}
+
+func setJson(s interface{}, w http.ResponseWriter) {
+	res, err := json.Marshal(s)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
 }

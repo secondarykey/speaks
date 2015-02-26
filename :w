@@ -6,14 +6,20 @@
     <input type="hidden" id="userId" name="userId" value="{{.User.Id}}"/>
     <input type="hidden" id="category" name="category" value="Public"/>
 
+<div class="input-group">
     <textarea id="speakTxt" class="form-control" rows="3"></textarea>
-    <button type="button" class="btn btn-info form-control" id="speakBtn"><span class="glyphicon glyphicon-edit" aria-hidden="true">Speak</span></button>
-    <button type="button" class="btn btn-default form-control" data-toggle="modal" data-target="#uploadModal"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></button>
+      <button type="button" class="btn btn-info" id="speakBtn"><span class="glyphicon glyphicon-edit" aria-hidden="true">Speak</span></button>
+</div>
+
+    <div class="text-right">
+      <button type="button" class="btn btn-info" id="speakBtn"><span class="glyphicon glyphicon-edit" aria-hidden="true">Speak</span></button>
+      <button type="button" class="btn btn-default input-group-btn" data-toggle="modal" data-target="#uploadModal"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></button>
+    </div>
   </div>
 
-  <div class="list-group-item text-center btn btn-success">
-      <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>Update 
-  </div>
+<div class="list-group-item text-center btn btn-success">
+  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>Update 
+</div>
 
 
   <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">

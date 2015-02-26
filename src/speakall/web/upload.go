@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	uuid "github.com/satori/go.uuid"
 	"io"
 	"log"
@@ -55,11 +54,9 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ret := result{
+	ret := &result{
 		FileName: "store/" + fileId,
 	}
 
-	res, err := json.Marshal(ret)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
+	setJson(ret, w)
 }
