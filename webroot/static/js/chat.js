@@ -4,15 +4,7 @@ var clientId;
 ws.onopen = function(e) {
 }
 
-ws.onmessage = function(e) {
-	var msg = $.parseJSON(e.data);
-    var cId = msg.ClientId;
-
-    if ( msg.Type == "Open" ) {
-        clientId = cId;
-        return;
-    }
-
+function addMessage(msg,cId) {
 	var suffix = "";
     if ( clientId == cId ) {
 	    suffix = "-me";
@@ -40,12 +32,22 @@ ws.onmessage = function(e) {
 
 	var footerTag = $('<footer/>');
 	footerTag.addClass('text-right');
-	footerTag.text('xxxx-xx-xx xx:xx:xx');
+	footerTag.text(msg.Created);
 
 	itemTag.append(iconBlockTag);
 	itemTag.append(speakBlockTag);
 	itemTag.append(footerTag);
 	$('#speakArea').after(itemTag);
+}
+
+ws.onmessage = function(e) {
+	var msg = $.parseJSON(e.data);
+    var cId = msg.ClientId;
+    if ( msg.Type == "Open" ) {
+        clientId = cId;
+        return;
+    }
+    addMessage(msg,cId);
 }
 
 function createMessage(msg) {
@@ -97,8 +99,9 @@ $(document).ready(function() {
            },
            dataType: 'json'
         }).success(function( data ) {
-           //var msg = "http://" + location.host + "/" + data.FileName;
-           alert("Success!");
+           $.each(data, function(i, msg){
+               addMessage(msg,"");
+           });
         }).error(function() {
             alert("Error!");
         });
