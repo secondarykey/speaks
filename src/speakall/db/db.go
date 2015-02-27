@@ -188,20 +188,3 @@ func insertInitTable() error {
 func Exec(sql string) (sql.Result, error) {
 	return inst.Exec(sql)
 }
-
-/*
-func Select() {
-	rows, err := inst.Query("select id, name from foo")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var name string
-		rows.Scan(&id, &name)
-		println(id, name)
-	}
-}
-*/

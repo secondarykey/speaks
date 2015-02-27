@@ -2,17 +2,31 @@ package db
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
+	"os"
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	setup()
+	ret := m.Run()
+	if ret == 0 {
+		teardown()
+	}
+	os.Exit(ret)
+}
+
+func setup() {
+	err := Listen("../../../data/db/SpeakAll-%s.db", "test")
+	So(err, ShouldBeNil)
+}
+
+func teardown() {
+}
+
 func TestDB(t *testing.T) {
 
-	var err error
 	// Only pass t into top-level Convey calls
-	Convey("database listen", t, func() {
-
-		err = Listen("../../../data/db/SpeakAll-%s.db", "test")
-		So(err, ShouldBeNil)
+	Convey("database test", t, func() {
 
 		Convey("Exec", func() {
 			result, err := Exec("select * user")
@@ -33,6 +47,12 @@ func TestDB(t *testing.T) {
 			//user
 			//role
 			//user_role
+		})
+		Convey("begin", func() {
+		})
+		Convey("rollback", func() {
+		})
+		Convey("commit", func() {
 		})
 	})
 

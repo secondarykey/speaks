@@ -6,10 +6,11 @@ import (
 )
 
 func TestConfig(t *testing.T) {
+
 	Convey("config", t, func() {
 		So(Config.Database, ShouldNotBeNil)
 		So(Config.Database.Path, ShouldNotBeNil)
-		So(Config.Database.Version, ShouldEqual, "0.0")
+		So(Config.Database.Version, ShouldNotBeNil)
 		So(Config.Web, ShouldNotBeNil)
 		So(Config.Web.Port, ShouldNotBeNil)
 		So(Config.Web.Root, ShouldNotBeNil)

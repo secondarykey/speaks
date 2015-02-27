@@ -7,12 +7,9 @@ import (
 
 func TestUserRole(t *testing.T) {
 
-	var err error
+	//var err error
 	// Only pass t into top-level Convey calls
-	Convey("database listen", t, func() {
-
-		err = Listen("../../../data/db/test.db")
-		So(err, ShouldBeNil)
+	Convey("user_role table test", t, func() {
 
 		Convey("create user role table", func() {
 		})

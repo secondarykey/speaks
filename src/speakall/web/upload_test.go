@@ -12,7 +12,7 @@ func TestUpload(t *testing.T) {
 	Convey("uploadHandler", t, func() {
 		ts := httptest.NewServer(http.HandlerFunc(uploadHandler))
 		defer ts.Close()
-		res, err := http.Get("/upload")
+		res, err := http.Get(ts.URL)
 		So(err, ShouldBeNil)
 
 		Convey("status code", t, func() {
@@ -23,7 +23,7 @@ func TestUpload(t *testing.T) {
 	Convey("storeHandler", t, func() {
 		ts := httptest.NewServer(http.HandlerFunc(storeHandler))
 		defer ts.Close()
-		res, err := http.Get("/store/test")
+		res, err := http.Get(ts.URL)
 		So(err, ShouldBeNil)
 
 		Convey("status code", t, func() {

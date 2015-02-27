@@ -4,8 +4,24 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	setup()
+	ret := m.Run()
+	if ret == 0 {
+		teardown()
+	}
+	os.Exit(ret)
+}
+
+func setup() {
+}
+
+func teardown() {
+}
 
 func TestWeb(t *testing.T) {
 
@@ -17,7 +33,7 @@ func TestWeb(t *testing.T) {
 	Convey("handler", t, func() {
 		ts := httptest.NewServer(http.HandlerFunc(handler))
 		defer ts.Close()
-		res, err := http.Get("/")
+		res, err := http.Get(ts.URL)
 		So(err, ShouldBeNil)
 
 		Convey("status code", t, func() {
@@ -25,10 +41,10 @@ func TestWeb(t *testing.T) {
 		})
 	})
 
-	Convey("me", t, func() {
+	Convey("meHandler", t, func() {
 		ts := httptest.NewServer(http.HandlerFunc(meHandler))
 		defer ts.Close()
-		res, err := http.Get("/me")
+		res, err := http.Get(ts.URL)
 		So(err, ShouldBeNil)
 
 		Convey("status code", t, func() {

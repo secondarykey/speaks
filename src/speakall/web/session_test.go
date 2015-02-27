@@ -6,8 +6,11 @@ import (
 )
 
 func TestSession(t *testing.T) {
-	Convey("session start", t, func() {
+
+	Convey("session test", t, func() {
+
 		So(store, ShouldBeNil)
+
 		Convey("startSession", t, func() {
 			startSession("Secret")
 			So(store, ShouldNotBeNil)
