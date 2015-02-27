@@ -27,7 +27,9 @@ function addMessage(msg,cId) {
 	var speakTag = $('<pre/>');
 	speakTag.addClass('speak' + suffix);
 
-	speakTag.text(msg.Content);
+    var linkTxt = msg.Content.replace(/(http:\/\/[\x21-\x7e]+)/gi, "<a href='$1' target='_blank'>$1</a>"); 
+
+	speakTag.html(linkTxt);
 	speakBlockTag.append(speakTag);
 
 	var footerTag = $('<footer/>');
@@ -63,8 +65,11 @@ function createMessage(msg) {
 $(document).ready(function() {
 	$('#speakBtn').click(function() {
 	    var txt = $('#speakTxt').val()
-		ws.send(createMessage(txt));
-	    $('#speakTxt').val('')
+        if ( txt != "" ) {
+		    ws.send(createMessage(txt));
+	        $('#speakTxt').val('')
+        }
+        $("#speakTxt").focus();
 	});
 
     $('#uploadFile').change(function() {
@@ -88,6 +93,7 @@ $(document).ready(function() {
             alert("Error!");
         });
         $("#uploadModal").modal("hide");
+        $("#speakTxt").focus();
     });
 
     function getMessage(cat,lastedId) {
@@ -106,6 +112,8 @@ $(document).ready(function() {
             alert("Error!");
         });
     }
+
     getMessage("Public","");
+    $("#speakTxt").focus();
 });
 
