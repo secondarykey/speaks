@@ -5,6 +5,16 @@ ws.onopen = function(e) {
 }
 
 function addMessage(msg,cId) {
+    var messageTag = createMessageTag(msg,cId);
+    $('#speakArea').after(messageTag);
+}
+
+function updateMessage(msg,cId) {
+    var messageTag = createMessageTag(msg,cId);
+    $('#updateBtn').before(messageTag);
+}
+
+function createMessageTag(msg,cId) {
 	var suffix = "";
     if ( clientId == cId ) {
 	    suffix = "-me";
@@ -39,7 +49,8 @@ function addMessage(msg,cId) {
 	itemTag.append(iconBlockTag);
 	itemTag.append(speakBlockTag);
 	itemTag.append(footerTag);
-	$('#speakArea').after(itemTag);
+
+    return itemTag;
 }
 
 ws.onmessage = function(e) {
@@ -52,7 +63,7 @@ ws.onmessage = function(e) {
     addMessage(msg,cId);
 }
 
-function createMessage(msg) {
+function createMessageJson(msg) {
 	var obj = new Object();
     obj.Content  = msg;
     obj.UserId   = Number($("#userId").val());
@@ -63,10 +74,16 @@ function createMessage(msg) {
 }
 
 $(document).ready(function() {
+
+	$('#updateBtn').click(function() {
+	    var lastedId = $('#lastedId').val()
+        getMessage("Public",lastedId);
+    });
+
 	$('#speakBtn').click(function() {
 	    var txt = $('#speakTxt').val()
         if ( txt != "" ) {
-		    ws.send(createMessage(txt));
+		    ws.send(createMessageJson(txt));
 	        $('#speakTxt').val('')
         }
         $("#speakTxt").focus();
@@ -88,7 +105,7 @@ $(document).ready(function() {
            dataType: 'json'
         }).success(function( data ) {
            var msg = "http://" + location.host + "/" + data.FileName;
-		   ws.send(createMessage(msg));
+		   ws.send(createMessageJson(msg));
         }).error(function() {
             alert("Error!");
         });
@@ -105,15 +122,18 @@ $(document).ready(function() {
            },
            dataType: 'json'
         }).success(function( data ) {
+           if (data.length > 0 ) {
+               $("#lastedId").val(data[data.length-1].Id);
+           }
            $.each(data, function(i, msg){
-               addMessage(msg,"");
+               updateMessage(msg,"");
            });
         }).error(function() {
             alert("Error!");
         });
     }
 
-    getMessage("Public","");
+    getMessage("Public","9999999999");
     $("#speakTxt").focus();
 });
 

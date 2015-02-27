@@ -6,7 +6,7 @@ type message struct {
 	ClientId string
 	Content  string
 	Category string
-	Date     string
+	Created  string
 }
 
 // Type

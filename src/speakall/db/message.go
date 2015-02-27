@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"log"
-	"time"
 )
 
 type Message struct {
@@ -24,7 +23,18 @@ func createMessageTable() error {
 }
 
 func SelectMessage(category, lastedId string) ([]Message, error) {
-	rows, err := inst.Query("select id,user_id,category,content,created from Message Where category = ? ORDER BY created ASC", category)
+
+	sql := "select id,user_id,category,content,created from Message Where category = ?"
+	if lastedId != "" {
+		sql += " AND id < ?"
+	} else {
+		sql += " AND id < 9999999999"
+	}
+	sql += " ORDER BY created DESC LIMIT 10"
+
+	log.Println(sql)
+
+	rows, err := inst.Query(sql, category, lastedId)
 	if err != nil {
 		return nil, err
 	}
@@ -40,16 +50,6 @@ func SelectMessage(category, lastedId string) ([]Message, error) {
 	return msgs, nil
 }
 
-func InsertMessage(userId int, category string, content string) (sql.Result, error) {
-	created := time.Now()
-	//countMessage()
-
+func InsertMessage(userId int, category, content, created string) (sql.Result, error) {
 	return inst.Exec("insert into Message(user_id,category,content,created) values(?, ?, ?, ?)", userId, category, content, created)
-}
-
-func countMessage() {
-	row := inst.QueryRow("select count(*) from Message")
-	var cnt int
-	row.Scan(&cnt)
-	log.Println(cnt)
 }
