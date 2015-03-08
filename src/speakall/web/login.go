@@ -7,6 +7,13 @@ import (
 )
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "GET" {
+		templateDir := "templates/"
+		setTemplates(w, nil, templateDir+"login.tmpl")
+		return
+	}
+
 	email := r.FormValue("email")
 	pswd := r.FormValue("password")
 

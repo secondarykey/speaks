@@ -28,14 +28,14 @@ func NewSchemaError(code int, msg string) *schemaError {
 	}
 }
 
-const schemaVersion = "0.0"
+const schemaVersion = "0.1"
 
 func check(path, ver string) (string, *schemaError) {
 
 	//%sがあるか？
 	pArr := strings.Split(path, "%s")
 	if len(pArr) != 2 {
-		return "", NewSchemaError(-1, "Error:database path is %s requid")
+		return "", NewSchemaError(-1, "Error:database path is '%s' requid")
 	}
 
 	rpath := fmt.Sprintf(path, schemaVersion)
@@ -104,6 +104,10 @@ func createInitTable() error {
 		return err
 	}
 	err = createMessageTable()
+	if err != nil {
+		return err
+	}
+	err = createCategoryTable()
 	if err != nil {
 		return err
 	}
