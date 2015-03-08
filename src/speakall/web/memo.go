@@ -4,7 +4,16 @@ import (
 	"net/http"
 )
 
-func markdownHandler(w http.ResponseWriter, r *http.Request) {
+func memoHandler(w http.ResponseWriter, r *http.Request) {
+	user := getLoginUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	tc := make(map[string]interface{})
+	tc["User"] = user
+
 	templateDir := "templates/"
-	setTemplates(w, nil, templateDir+"menu.tmpl", templateDir+"markdown.tmpl")
+	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"memo.tmpl")
 }

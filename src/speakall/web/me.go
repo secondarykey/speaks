@@ -5,6 +5,15 @@ import (
 )
 
 func meHandler(w http.ResponseWriter, r *http.Request) {
+	user := getLoginUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	tc := make(map[string]interface{})
+	tc["User"] = user
+
 	templateDir := "templates/"
-	setTemplates(w, nil, templateDir+"menu.tmpl", templateDir+"me.tmpl")
+	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"me.tmpl")
 }

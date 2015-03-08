@@ -6,14 +6,13 @@ import (
 
 func chatHandler(w http.ResponseWriter, r *http.Request) {
 
-	session := getSession(r)
-	user := session.Values["User"]
-	category := "Dashboard"
-
+	user := getLoginUser(r)
 	if user == nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
+
+	category := "Dashboard"
 
 	tc := make(map[string]interface{})
 	tc["User"] = user

@@ -22,3 +22,8 @@ func getSession(r *http.Request) *sessions.Session {
 	session, _ := store.Get(r, Config.Session.Name)
 	return session
 }
+
+func getLoginUser(r *http.Request) interface{} {
+	session := getSession(r)
+	return session.Values["User"]
+}

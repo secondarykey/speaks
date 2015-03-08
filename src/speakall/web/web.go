@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	http.HandleFunc("/markdown", markdownHandler)
+	http.HandleFunc("/memo", memoHandler)
 	http.HandleFunc("/me", meHandler)
 
 	http.HandleFunc("/category", categoryHandler)
