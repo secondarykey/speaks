@@ -31,30 +31,6 @@ func Listen(static, port string) {
 	}
 }
 
-func chatHandler(w http.ResponseWriter, r *http.Request) {
-
-	session := getSession(r)
-	user := session.Values["User"]
-	category := "Dashboard"
-
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-
-	tc := make(map[string]interface{})
-	tc["User"] = user
-	tc["Category"] = category
-
-	templateDir := "templates/"
-	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"chat.tmpl")
-}
-
-func meHandler(w http.ResponseWriter, r *http.Request) {
-	templateDir := "templates/"
-	setTemplates(w, nil, templateDir+"menu.tmpl", templateDir+"me.tmpl")
-}
-
 func setTemplates(w http.ResponseWriter, param interface{}, templateFiles ...string) {
 
 	templateDir := "templates/"
@@ -70,11 +46,6 @@ func setTemplates(w http.ResponseWriter, param interface{}, templateFiles ...str
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)
 	}
-}
-
-func markdownHandler(w http.ResponseWriter, r *http.Request) {
-	templateDir := "templates/"
-	setTemplates(w, nil, templateDir+"menu.tmpl", templateDir+"markdown.tmpl")
 }
 
 func setJson(s interface{}, w http.ResponseWriter) {
