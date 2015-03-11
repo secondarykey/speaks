@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	uuid "github.com/satori/go.uuid"
 )
 
 type Category struct {
@@ -21,5 +22,37 @@ func createCategoryTable() error {
 }
 
 func InsertCategory(key, name, desc string) (sql.Result, error) {
-	return inst.Exec("insert into Category(key,name,desc) values(?, ?, ?)", key, name, desc)
+	return inst.Exec("insert into Category(key,name,description) values(?, ?, ?)", key, name, desc)
+}
+
+func GenerateCategoryKey() (string, error) {
+	for {
+		genKey := uuid.NewV4().String()
+		var key string
+		err := inst.QueryRow("select key from Category where key = ?", genKey).Scan(key)
+		switch {
+		case err == sql.ErrNoRows:
+			return genKey, nil
+		case err != nil:
+			return "", err
+		}
+	}
+}
+
+func SelectAllCategory() ([]Category, error) {
+
+	sql := "select id,key,name,description from Category"
+
+	rows, err := inst.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	cats := make([]Category, 0)
+	for rows.Next() {
+		cat := Category{}
+		rows.Scan(&cat.Id, &cat.Key, &cat.Name, &cat.Description)
+		cats = append(cats, cat)
+	}
+	return cats, nil
 }

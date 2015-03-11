@@ -1,21 +1,22 @@
-{{define "activeMenu"}}category{{end}}
 {{define "JavaScript"}}
 {{end}}
 {{define "content"}}
 
 <form action="#" method="post" class="form-horizontal">
 
+  <input type="hidden" name="key" value="{{.CategoryKey}}">
+
   <div class="form-group">
     <label for="CategoryName" class="col-sm-2 control-label">Name</label>
     <div class="col-sm-7">
-       <input type="text" class="form-control" id="CategoryName" placeholder="Category Name">
+       <input type="text" name="name" class="form-control" id="CategoryName" placeholder="Category Name">
     </div>
   </div>
 
   <div class="form-group">
     <label for="Description" class="col-sm-2 control-label">Description</label>
     <div class="col-sm-7">
-    <textarea id="Description" class="form-control" rows="3" placeholder="Description"></textarea>
+    <textarea id="Description" name="description" class="form-control" rows="3" placeholder="Description"></textarea>
     </div>
   </div>
 

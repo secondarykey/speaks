@@ -132,8 +132,33 @@ $(document).ready(function() {
             alert("Error!");
         });
     }
+    function getCategory() {
+        $.ajax({
+           url: "category/list",
+           type: 'POST',
+           data: { },
+           dataType: 'json'
+        }).success(function( data ) {
+           var ul = $('#CategoryUL');
+           if (data.length > 0 ) {
+               ul.empty();
+           }
+           $.each(data, function(i, category){
+	          var li = $('<li/>');
+	          var aTag = $('<a/>');
+	          aTag.attr('href','Test');
+	          aTag.text(category.Name);
+
+	          li.append(aTag);
+	          ul.append(li);
+           });
+        }).error(function() {
+            alert("Error!");
+        });
+    }
 
     getMessage("Public","9999999999");
+    getCategory()
     $("#speakTxt").focus();
 });
 

@@ -12,6 +12,8 @@ func init() {
 	http.HandleFunc("/me", meHandler)
 
 	http.HandleFunc("/category", categoryHandler)
+	http.HandleFunc("/category/list", categoryListHandler)
+	//http.HandleFunc("/category/edit/", categoryHandler)
 
 	http.HandleFunc("/message/", messageHandler)
 	http.HandleFunc("/login", loginHandler)

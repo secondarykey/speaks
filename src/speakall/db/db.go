@@ -35,11 +35,10 @@ func check(path, ver string) (string, *schemaError) {
 	//%sがあるか？
 	pArr := strings.Split(path, "%s")
 	if len(pArr) != 2 {
-		return "", NewSchemaError(-1, "Error:database path is '%s' requid")
+		return "", NewSchemaError(-1, "Error:database path is '%s' requid["+path+"]")
 	}
 
 	rpath := fmt.Sprintf(path, schemaVersion)
-
 	//存在するか？
 	_, err := os.Stat(rpath)
 	//versionが一緒か？
