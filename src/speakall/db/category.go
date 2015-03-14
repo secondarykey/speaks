@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	uuid "github.com/satori/go.uuid"
+	"log"
 )
 
 type Category struct {
@@ -40,9 +41,7 @@ func GenerateCategoryKey() (string, error) {
 }
 
 func SelectAllCategory() ([]Category, error) {
-
 	sql := "select id,key,name,description from Category"
-
 	rows, err := inst.Query(sql)
 	if err != nil {
 		return nil, err
@@ -55,4 +54,12 @@ func SelectAllCategory() ([]Category, error) {
 		cats = append(cats, cat)
 	}
 	return cats, nil
+}
+
+func SelectCategory(catId string) (Category, error) {
+	cat := Category{}
+	log.Println(catId)
+	err := inst.QueryRow("select id,key,name,description from Category where key = ?", catId).
+		Scan(&cat.Id, &cat.Key, &cat.Name, &cat.Description)
+	return cat, err
 }

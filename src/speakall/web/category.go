@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 	"speakall/db"
+	"strings"
 )
 
 func categoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func categoryHandler(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		desc := r.FormValue("description")
 		key := r.FormValue("key")
-		_, err := db.InsertCategory(name, desc, key)
+		_, err := db.InsertCategory(key, name, desc)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -48,4 +49,19 @@ func categoryListHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	setJson(cats, w)
+}
+
+func categoryIdHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		http.Error(w, "GETしないで><", http.StatusBadRequest)
+		return
+	}
+	url := r.URL.Path
+	pathS := strings.Split(url, "/")
+
+	cat, err := db.SelectCategory(pathS[2])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	setJson(cat, w)
 }

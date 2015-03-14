@@ -28,7 +28,7 @@ func NewSchemaError(code int, msg string) *schemaError {
 	}
 }
 
-const schemaVersion = "0.1"
+const schemaVersion = "0.2"
 
 func check(path, ver string) (string, *schemaError) {
 

@@ -13,6 +13,7 @@ func init() {
 
 	http.HandleFunc("/category", categoryHandler)
 	http.HandleFunc("/category/list", categoryListHandler)
+	http.HandleFunc("/category/", categoryIdHandler)
 	//http.HandleFunc("/category/edit/", categoryHandler)
 
 	http.HandleFunc("/message/", messageHandler)

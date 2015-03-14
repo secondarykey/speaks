@@ -33,6 +33,7 @@ func SelectMessage(category, lastedId string) ([]Message, error) {
 	sql += " ORDER BY created DESC LIMIT 10"
 
 	log.Println(sql)
+	log.Println(category)
 
 	rows, err := inst.Query(sql, category, lastedId)
 	if err != nil {

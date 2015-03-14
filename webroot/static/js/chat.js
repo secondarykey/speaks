@@ -22,6 +22,7 @@ function createMessageTag(msg,cId) {
 
 	var itemTag = $('<div/>');
 	itemTag.addClass('list-group-item');
+	itemTag.addClass('category-speak');
 
 	var iconBlockTag = $('<div/>');
 	iconBlockTag.addClass('icon-block' + suffix);
@@ -73,11 +74,81 @@ function createMessageJson(msg) {
     return json;
 }
 
+function getCategoryList() {
+    $.ajax({
+       url: "category/list",
+       type: 'POST',
+       data: { },
+       dataType: 'json'
+    }).success(function( data ) {
+       var ul = $('#CategoryUL');
+       if (data.length > 0 ) {
+           ul.empty();
+       }
+       $.each(data, function(i, category){
+           var li = $('<li/>');
+           var aTag = $('<a/>');
+           aTag.attr('href','#');
+           aTag.text(category.Name);
+
+           aTag.on("click",{key:category.Key},changeCategory);
+
+           li.append(aTag);
+           ul.append(li);
+       });
+    }).error(function() {
+        alert("Error!");
+    });
+}
+
+function getMessageList(cat,lastedId) {
+    $.ajax({
+       url: "message/" + cat,
+       type: 'POST',
+       data: {
+           "lastedId" : lastedId
+       },
+       dataType: 'json'
+    }).success(function( data ) {
+       if (data.length > 0 ) {
+           $("#lastedId").val(data[data.length-1].Id);
+       }
+       $.each(data, function(i, msg){
+           updateMessage(msg,"");
+       });
+    }).error(function() {
+        alert("Error!");
+    });
+}
+
+function changeCategory(evt) {
+    $.ajax({
+       url: "category/" + evt.data.key,
+       type: 'POST',
+       data: { },
+       dataType: 'json'
+    }).success(function( data ) {
+        // tag empty
+        $(".category-speak").each(function() {
+            $(this).remove();
+        });
+        // change title 
+        $("#speakTitle").text(data.Name);
+        // change hide value 
+        $("#category").val(data.Key);
+        getMessageList(data.Key,"9999999999");
+    }).error(function() {
+        alert("Error!");
+    });
+    return false;
+}
+
 $(document).ready(function() {
 
 	$('#updateBtn').click(function() {
 	    var lastedId = $('#lastedId').val()
-        getMessage("Public",lastedId);
+	    var category = $('#category').val()
+        getMessageList(category,lastedId);
     });
 
 	$('#speakBtn').click(function() {
@@ -113,52 +184,9 @@ $(document).ready(function() {
         $("#speakTxt").focus();
     });
 
-    function getMessage(cat,lastedId) {
-        $.ajax({
-           url: "message/" + cat,
-           type: 'POST',
-           data: {
-               "lastedId" : lastedId
-           },
-           dataType: 'json'
-        }).success(function( data ) {
-           if (data.length > 0 ) {
-               $("#lastedId").val(data[data.length-1].Id);
-           }
-           $.each(data, function(i, msg){
-               updateMessage(msg,"");
-           });
-        }).error(function() {
-            alert("Error!");
-        });
-    }
-    function getCategory() {
-        $.ajax({
-           url: "category/list",
-           type: 'POST',
-           data: { },
-           dataType: 'json'
-        }).success(function( data ) {
-           var ul = $('#CategoryUL');
-           if (data.length > 0 ) {
-               ul.empty();
-           }
-           $.each(data, function(i, category){
-	          var li = $('<li/>');
-	          var aTag = $('<a/>');
-	          aTag.attr('href','Test');
-	          aTag.text(category.Name);
-
-	          li.append(aTag);
-	          ul.append(li);
-           });
-        }).error(function() {
-            alert("Error!");
-        });
-    }
-
-    getMessage("Public","9999999999");
-    getCategory()
+    getMessageList("Dashboard","9999999999");
+    getCategoryList()
     $("#speakTxt").focus();
+
 });
 
