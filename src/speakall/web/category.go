@@ -35,6 +35,9 @@ func categoryHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		//DashboardにURLを教える
+
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }

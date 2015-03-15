@@ -8,17 +8,20 @@ import (
 )
 
 func init() {
+
 	http.HandleFunc("/memo", memoHandler)
 	http.HandleFunc("/me", meHandler)
+
+	http.HandleFunc("/message/", messageHandler)
 
 	http.HandleFunc("/category", categoryHandler)
 	http.HandleFunc("/category/list", categoryListHandler)
 	http.HandleFunc("/category/", categoryIdHandler)
 	//http.HandleFunc("/category/edit/", categoryHandler)
 
-	http.HandleFunc("/message/", messageHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
+
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/store/", storeHandler)
 

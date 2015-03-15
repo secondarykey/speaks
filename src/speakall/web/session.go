@@ -27,3 +27,9 @@ func getLoginUser(r *http.Request) interface{} {
 	session := getSession(r)
 	return session.Values["User"]
 }
+
+func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error {
+	session := getSession(r)
+	session.Values["User"] = u
+	return session.Save(r, w)
+}

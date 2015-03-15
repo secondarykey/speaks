@@ -29,14 +29,20 @@ func insertUser(tx *sql.Tx, name string, email string, password string) (sql.Res
 		return nil, err
 	}
 	defer stmt.Close()
-	pswd := createMD5(password)
+	pswd := CreateMD5(password)
 	return stmt.Exec(name, email, pswd)
 }
 
-func createMD5(text string) string {
+func CreateMD5(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func UpdateUser(u *User) error {
+	_, err := inst.Exec("update user set name=?,email=?,password=? where id = ?",
+		u.Name, u.Email, u.Password, u.Id)
+	return err
 }
 
 func SelectUser(email, pswd string) (*User, error) {
@@ -47,9 +53,8 @@ func SelectUser(email, pswd string) (*User, error) {
 		return nil, err
 	}
 
-	if user.Password == createMD5(pswd) {
+	if user.Password == CreateMD5(pswd) {
 		return user, nil
 	}
 	return nil, errors.New("パスワードが違うよ")
-
 }
