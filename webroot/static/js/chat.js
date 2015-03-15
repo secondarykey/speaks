@@ -20,6 +20,11 @@ function createMessageTag(msg,cId) {
 	    suffix = "-me";
     }
 
+    var userId = Number($('#userId').val());
+    if ( userId == msg.UserId ) {
+	    suffix = "-me";
+    }
+
 	var itemTag = $('<div/>');
 	itemTag.addClass('list-group-item');
 	itemTag.addClass('category-speak');
@@ -28,8 +33,15 @@ function createMessageTag(msg,cId) {
 	iconBlockTag.addClass('icon-block' + suffix);
 	var iconTag = $('<img/>');
 	iconTag.addClass('speak-icon' + suffix);
-	iconTag.attr("src","/static/images/nobody.png");
+	iconTag.addClass('userIcon');
+	iconTag.attr("src","/static/images/icon/"+msg.UserId);
 	iconBlockTag.append(iconTag);
+    iconTag.error(function() {
+        $(this).attr({
+            src: '/static/images/icon/nobody.png',
+            alt: 'no image'
+        });
+    });
 
 	var speakBlockTag = $('<div/>');
 	speakBlockTag.addClass('speak-block' + suffix);
@@ -145,9 +157,10 @@ function changeCategory(evt) {
 
 $(document).ready(function() {
 
+
 	$('#updateBtn').click(function() {
-	    var lastedId = $('#lastedId').val()
-	    var category = $('#category').val()
+	    var lastedId = $('#lastedId').val();
+	    var category = $('#category').val();
         getMessageList(category,lastedId);
     });
 
@@ -166,7 +179,6 @@ $(document).ready(function() {
         $.each(files, function(i, file){
             fd.append('uploadFile', file);
         });
-
         $.ajax({
            url: "upload",
            type: 'POST',
@@ -187,6 +199,5 @@ $(document).ready(function() {
     getMessageList("Dashboard","9999999999");
     getCategoryList()
     $("#speakTxt").focus();
-
 });
 
