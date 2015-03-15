@@ -123,7 +123,7 @@ function getMessageList(cat,lastedId) {
 
 function changeCategory(evt) {
     $.ajax({
-       url: "category/" + evt.data.key,
+       url: "category/view/" + evt.data.key,
        type: 'POST',
        data: { },
        dataType: 'json'

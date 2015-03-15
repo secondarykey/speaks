@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
@@ -10,7 +9,6 @@ import (
 )
 
 var inst *sql.DB
-var tx *sql.Tx
 
 type schemaError struct {
 	code    int
@@ -113,39 +111,16 @@ func createInitTable() error {
 	return nil
 }
 
-func begin() error {
-	var err error
-	tx, err = inst.Begin()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func rollback() error {
-	if tx != nil {
-		err := tx.Rollback()
-		tx = nil
-		return err
-	}
-	return errors.New("not use Tx")
-}
-
-func commit() error {
-	err := tx.Commit()
-	tx = nil
-	return err
-}
-
 func insertInitTable() error {
 
-	err := begin()
-	defer rollback()
+	tx, err := inst.Begin()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
-	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@localhost", "password")
+	pwd := CreateMD5("password")
+	rslt, err := InsertUser(tx, "SpeakAll管理者", "admin@localhost", pwd)
 	if err != nil {
 		return err
 	}
@@ -169,23 +144,22 @@ func insertInitTable() error {
 		return err
 	}
 
-	rslt, err = insertUserRole(tx, int(userId), "Admin")
+	rslt, err = InsertUserRole(tx, int(userId), "Admin")
 	if err != nil {
 		return err
 	}
 
-	rslt, err = insertUserRole(tx, int(userId), "Chairman")
+	rslt, err = InsertUserRole(tx, int(userId), "Chairman")
 	if err != nil {
 		return err
 	}
 
-	rslt, err = insertUserRole(tx, int(userId), "Speaker")
+	rslt, err = InsertUserRole(tx, int(userId), "Speaker")
 	if err != nil {
 		return err
 	}
 
-	commit()
-	return nil
+	return tx.Commit()
 }
 
 func Exec(sql string) (sql.Result, error) {

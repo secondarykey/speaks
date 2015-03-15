@@ -6,7 +6,15 @@ import (
 	"strings"
 )
 
+//category
 func categoryHandler(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Path
+	pathS := strings.Split(url, "/")
+	if len(pathS) > 2 {
+		http.Error(w, url+" is Not Found.", http.StatusNotFound)
+		return
+	}
+
 	if r.Method == "GET" {
 		user := getLoginUser(r)
 		if user == nil {
@@ -54,7 +62,7 @@ func categoryListHandler(w http.ResponseWriter, r *http.Request) {
 	setJson(cats, w)
 }
 
-func categoryIdHandler(w http.ResponseWriter, r *http.Request) {
+func categoryViewHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		http.Error(w, "GETしないで><", http.StatusBadRequest)
 		return
@@ -62,7 +70,7 @@ func categoryIdHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
 
-	cat, err := db.SelectCategory(pathS[2])
+	cat, err := db.SelectCategory(pathS[3])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

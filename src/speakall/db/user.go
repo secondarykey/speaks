@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	uuid "github.com/satori/go.uuid"
 )
 
 type User struct {
@@ -23,14 +24,28 @@ func createUserTable() error {
 	return err
 }
 
-func insertUser(tx *sql.Tx, name string, email string, password string) (sql.Result, error) {
+func InsertUser(tx *sql.Tx, name string, email string, password string) (sql.Result, error) {
 	stmt, err := tx.Prepare("insert into User(name,email,password) values(?, ?, ?)")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
-	pswd := CreateMD5(password)
-	return stmt.Exec(name, email, pswd)
+	return stmt.Exec(name, email, password)
+}
+
+func CreateUser(u *User) error {
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	rslt, err := InsertUser(tx, u.Name, u.Email, uuid.NewV4().String())
+	userId, _ := rslt.LastInsertId()
+	rslt, err = InsertUserRole(tx, int(userId), "Speaker")
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func CreateMD5(text string) string {
@@ -57,4 +72,29 @@ func SelectUser(email, pswd string) (*User, error) {
 		return user, nil
 	}
 	return nil, errors.New("パスワードが違うよ")
+}
+
+func SelectPassword(pswd string) (*User, error) {
+	user := &User{}
+	err := inst.QueryRow("select id, name ,email,password from user where password = ?", pswd).Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func SelectAllUser() ([]*User, error) {
+	sql := "select id,name,email,password from user"
+	rows, err := inst.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	users := make([]*User, 0)
+	for rows.Next() {
+		user := &User{}
+		rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+		users = append(users, user)
+	}
+	return users, nil
 }

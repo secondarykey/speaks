@@ -10,13 +10,16 @@ import (
 func init() {
 
 	http.HandleFunc("/memo", memoHandler)
-	http.HandleFunc("/me", meHandler)
 
 	http.HandleFunc("/message/", messageHandler)
 
+	http.HandleFunc("/me", meHandler)
+	http.HandleFunc("/user", userHandler)
+	http.HandleFunc("/user/register/", userRegisterHandler)
+
 	http.HandleFunc("/category", categoryHandler)
 	http.HandleFunc("/category/list", categoryListHandler)
-	http.HandleFunc("/category/", categoryIdHandler)
+	http.HandleFunc("/category/view/", categoryViewHandler)
 	//http.HandleFunc("/category/edit/", categoryHandler)
 
 	http.HandleFunc("/login", loginHandler)

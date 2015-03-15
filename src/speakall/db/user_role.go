@@ -18,7 +18,7 @@ func createUserRoleTable() error {
 	return err
 }
 
-func insertUserRole(tx *sql.Tx, userId int, roleKey string) (sql.Result, error) {
+func InsertUserRole(tx *sql.Tx, userId int, roleKey string) (sql.Result, error) {
 	stmt, err := tx.Prepare("insert into UserRole(user_id,role_key) values(?, ?)")
 	if err != nil {
 		return nil, err
