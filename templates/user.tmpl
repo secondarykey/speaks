@@ -1,0 +1,66 @@
+{{define "JavaScript"}}
+{{end}}
+{{define "content"}}
+
+<form action="{{.URL}}" method="post" class="form-horizontal">
+
+  <div class="form-group">
+    <label for="name" class="col-sm-2 control-label">Name</label>
+    <div class="col-sm-10">
+       <input name="dispName" type="text" class="form-control" id="name" placeholder="Name" value="{{.User.Name}}">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="email" class="col-sm-2 control-label">Email</label>
+    <div class="col-sm-10">
+       <input name="email" type="email" class="form-control" id="email" placeholder="Email" value="{{.User.Email}}">
+    </div>
+  </div>
+
+{{if ne .URL "/user" }}
+  <div class="form-group">
+    <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+    <div class="col-sm-10">
+      <input type="password" name="password" class="form-control" id="inputPassword" placeholder="Password">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="verifiedPassword3" class="col-sm-2 control-label">Password(verified)</label>
+    <div class="col-sm-10">
+      <input type="password" name="verifiedPassword" class="form-control" id="verifiedPassword" placeholder="Password">
+    </div>
+  </div>
+{{end}}
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-primary">Edit</button>
+    </div>
+  </div>
+
+{{if eq .URL "/user" }}
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">User List</div>
+  <table class="table">
+  <tr> 
+    <th>Name</th>
+    <th>EMail</th>
+    <th>URL</th>
+  </tr>
+  {{range .UserList}}
+  <tr> 
+    <td>{{.Name}}</td>
+    <td>{{.Email}}</td>
+    <td>{{.Password}}</td>
+  </tr>
+  {{end}}
+  </table>
+</div>
+{{end}}
+
+
+</form>
+{{end}}
