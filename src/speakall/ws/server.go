@@ -3,10 +3,12 @@ package ws
 import (
 	"golang.org/x/net/websocket"
 	"net/http"
+	"speakall/db"
 )
 
 type Server struct {
 	clients  map[string]*client
+	username map[int]string
 	addCh    chan *client
 	removeCh chan *client
 	msgCh    chan *message
@@ -15,6 +17,7 @@ type Server struct {
 func Listen(path string) {
 	server := &Server{
 		clients:  make(map[string]*client),
+		username: make(map[int]string),
 		addCh:    make(chan *client),
 		removeCh: make(chan *client),
 		msgCh:    make(chan *message),
@@ -31,6 +34,18 @@ func (s *Server) remove(c *client) {
 }
 
 func (s *Server) sendMessage(msg *message) {
+
+	name := "someone"
+	if s.username[msg.UserId] == "" {
+		wk, err := db.GetUserName(msg.UserId)
+		if err == nil {
+			name = wk
+			s.username[msg.UserId] = name
+		}
+	} else {
+		name = s.username[msg.UserId]
+	}
+	msg.UserName = name
 
 	for _, c := range s.clients {
 		client := c

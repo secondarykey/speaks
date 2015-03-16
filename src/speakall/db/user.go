@@ -97,6 +97,15 @@ func SelectPassword(pswd string) (*User, error) {
 	return user, nil
 }
 
+func GetUserName(id int) (string, error) {
+	var name string
+	err := inst.QueryRow("select name from user where id = ?", id).Scan(&name)
+	if err != nil {
+		return "", err
+	}
+	return name, nil
+}
+
 func SelectAllUser() ([]*User, error) {
 	sql := "select id,name,email,password from user"
 	rows, err := inst.Query(sql)

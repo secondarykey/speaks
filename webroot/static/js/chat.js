@@ -15,6 +15,7 @@ function updateMessage(msg,cId) {
 }
 
 function createMessageTag(msg,cId) {
+
 	var suffix = "";
     if ( clientId == cId ) {
 	    suffix = "-me";
@@ -45,7 +46,7 @@ function createMessageTag(msg,cId) {
 
 	var speakBlockTag = $('<div/>');
 	speakBlockTag.addClass('speak-block' + suffix);
-	speakBlockTag.text('say');
+	speakBlockTag.text(msg.UserName + ' Says.');
 
 	var speakTag = $('<pre/>');
 	speakTag.addClass('speak' + suffix);
@@ -160,12 +161,13 @@ function changeCategory(evt) {
         $("#Description").text(data.Description);
         // change hide value 
         $("#category").val(data.Key);
+        ws.send(createChangeJson());
+
         getMessageList(data.Key,"9999999999");
     }).error(function() {
         alert("Error!");
     });
 
-    ws.send(createChangeJson());
 
     return false;
 }

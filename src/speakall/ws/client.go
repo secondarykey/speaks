@@ -27,9 +27,9 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 		msg := &message{}
 		err := websocket.JSON.Receive(c.ws, msg)
 		if err == nil {
-			t := time.Now()
-			msg.Created = t.Format("2006/01/02 15:04:05")
 			if msg.Type != "Change" {
+				t := time.Now()
+				msg.Created = t.Format("2006/01/02 15:04:05")
 				go db.InsertMessage(msg.UserId, msg.Category, msg.Content, msg.Created)
 				msgCh <- msg
 			} else {

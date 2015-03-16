@@ -2,13 +2,13 @@ package db
 
 import (
 	"database/sql"
-	"log"
 )
 
 type Message struct {
 	Id       int
 	Category string
 	UserId   int
+	UserName string
 	Content  string
 	Created  string
 }
@@ -24,16 +24,22 @@ func createMessageTable() error {
 
 func SelectMessage(category, lastedId string) ([]Message, error) {
 
-	sql := "select id,user_id,category,content,created from Message Where category = ?"
-	if lastedId != "" {
-		sql += " AND id < ?"
-	} else {
-		sql += " AND id < 9999999999"
-	}
-	sql += " ORDER BY created DESC LIMIT 10"
+	sql := "select " +
+		"Message.id," +
+		"Message.user_id," +
+		"Message.category," +
+		"Message.content," +
+		"Message.created," +
+		"User.Name" +
+		" from Message INNER JOIN User ON Message.user_id = User.id" +
+		" Where category = ?"
 
-	log.Println(sql)
-	log.Println(category)
+	if lastedId != "" {
+		sql += " AND Message.id < ?"
+	} else {
+		sql += " AND Message.id < 9999999999"
+	}
+	sql += " ORDER BY Message.created DESC LIMIT 10"
 
 	rows, err := inst.Query(sql, category, lastedId)
 	if err != nil {
@@ -44,7 +50,7 @@ func SelectMessage(category, lastedId string) ([]Message, error) {
 	for rows.Next() {
 		msg := Message{}
 		rows.Scan(&msg.Id, &msg.UserId, &msg.Category,
-			&msg.Content, &msg.Created)
+			&msg.Content, &msg.Created, &msg.UserName)
 
 		msgs = append(msgs, msg)
 	}

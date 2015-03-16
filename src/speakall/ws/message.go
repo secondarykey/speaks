@@ -3,6 +3,7 @@ package ws
 type message struct {
 	Type     string
 	UserId   int
+	UserName string
 	ClientId string
 	Content  string
 	Category string
