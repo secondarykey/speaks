@@ -1,7 +1,11 @@
 package web
 
 import (
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	. "speakall/config"
 	"speakall/db"
 	"strings"
 )
@@ -147,4 +151,37 @@ func meHandler(w http.ResponseWriter, r *http.Request) {
 
 	templateDir := "templates/"
 	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"user.tmpl")
+}
+
+func iconRegisterHandler(w http.ResponseWriter, r *http.Request) {
+
+	user := getLoginUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	up := user.(*db.User)
+	path := Config.Web.Root + "/static/images/icon/" + fmt.Sprint(up.Id)
+
+	file, _, err := r.FormFile("uploadFile")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	out, err := os.Create(path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer out.Close()
+	_, err = io.Copy(out, file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }

@@ -61,6 +61,16 @@
 </div>
 {{end}}
 
+{{if eq .URL "/me" }}
+<form action="/me/upload" method="post" enctype="multipart/form-data">
+    <div class="input-group">
+      <input type="file" id="uploadFile" name="uploadFile" class="form-control">
+      <span class="input-group-btn">
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </span>
+    </div>
+</form>
+{{end}}
 
 </form>
 {{end}}
