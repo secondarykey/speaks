@@ -14,7 +14,14 @@
 
     <script src="/static/js/jquery-1.11.2.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/base.js"></script>
+
+{{template "JavaScript" .}}
+   <script>
+      $(document).ready(function() {
+            var curentFile = window.location.pathname.split("/").pop();
+            $('ul.nav > li > a[href="/' + curentFile + '"]').parent().addClass('active');
+      });
+   </script>
 
   </head>
   <body>

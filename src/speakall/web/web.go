@@ -1,21 +1,34 @@
 package web
 
 import (
+	"encoding/json"
 	"html/template"
-	"log"
 	"net/http"
 	. "speakall/config"
 )
 
 func init() {
-	http.HandleFunc("/markdown", markdownHandler)
+
+	http.HandleFunc("/memo", memoHandler)
+
+	http.HandleFunc("/message/", messageHandler)
+
 	http.HandleFunc("/me", meHandler)
+	http.HandleFunc("/user", userHandler)
+	http.HandleFunc("/user/register/", userRegisterHandler)
+
+	http.HandleFunc("/category", categoryHandler)
+	http.HandleFunc("/category/list", categoryListHandler)
+	http.HandleFunc("/category/view/", categoryViewHandler)
+	//http.HandleFunc("/category/edit/", categoryHandler)
+
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
+
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/store/", storeHandler)
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", chatHandler)
 }
 
 func Listen(static, port string) {
@@ -27,71 +40,28 @@ func Listen(static, port string) {
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-
-	url := r.URL.Path
-	if url == "/favicon.ico" {
-		http.Error(w, "", http.StatusNotFound)
-		return
-	}
-
-	session := getSession(r)
-	user := session.Values["User"]
-	category := "Dashboard"
-
-	log.Println(user)
+func setTemplates(w http.ResponseWriter, param interface{}, templateFiles ...string) {
 
 	templateDir := "templates/"
 	tmpls := make([]string, 0)
 	tmpls = append(tmpls, templateDir+"layout.tmpl")
 
-	if user == nil {
-		tmpls = append(tmpls, templateDir+"login.tmpl")
-	} else {
-		tmpls = append(tmpls, templateDir+"menu.tmpl")
-		tmpls = append(tmpls, templateDir+"chat.tmpl")
+	for _, elm := range templateFiles {
+		tmpls = append(tmpls, elm)
 	}
 
 	tmpl := template.Must(template.ParseFiles(tmpls...))
-
-	tc := make(map[string]interface{})
-	tc["User"] = user
-	tc["Category"] = category
-
-	//template exec
-	if err := tmpl.Execute(w, tc); err != nil {
+	if err := tmpl.Execute(w, param); err != nil {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)
 	}
 }
 
-func meHandler(w http.ResponseWriter, r *http.Request) {
-
-	templateDir := "templates/"
-	tmpls := make([]string, 0)
-	tmpls = append(tmpls, templateDir+"layout.tmpl")
-	tmpls = append(tmpls, templateDir+"menu.tmpl")
-	tmpls = append(tmpls, templateDir+"me.tmpl")
-	tmpl := template.Must(template.ParseFiles(tmpls...))
-	tc := make(map[string]interface{})
-
-	//tc["User"] = user
-	//tc["Category"] = category
-
-	if err := tmpl.Execute(w, tc); err != nil {
-		http.Error(w, err.Error(),
-			http.StatusInternalServerError)
+func setJson(s interface{}, w http.ResponseWriter) {
+	res, err := json.Marshal(s)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-func markdownHandler(w http.ResponseWriter, r *http.Request) {
-	templateDir := "templates/"
-	tmpls := make([]string, 0)
-	tmpls = append(tmpls, templateDir+"markdown.tmpl")
-	tmpl := template.Must(template.ParseFiles(tmpls...))
-	tc := make(map[string]interface{})
-	if err := tmpl.Execute(w, tc); err != nil {
-		http.Error(w, err.Error(),
-			http.StatusInternalServerError)
-	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
 }

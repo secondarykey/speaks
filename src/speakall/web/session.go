@@ -11,6 +11,7 @@ import (
 var store *sessions.CookieStore
 
 func init() {
+	gob.Register(&db.RoleMap{})
 	gob.Register(&db.User{})
 }
 
@@ -21,4 +22,15 @@ func startSession(secret string) {
 func getSession(r *http.Request) *sessions.Session {
 	session, _ := store.Get(r, Config.Session.Name)
 	return session
+}
+
+func getLoginUser(r *http.Request) interface{} {
+	session := getSession(r)
+	return session.Values["User"]
+}
+
+func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error {
+	session := getSession(r)
+	session.Values["User"] = u
+	return session.Save(r, w)
 }

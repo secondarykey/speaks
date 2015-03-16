@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
+	"log"
 )
 
 type setting struct {
@@ -29,5 +30,8 @@ type session struct {
 var Config setting
 
 func init() {
-	toml.DecodeFile("SpeakAll.ini", &Config)
+	_, err := toml.DecodeFile("SpeakAll.ini", &Config)
+	if err != nil {
+		log.Println(err)
+	}
 }

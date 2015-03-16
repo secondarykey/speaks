@@ -3,7 +3,6 @@ package ws
 import (
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/websocket"
-	"log"
 	"speakall/db"
 	"time"
 )
@@ -25,20 +24,20 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 	for {
 		msg := &message{}
 		err := websocket.JSON.Receive(c.ws, msg)
-		log.Println(msg)
 		if err == nil {
-			msg.Date = time.Now().String()
+			t := time.Now()
+			msg.Created = t.Format("2006/01/02 15:04:05")
+			go db.InsertMessage(msg.UserId, msg.Category, msg.Content, msg.Created)
+
 			msgCh <- msg
 		} else {
 			removeCh <- c
 			return
 		}
-		c.send(createOpenMessage(c.Id))
 	}
 }
 
 func (c *client) send(msg *message) {
-	go db.InsertMessage(msg.UserId, msg.Category, msg.Content)
 	err := websocket.JSON.Send(c.ws, msg)
 	if err != nil {
 	}

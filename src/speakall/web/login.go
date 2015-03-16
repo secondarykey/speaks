@@ -7,6 +7,13 @@ import (
 )
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "GET" {
+		templateDir := "templates/"
+		setTemplates(w, nil, templateDir+"login.tmpl")
+		return
+	}
+
 	email := r.FormValue("email")
 	pswd := r.FormValue("password")
 
@@ -15,9 +22,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	session := getSession(r)
-	session.Values["User"] = user
-	err = session.Save(r, w)
+
+	err = saveLoginUser(r, w, user)
 	if err != nil {
 		log.Println(err)
 	}

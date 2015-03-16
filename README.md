@@ -4,6 +4,8 @@ becouse still in development,the documents is appropriate.
 "SpeakAll" is Simple SNS.
 use of on-premises environment.
 
+![TravisCI](https://travis-ci.org/secondarykey/SpeakAll.svg?branch=master)
+
 environment :
 
   put the SpeakAll.ini the run dhirectory.

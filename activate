@@ -37,7 +37,5 @@ export _OLD_GOROOT="$GOROOT"
 export _OLD_PS1="$PS1"
 export GOENVNAME="SpeakAll"
 export PS1="(go:SpeakAll): "
-export PATH="$GOPATH/bin":"$GOROOT/bin":$PATH
-export GOPATH=$GOPATH:$(pwd)
-#export GOROOT=/usr/local/go/1.4.1
+export GOPATH=$(pwd)
 

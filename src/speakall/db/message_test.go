@@ -9,10 +9,7 @@ func TestMessage(t *testing.T) {
 
 	var err error
 	// Only pass t into top-level Convey calls
-	Convey("database listen", t, func() {
-
-		err = Listen("../../../data/db/test.db")
-		So(err, ShouldBeNil)
+	Convey("message table test", t, func() {
 
 		Convey("create message table", func() {
 			err = createMessageTable()
@@ -21,7 +18,7 @@ func TestMessage(t *testing.T) {
 
 		Convey("insert message table", func() {
 			begin()
-			InsertMessage(10, "Category", "Content")
+			InsertMessage(10, "Category", "Content", "Created")
 			commit()
 
 			rows, _ := inst.Query("select id,user_id,category,content,created from Message")
@@ -40,27 +37,27 @@ func TestMessage(t *testing.T) {
 				So(created, ShouldNotBeNil)
 			}
 
-			msgs, err := selectMessage("Category")
+			msgs, err := SelectMessage("Category", "")
 			So(err, ShouldBeNil)
 			So(len(msgs), ShouldEqual, 1)
 		})
 
 		Convey("select message table", func() {
 			begin()
-			_, err = InsertMessage(10, "Category", "Content")
-			_, err = InsertMessage(11, "Category", "Content")
-			_, err = InsertMessage(12, "TEST", "Content")
+			_, err = InsertMessage(10, "Category", "Content", "Created")
+			_, err = InsertMessage(11, "Category", "Content", "Created")
+			_, err = InsertMessage(12, "TEST", "Content", "Created")
 			commit()
 
-			msgs, err := selectMessage("Category")
+			msgs, err := SelectMessage("Category", "")
 			So(err, ShouldBeNil)
 			So(len(msgs), ShouldEqual, 2)
 
-			msgs, err = selectMessage("TEST")
+			msgs, err = SelectMessage("TEST", "")
 			So(err, ShouldBeNil)
 			So(len(msgs), ShouldEqual, 1)
 
-			msgs, err = selectMessage("")
+			msgs, err = SelectMessage("", "")
 			So(err, ShouldBeNil)
 			So(len(msgs), ShouldEqual, 0)
 		})

@@ -7,12 +7,12 @@ import (
 
 func TestUser(t *testing.T) {
 
-	var err error
+	//var err error
 	// Only pass t into top-level Convey calls
-	Convey("create user table", t, func() {
+	Convey("user table test", t, func() {
 
-		err = Listen("../../../data/db/test.db")
-		So(err, ShouldBeNil)
+		Convey("create user table", func() {
+		})
 
 		Convey("insert user table", func() {
 		})

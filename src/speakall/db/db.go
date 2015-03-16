@@ -2,16 +2,13 @@ package db
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
 	"os"
 	"strings"
 )
 
 var inst *sql.DB
-var tx *sql.Tx
 
 type schemaError struct {
 	code    int
@@ -29,23 +26,21 @@ func NewSchemaError(code int, msg string) *schemaError {
 	}
 }
 
-const schemaVersion = "0.0"
+const schemaVersion = "0.2"
 
 func check(path, ver string) (string, *schemaError) {
 
 	//%sがあるか？
 	pArr := strings.Split(path, "%s")
 	if len(pArr) != 2 {
-		return "", NewSchemaError(-1, "Error:database path is %s requid")
+		return "", NewSchemaError(-1, "Error:database path is '%s' requid["+path+"]")
 	}
 
 	rpath := fmt.Sprintf(path, schemaVersion)
-	log.Println(rpath)
-
 	//存在するか？
 	_, err := os.Stat(rpath)
 	//versionが一緒か？
-	if ver == schemaVersion {
+	if ver == schemaVersion || ver == "test" {
 		if err == nil {
 			return rpath, nil
 		}
@@ -109,42 +104,23 @@ func createInitTable() error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func begin() error {
-	var err error
-	tx, err = inst.Begin()
+	err = createCategoryTable()
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func rollback() error {
-	if tx != nil {
-		err := tx.Rollback()
-		tx = nil
-		return err
-	}
-	return errors.New("not use Tx")
-}
-
-func commit() error {
-	err := tx.Commit()
-	tx = nil
-	return err
 }
 
 func insertInitTable() error {
 
-	err := begin()
-	defer rollback()
+	tx, err := inst.Begin()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
-	rslt, err := insertUser(tx, "SpeakAll管理者", "admin@localhost", "password")
+	pwd := CreateMD5("password")
+	rslt, err := InsertUser(tx, "SpeakAll管理者", "admin@localhost", pwd)
 	if err != nil {
 		return err
 	}
@@ -168,42 +144,24 @@ func insertInitTable() error {
 		return err
 	}
 
-	rslt, err = insertUserRole(tx, int(userId), "Admin")
+	rslt, err = InsertUserRole(tx, int(userId), "Admin")
 	if err != nil {
 		return err
 	}
 
-	rslt, err = insertUserRole(tx, int(userId), "Chairman")
+	rslt, err = InsertUserRole(tx, int(userId), "Chairman")
 	if err != nil {
 		return err
 	}
 
-	rslt, err = insertUserRole(tx, int(userId), "Speaker")
+	rslt, err = InsertUserRole(tx, int(userId), "Speaker")
 	if err != nil {
 		return err
 	}
 
-	commit()
-	return nil
+	return tx.Commit()
 }
 
 func Exec(sql string) (sql.Result, error) {
 	return inst.Exec(sql)
 }
-
-/*
-func Select() {
-	rows, err := inst.Query("select id, name from foo")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var name string
-		rows.Scan(&id, &name)
-		println(id, name)
-	}
-}
-*/
