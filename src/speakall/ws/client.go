@@ -8,14 +8,16 @@ import (
 )
 
 type client struct {
-	Id string
-	ws *websocket.Conn
+	Id       string
+	Category string
+	ws       *websocket.Conn
 }
 
 func newClient(ws *websocket.Conn) *client {
 	return &client{
-		Id: uuid.NewV4().String(),
-		ws: ws,
+		Id:       uuid.NewV4().String(),
+		Category: "Dashboard",
+		ws:       ws,
 	}
 }
 
@@ -27,9 +29,12 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 		if err == nil {
 			t := time.Now()
 			msg.Created = t.Format("2006/01/02 15:04:05")
-			go db.InsertMessage(msg.UserId, msg.Category, msg.Content, msg.Created)
-
-			msgCh <- msg
+			if msg.Type != "Change" {
+				go db.InsertMessage(msg.UserId, msg.Category, msg.Content, msg.Created)
+				msgCh <- msg
+			} else {
+				c.Category = msg.Category
+			}
 		} else {
 			removeCh <- c
 			return

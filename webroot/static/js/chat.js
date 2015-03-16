@@ -76,9 +76,20 @@ ws.onmessage = function(e) {
     addMessage(msg,cId);
 }
 
+function createChangeJson() {
+	var obj = new Object();
+    obj.Type     = "Change";
+    obj.UserId   = Number($("#userId").val());
+    obj.Category = $("#category").val();
+    obj.ClientId = clientId;
+	var json = JSON.stringify(obj);
+    return json;
+}
+
 function createMessageJson(msg) {
 	var obj = new Object();
     obj.Content  = msg;
+    obj.Type     = "Message";
     obj.UserId   = Number($("#userId").val());
     obj.Category = $("#category").val();
     obj.ClientId = clientId;
@@ -153,11 +164,13 @@ function changeCategory(evt) {
     }).error(function() {
         alert("Error!");
     });
+
+    ws.send(createChangeJson());
+
     return false;
 }
 
 $(document).ready(function() {
-
 
 	$('#updateBtn').click(function() {
 	    var lastedId = $('#lastedId').val();

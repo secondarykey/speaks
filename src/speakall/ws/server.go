@@ -31,11 +31,14 @@ func (s *Server) remove(c *client) {
 }
 
 func (s *Server) sendMessage(msg *message) {
+
 	for _, c := range s.clients {
 		client := c
-		go func() {
-			client.send(msg)
-		}()
+		if msg.Category == client.Category {
+			go func() {
+				client.send(msg)
+			}()
+		}
 	}
 }
 
