@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	. "speakall/config"
@@ -163,6 +164,8 @@ func iconRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	up := user.(*db.User)
 	path := Config.Web.Root + "/static/images/icon/" + fmt.Sprint(up.Id)
+
+	log.Println(path)
 
 	file, _, err := r.FormFile("uploadFile")
 	if err != nil {
