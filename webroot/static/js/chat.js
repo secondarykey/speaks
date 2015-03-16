@@ -146,6 +146,7 @@ function changeCategory(evt) {
         });
         // change title 
         $("#speakTitle").text(data.Name);
+        $("#Description").text(data.Description);
         // change hide value 
         $("#category").val(data.Key);
         getMessageList(data.Key,"9999999999");
