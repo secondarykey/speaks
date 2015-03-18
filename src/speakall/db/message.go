@@ -24,16 +24,7 @@ func createMessageTable() error {
 
 func SelectMessage(category, lastedId string) ([]Message, error) {
 
-	sql := "select " +
-		"Message.id," +
-		"Message.user_id," +
-		"Message.category," +
-		"Message.content," +
-		"Message.created," +
-		"User.Name" +
-		" from Message INNER JOIN User ON Message.user_id = User.id" +
-		" Where category = ?"
-
+	sql := createSQL()
 	if lastedId != "" {
 		sql += " AND Message.id < ?"
 	} else {
@@ -55,6 +46,37 @@ func SelectMessage(category, lastedId string) ([]Message, error) {
 		msgs = append(msgs, msg)
 	}
 	return msgs, nil
+}
+func SelectAllMessage(category string) ([]Message, error) {
+	sql := createSQL()
+	sql += " ORDER BY Message.created ASC"
+	rows, err := inst.Query(sql, category)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	msgs := make([]Message, 0)
+	for rows.Next() {
+		msg := Message{}
+		rows.Scan(&msg.Id, &msg.UserId, &msg.Category,
+			&msg.Content, &msg.Created, &msg.UserName)
+
+		msgs = append(msgs, msg)
+	}
+	return msgs, nil
+}
+
+func createSQL() string {
+	sql := "select " +
+		"Message.id," +
+		"Message.user_id," +
+		"Message.category," +
+		"Message.content," +
+		"Message.created," +
+		"User.Name" +
+		" from Message INNER JOIN User ON Message.user_id = User.id" +
+		" Where category = ?"
+	return sql
 }
 
 func InsertMessage(userId int, category, content, created string) (sql.Result, error) {

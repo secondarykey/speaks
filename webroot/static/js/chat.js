@@ -109,15 +109,21 @@ function getCategoryList() {
        if (data.length > 0 ) {
            ul.empty();
        }
+
        $.each(data, function(i, category){
            var li = $('<li/>');
            var aTag = $('<a/>');
            aTag.attr('href','#');
            aTag.text(category.Name);
 
-           aTag.on("click",{key:category.Key},changeCategory);
+           //<span class="badge">4</span>
+           var spanTag = $('<span/>');
+           spanTag.addClass('badge');
+           //spanTag.text("4");
 
+           aTag.on("click",{key:category.Key},changeCategory);
            li.append(aTag);
+           li.append(spanTag);
            ul.append(li);
        });
     }).error(function() {
@@ -210,6 +216,12 @@ $(document).ready(function() {
         });
         $("#uploadModal").modal("hide");
         $("#speakTxt").focus();
+    });
+
+	$('#memoBtn').click(function() {
+       var key = $("#category").val();
+       var url = "http://" + location.host + "/memo/view/" + key;
+       window.open(url, '_blank');
     });
 
     getMessageList("Dashboard","9999999999");

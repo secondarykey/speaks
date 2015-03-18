@@ -108,6 +108,10 @@ func createInitTable() error {
 	if err != nil {
 		return err
 	}
+	err = createMemoTable()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
