@@ -122,6 +122,7 @@ function getCategoryList() {
            //spanTag.text("4");
 
            aTag.on("click",{key:category.Key},changeCategory);
+
            li.append(aTag);
            li.append(spanTag);
            ul.append(li);
@@ -152,8 +153,16 @@ function getMessageList(cat,lastedId) {
 }
 
 function changeCategory(evt) {
+
+    var catKey = evt.data.key
+    if ( catKey == "Dashboard") {
+        $("#memoBtn").hide();
+    } else {
+        $("#memoBtn").show();
+    }
+
     $.ajax({
-       url: "category/view/" + evt.data.key,
+       url: "category/view/" + catKey,
        type: 'POST',
        data: { },
        dataType: 'json'
@@ -173,7 +182,6 @@ function changeCategory(evt) {
     }).error(function() {
         alert("Error!");
     });
-
 
     return false;
 }
@@ -223,6 +231,7 @@ $(document).ready(function() {
        var url = "http://" + location.host + "/memo/view/" + key;
        window.open(url, '_blank');
     });
+	$('#memoBtn').hide();
 
     getMessageList("Dashboard","9999999999");
     getCategoryList()

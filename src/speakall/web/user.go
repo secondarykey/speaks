@@ -50,6 +50,8 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			elm.Password = ""
 		}
 	}
+
+	tc["User"] = user
 	tc["UserList"] = ulist
 
 	templateDir := "templates/"

@@ -37,5 +37,5 @@ export _OLD_GOROOT="$GOROOT"
 export _OLD_PS1="$PS1"
 export GOENVNAME="SpeakAll"
 export PS1="(go:SpeakAll): "
-export GOPATH=$(pwd)
+export GOPATH=$GOPATH:$(pwd)
 
