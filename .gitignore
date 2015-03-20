@@ -4,3 +4,4 @@ data/
 webroot/static/images/icon/
 src/github.com/
 src/golang.org/
+bin/

@@ -58,7 +58,26 @@ function createMessageTag(msg,cId) {
 
 	var footerTag = $('<footer/>');
 	footerTag.addClass('text-right');
-	footerTag.text(msg.Created);
+	footerTag.text(msg.Created + " ");
+    if ( suffix == "-me" ) {
+        var delBtn = $('<button/>');
+        delBtn.addClass('btn');
+        delBtn.addClass('btn-danger');
+        delBtn.addClass('btn-xs');
+        delBtn.css('height','26px');
+        delBtn.attr('data-id',msg.Id);
+        delBtn.on("click",null,deleteMessage);
+        delBtn.popConfirm({
+                title:"Delete Message",
+                content:"Delete?",
+                placement:"left"
+        });
+        var delSpn = $('<span/>');
+        delSpn.addClass('glyphicon');
+        delSpn.addClass('glyphicon-remove-sign');
+        delBtn.append(delSpn);
+	    footerTag.append(delBtn);
+    }
 
 	itemTag.append(iconBlockTag);
 	itemTag.append(speakBlockTag);
@@ -179,6 +198,22 @@ function changeCategory(evt) {
         ws.send(createChangeJson());
 
         getMessageList(data.Key,"9999999999");
+    }).error(function() {
+        alert("Error!");
+    });
+
+    return false;
+}
+
+function deleteMessage(evt) {
+    var msgId = $(this).attr('data-id');
+    $.ajax({
+       url: "message/delete/" + msgId,
+       type: 'POST',
+       data: { },
+       dataType: 'json'
+    }).success(function( data ) {
+      //TODO: Deleting Tag & sennding delete message
     }).error(function() {
         alert("Error!");
     });

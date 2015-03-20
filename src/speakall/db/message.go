@@ -82,3 +82,9 @@ func createSQL() string {
 func InsertMessage(userId int, category, content, created string) (sql.Result, error) {
 	return inst.Exec("insert into Message(user_id,category,content,created) values(?, ?, ?, ?)", userId, category, content, created)
 }
+
+func DeleteMessage(id string, user_id int) error {
+	_, err := inst.Exec("delete from Message where id = ? and user_id = ?",
+		id, user_id)
+	return err
+}

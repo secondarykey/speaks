@@ -14,6 +14,7 @@ func init() {
 	http.HandleFunc("/memo/view/", memoViewHandler)
 
 	http.HandleFunc("/message/", messageHandler)
+	http.HandleFunc("/message/delete/", messageDeleteHandler)
 
 	http.HandleFunc("/me", meHandler)
 	http.HandleFunc("/me/upload", iconRegisterHandler)
