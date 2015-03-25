@@ -14,11 +14,12 @@ type Message struct {
 }
 
 func createMessageTable() error {
+	_, err := Exec("CREATE TABLE Message(id INTEGER PRIMARY KEY AUTOINCREMENT,category text,user_id integer,content text,created text)")
+	return err
+}
+
+func deleteMessageTable() error {
 	_, err := Exec("DROP TABLE if exists Message")
-	if err != nil {
-		return err
-	}
-	_, err = Exec("CREATE TABLE Message(id INTEGER PRIMARY KEY AUTOINCREMENT,category text,user_id integer,content text,created text)")
 	return err
 }
 

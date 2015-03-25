@@ -14,7 +14,8 @@ type Server struct {
 	msgCh    chan *message
 }
 
-func Listen(path string) {
+func Listen(path string) error {
+
 	server := &Server{
 		clients:  make(map[string]*client),
 		username: make(map[int]string),
@@ -22,7 +23,7 @@ func Listen(path string) {
 		removeCh: make(chan *client),
 		msgCh:    make(chan *message),
 	}
-	go server.listen(path)
+	return server.listen(path)
 }
 
 func (s *Server) add(c *client) {
@@ -53,6 +54,8 @@ func (s *Server) sendMessage(msg *message) {
 			go func() {
 				client.send(msg)
 			}()
+		} else {
+			//notify badge
 		}
 	}
 }
@@ -66,16 +69,22 @@ func (s *Server) websocketHandler() http.Handler {
 	})
 }
 
-func (s *Server) listen(pattern string) {
+func (s *Server) listen(pattern string) error {
+
 	http.Handle(pattern, s.websocketHandler())
-	for {
-		select {
-		case c := <-s.addCh:
-			s.add(c)
-		case c := <-s.removeCh:
-			s.remove(c)
-		case m := <-s.msgCh:
-			s.sendMessage(m)
+	//goroutine
+	go func() {
+		for {
+			select {
+			case c := <-s.addCh:
+				s.add(c)
+			case c := <-s.removeCh:
+				s.remove(c)
+			case m := <-s.msgCh:
+				s.sendMessage(m)
+			}
 		}
-	}
+	}()
+
+	return nil
 }

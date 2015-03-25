@@ -3,7 +3,6 @@ package web
 import (
 	uuid "github.com/satori/go.uuid"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	. "speakall/config"
@@ -17,10 +16,8 @@ type result struct {
 func storeHandler(w http.ResponseWriter, r *http.Request) {
 	path := Config.Web.Upload
 	urlSlice := strings.Split(r.URL.Path, "/")
-	log.Println(urlSlice)
 
 	file := path + "/" + urlSlice[2]
-	log.Println(file)
 	_, err := os.Stat(file)
 	if os.IsNotExist(err) {
 		http.Error(w, err.Error(), http.StatusNotFound)

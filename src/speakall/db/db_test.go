@@ -7,20 +7,25 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	setup()
+	setUp()
 	ret := m.Run()
 	if ret == 0 {
-		teardown()
+		tearDown()
 	}
 	os.Exit(ret)
 }
 
-func setup() {
+func setUp() {
 	err := Listen("../../../data/db/SpeakAll-%s.db", "test")
-	So(err, ShouldBeNil)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func teardown() {
+func tearDown() {
+}
+
+func ListenTestTable() {
 }
 
 func TestDB(t *testing.T) {
@@ -37,22 +42,22 @@ func TestDB(t *testing.T) {
 			So(err, ShouldBeNil)
 		})
 
-		Convey("createInitTable", func() {
+		Convey("createInitTables", func() {
 			// user exist
 			// role exist
 			// user_role exist
+		})
+
+		Convey("deleteTables", func() {
+			//user
+			//role
+			//user_role
 		})
 
 		Convey("insertInitTable", func() {
 			//user
 			//role
 			//user_role
-		})
-		Convey("begin", func() {
-		})
-		Convey("rollback", func() {
-		})
-		Convey("commit", func() {
 		})
 	})
 

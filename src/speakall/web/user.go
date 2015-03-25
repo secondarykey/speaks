@@ -3,7 +3,6 @@ package web
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	. "speakall/config"
@@ -54,8 +53,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	tc["User"] = user
 	tc["UserList"] = ulist
 
-	templateDir := "templates/"
-	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"user.tmpl")
+	setTemplates(w, tc, "menu.tmpl", "user.tmpl")
 	return
 }
 
@@ -78,8 +76,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	tc["URL"] = url
 
 	if r.Method == "GET" {
-		templateDir := "templates/"
-		setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"user.tmpl")
+		setTemplates(w, tc, "menu.tmpl", "user.tmpl")
 		return
 	}
 
@@ -125,35 +122,32 @@ func meHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 
-		up := user.(*db.User)
-
 		name := r.FormValue("dispName")
 		email := r.FormValue("email")
-		up.Name = name
-		up.Email = email
+		user.Name = name
+		user.Email = email
 
 		pwd := r.FormValue("password")
 		veri := r.FormValue("verifiedPassword")
 		if pwd != "" {
 			if pwd == veri {
-				up.Password = db.CreateMD5(pwd)
+				user.Password = db.CreateMD5(pwd)
 			}
 		}
 		//update
-		err := db.UpdateUser(up)
+		err := db.UpdateUser(user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = saveLoginUser(r, w, up)
+		err = saveLoginUser(r, w, user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 
-	templateDir := "templates/"
-	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"user.tmpl")
+	setTemplates(w, tc, "menu.tmpl", "user.tmpl")
 }
 
 func iconRegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -164,10 +158,7 @@ func iconRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	up := user.(*db.User)
-	path := Config.Web.Root + "/static/images/icon/" + fmt.Sprint(up.Id)
-
-	log.Println(path)
+	path := Config.Web.Root + "/static/images/icon/" + fmt.Sprint(user.Id)
 
 	file, _, err := r.FormFile("uploadFile")
 	if err != nil {

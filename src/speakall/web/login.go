@@ -1,7 +1,7 @@
 package web
 
 import (
-	"log"
+	"database/sql"
 	"net/http"
 	"speakall/db"
 )
@@ -9,8 +9,7 @@ import (
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
-		templateDir := "templates/"
-		setTemplates(w, nil, templateDir+"login.tmpl")
+		setTemplates(w, nil, "login.tmpl")
 		return
 	}
 
@@ -19,21 +18,23 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := db.SelectUser(email, pswd)
 	if err != nil {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
+		if err == sql.ErrNoRows {
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	err = saveLoginUser(r, w, user)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session := getSession(r)
-	session.Values["User"] = nil
-	session.Save(r, w)
+	saveLoginUser(r, w, nil)
 	http.Redirect(w, r, "/", http.StatusFound)
 }

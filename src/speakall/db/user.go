@@ -18,11 +18,12 @@ type User struct {
 }
 
 func createUserTable() error {
+	_, err := Exec("CREATE TABLE User(id INTEGER PRIMARY KEY AUTOINCREMENT,name text,email text,password text)")
+	return err
+}
+
+func deleteUserTable() error {
 	_, err := Exec("DROP TABLE if exists User")
-	if err != nil {
-		return err
-	}
-	_, err = Exec("CREATE TABLE User(id INTEGER PRIMARY KEY AUTOINCREMENT,name text,email text,password text)")
 	return err
 }
 
@@ -85,6 +86,7 @@ func SelectUser(email, pswd string) (*User, error) {
 		}
 		return user, nil
 	}
+
 	return nil, errors.New("パスワードが違うよ")
 }
 

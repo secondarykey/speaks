@@ -10,11 +10,12 @@ type UserRole struct {
 }
 
 func createUserRoleTable() error {
+	_, err := Exec("CREATE TABLE UserRole(user_id int,role_key text)")
+	return err
+}
+
+func deleteUserRoleTable() error {
 	_, err := Exec("DROP TABLE if exists UserRole")
-	if err != nil {
-		return err
-	}
-	_, err = Exec("CREATE TABLE UserRole(user_id int,role_key text)")
 	return err
 }
 

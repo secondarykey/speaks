@@ -10,12 +10,20 @@ type Role struct {
 	Name string
 }
 
+const (
+	ADMIN    = "Admin"
+	CHAIRMAN = "Chairman"
+	SPEAKER  = "Speaker"
+	VIEWER   = "Viewer"
+)
+
 func createRoleTable() error {
+	_, err := Exec("CREATE TABLE Role(key text PRIMARY KEY,name text)")
+	return err
+}
+
+func deleteRoleTable() error {
 	_, err := Exec("DROP TABLE if exists Role")
-	if err != nil {
-		return err
-	}
-	_, err = Exec("CREATE TABLE Role(key text PRIMARY KEY,name text)")
 	return err
 }
 

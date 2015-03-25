@@ -35,29 +35,27 @@ func init() {
 	http.HandleFunc("/", chatHandler)
 }
 
-func Listen(static, port string) {
-	startSession(Config.Session.Secret)
+func Listen(static, port string) error {
+	startSession()
 	http.Handle("/static/", http.FileServer(http.Dir(static)))
-	err := http.ListenAndServe(":"+port, nil)
-	if err != nil {
-		panic(err)
-	}
+
+	return http.ListenAndServe(":"+port, nil)
 }
 
 func setTemplates(w http.ResponseWriter, param interface{}, templateFiles ...string) {
 
-	templateDir := "templates/"
+	templateDir := Config.Web.Template
 	tmpls := make([]string, 0)
-	tmpls = append(tmpls, templateDir+"layout.tmpl")
+	tmpls = append(tmpls, templateDir+"/layout.tmpl")
 
 	for _, elm := range templateFiles {
-		tmpls = append(tmpls, elm)
+		tmpls = append(tmpls, templateDir+"/"+elm)
 	}
 
 	tmpl := template.Must(template.ParseFiles(tmpls...))
 	if err := tmpl.Execute(w, param); err != nil {
-		http.Error(w, err.Error(),
-			http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -65,6 +63,7 @@ func setJson(s interface{}, w http.ResponseWriter) {
 	res, err := json.Marshal(s)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)

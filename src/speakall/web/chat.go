@@ -13,11 +13,9 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	category := "Dashboard"
-
 	tc := make(map[string]interface{})
 	tc["User"] = user
 	tc["Category"] = category
 
-	templateDir := "templates/"
-	setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"chat.tmpl")
+	setTemplates(w, tc, "menu.tmpl", "chat.tmpl")
 }

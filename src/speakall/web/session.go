@@ -15,22 +15,32 @@ func init() {
 	gob.Register(&db.User{})
 }
 
-func startSession(secret string) {
+func startSession() {
+	secret := Config.Session.Secret
 	store = sessions.NewCookieStore([]byte(secret))
 }
 
-func getSession(r *http.Request) *sessions.Session {
-	session, _ := store.Get(r, Config.Session.Name)
-	return session
+func getSession(r *http.Request) (*sessions.Session, error) {
+	return store.Get(r, Config.Session.Name)
 }
 
-func getLoginUser(r *http.Request) interface{} {
-	session := getSession(r)
-	return session.Values["User"]
+func getLoginUser(r *http.Request) *db.User {
+	session, err := getSession(r)
+	if err != nil {
+		return nil
+	}
+	v := session.Values["User"]
+	if v == nil {
+		return nil
+	}
+	return v.(*db.User)
 }
 
-func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error {
-	session := getSession(r)
+func saveLoginUser(r *http.Request, w http.ResponseWriter, u *db.User) error {
+	session, err := getSession(r)
+	if err != nil {
+		return err
+	}
 	session.Values["User"] = u
 	return session.Save(r, w)
 }

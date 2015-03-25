@@ -1,3 +1,5 @@
+var wActive = true;
+var canNotify = notify.isSupported ;
 var ws = new WebSocket("ws://" + location.host + "/ws/");
 var clientId;
 
@@ -94,6 +96,7 @@ ws.onmessage = function(e) {
         return;
     }
     addMessage(msg,cId);
+    createNotify("Notify","you have speak","/static/js/alert.ico");
 }
 
 function createChangeJson() {
@@ -221,7 +224,29 @@ function deleteMessage(evt) {
     return false;
 }
 
+function createNotify(title,body,icon) {
+    if ( !wActive && canNotify && 
+            (notify.permissionLevel() == notify.PERMISSION_GRANTED) ) {
+        notify.createNotification(title,{body:body,icon:icon});
+    }
+}
+
 $(document).ready(function() {
+    if ( canNotify ) {
+        var permission = notify.permissionLevel();
+        if ( permission == notify.PERMISSION_DEFAULT ) {
+            notify.requestPermission();
+        //} else if ( permission == notify.PERMISSION_GRANTED ) {
+            //createNotify("Notify","Message!","alert.ico");
+        }
+        //notify.PERMISSION_DENIED
+    }
+
+    $(window).bind("focus",function(){  //フォーカスした
+        wActive = true;
+    }).bind("blur",function(){  //フォーカスが外れた
+        wActive = false;
+    }); 
 
 	$('#updateBtn').click(function() {
 	    var lastedId = $('#lastedId').val();

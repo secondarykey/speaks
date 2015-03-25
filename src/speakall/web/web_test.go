@@ -2,8 +2,6 @@ package web
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -26,30 +24,17 @@ func teardown() {
 func TestWeb(t *testing.T) {
 
 	Convey("Listen", t, func() {
-		Convey("database", t, func() {
+		Convey("Start WebServer", t, func() {
 		})
 	})
 
-	Convey("handler", t, func() {
-		ts := httptest.NewServer(http.HandlerFunc(handler))
-		defer ts.Close()
-		res, err := http.Get(ts.URL)
-		So(err, ShouldBeNil)
-
-		Convey("status code", t, func() {
-			So(res.StatusCode, ShouldEqual, 200)
+	Convey("setTemplates", t, func() {
+		Convey("", t, func() {
 		})
 	})
 
-	Convey("meHandler", t, func() {
-		ts := httptest.NewServer(http.HandlerFunc(meHandler))
-		defer ts.Close()
-		res, err := http.Get(ts.URL)
-		So(err, ShouldBeNil)
-
-		Convey("status code", t, func() {
-			So(res.StatusCode, ShouldEqual, 200)
+	Convey("setJson", t, func() {
+		Convey("", t, func() {
 		})
 	})
-
 }

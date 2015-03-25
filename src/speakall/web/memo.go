@@ -28,8 +28,7 @@ func memoEditHandler(w http.ResponseWriter, r *http.Request) {
 		tc["User"] = user
 		tc["Memo"] = memo
 
-		templateDir := "templates/"
-		setTemplates(w, tc, templateDir+"memo/edit.tmpl")
+		setTemplates(w, tc, "memo/edit.tmpl")
 		return
 	}
 
@@ -68,9 +67,7 @@ func memoViewHandler(w http.ResponseWriter, r *http.Request) {
 	tc := make(map[string]interface{})
 	tc["Memo"] = memo
 
-	templateDir := "templates/"
-	setTemplates(w, tc, templateDir+"memo/view.tmpl")
-
+	setTemplates(w, tc, "memo/view.tmpl")
 }
 
 func createMemoContent(key string) string {

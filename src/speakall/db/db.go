@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"os"
 	"strings"
 )
 
-var inst *sql.DB
+const schemaVersion = "0.2"
 
 type schemaError struct {
 	code    int
@@ -26,20 +27,20 @@ func NewSchemaError(code int, msg string) *schemaError {
 	}
 }
 
-const schemaVersion = "0.2"
+var inst *sql.DB
 
-func check(path, ver string) (string, *schemaError) {
+func checkSchemaVersion(path, ver string) (string, *schemaError) {
 
-	//%sがあるか？
+	//%s be
 	pArr := strings.Split(path, "%s")
 	if len(pArr) != 2 {
 		return "", NewSchemaError(-1, "Error:database path is '%s' requid["+path+"]")
 	}
 
 	rpath := fmt.Sprintf(path, schemaVersion)
-	//存在するか？
+	//exist database file
 	_, err := os.Stat(rpath)
-	//versionが一緒か？
+	//call version check
 	if ver == schemaVersion || ver == "test" {
 		if err == nil {
 			return rpath, nil
@@ -50,19 +51,18 @@ func check(path, ver string) (string, *schemaError) {
 	if err == nil {
 		return rpath, nil
 	}
-
-	//code 0 ってなんだ？
-
+	//code 0
 	return rpath, NewSchemaError(0, "Warning:Program version,TOML file version")
 }
 
 func Listen(path, version string) error {
 
 	var err error
-	rp, scErr := check(path, version)
+	rp, scErr := checkSchemaVersion(path, version)
 
 	cFlag := true
 	if scErr != nil {
+		log.Println("SchemaError:" + scErr.Error())
 		if scErr.code == 0 {
 			cFlag = false
 		} else {
@@ -79,7 +79,12 @@ func Listen(path, version string) error {
 		return nil
 	}
 
-	err = createInitTable()
+	err = deleteTables()
+	if err != nil {
+		return err
+	}
+
+	err = createInitTables()
 	if err != nil {
 		return err
 	}
@@ -87,7 +92,7 @@ func Listen(path, version string) error {
 	return insertInitTable()
 }
 
-func createInitTable() error {
+func createInitTables() error {
 	err := createUserTable()
 	if err != nil {
 		return err
@@ -164,6 +169,34 @@ func insertInitTable() error {
 	}
 
 	return tx.Commit()
+}
+
+func deleteTables() error {
+	err := deleteUserTable()
+	if err != nil {
+		return err
+	}
+	err = deleteRoleTable()
+	if err != nil {
+		return err
+	}
+	err = deleteUserRoleTable()
+	if err != nil {
+		return err
+	}
+	err = deleteMessageTable()
+	if err != nil {
+		return err
+	}
+	err = deleteCategoryTable()
+	if err != nil {
+		return err
+	}
+	err = deleteMemoTable()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Exec(sql string) (sql.Result, error) {

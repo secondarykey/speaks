@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
-	"log"
 )
 
 type setting struct {
@@ -17,9 +16,10 @@ type database struct {
 }
 
 type web struct {
-	Port   string
-	Root   string
-	Upload string
+	Port     string
+	Root     string
+	Upload   string
+	Template string
 }
 
 type session struct {
@@ -29,9 +29,7 @@ type session struct {
 
 var Config setting
 
-func init() {
-	_, err := toml.DecodeFile("SpeakAll.ini", &Config)
-	if err != nil {
-		log.Println(err)
-	}
+func Load(file string) error {
+	_, err := toml.DecodeFile(file, &Config)
+	return err
 }

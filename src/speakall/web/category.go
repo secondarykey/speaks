@@ -32,8 +32,7 @@ func categoryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		tc["CategoryKey"] = key
 
-		templateDir := "templates/"
-		setTemplates(w, tc, templateDir+"menu.tmpl", templateDir+"category.tmpl")
+		setTemplates(w, tc, "menu.tmpl", "category.tmpl")
 	} else {
 		name := r.FormValue("name")
 		desc := r.FormValue("description")
@@ -43,9 +42,7 @@ func categoryHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		//DashboardにURLを教える
-
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }

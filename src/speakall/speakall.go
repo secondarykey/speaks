@@ -8,22 +8,28 @@ import (
 	"speakall/ws"
 )
 
+var done chan error
+
 func Start() error {
 
 	log.Println("######## start DBServer")
-	err := db.Listen(Config.Database.Path, Config.Database.Version)
+	path := Config.Database.Path
+	ver := Config.Database.Version
+
+	err := db.Listen(path, ver)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
 	log.Println("######## start WSServer")
-	ws.Listen("/ws/")
+	err = ws.Listen("/ws/")
+	if err != nil {
+		return err
+	}
 
 	log.Println("######## start HTTPServer")
 	port := Config.Web.Port
 	staticDir := Config.Web.Root
-	web.Listen(staticDir, port)
 
-	return nil
+	return web.Listen(staticDir, port)
 }

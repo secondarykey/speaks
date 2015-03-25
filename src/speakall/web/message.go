@@ -53,10 +53,10 @@ func messageDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	msgId := msgS[3]
-	up := user.(*db.User)
-	err := db.DeleteMessage(msgId, up.Id)
+	err := db.DeleteMessage(msgId, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	rtn := map[string]string{

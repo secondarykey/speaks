@@ -12,11 +12,12 @@ type Memo struct {
 }
 
 func createMemoTable() error {
+	_, err := Exec("CREATE TABLE Memo(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,content text)")
+	return err
+}
+
+func deleteMemoTable() error {
 	_, err := Exec("DROP TABLE if exists Memo")
-	if err != nil {
-		return err
-	}
-	_, err = Exec("CREATE TABLE Memo(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,content text)")
 	return err
 }
 
@@ -36,6 +37,7 @@ func UpdateMemo(key, name, content string) error {
 		name, content, key)
 	return err
 }
+
 func DeleteMemo(key string) error {
 	_, err := inst.Exec("delete from memo where key = ?",
 		key)

@@ -8,6 +8,9 @@ import (
 func TestConfig(t *testing.T) {
 
 	Convey("config", t, func() {
+		err := Load("../../../test.ini")
+		So(err, ShouldBeNil)
+
 		So(Config.Database, ShouldNotBeNil)
 		So(Config.Database.Path, ShouldNotBeNil)
 		So(Config.Database.Version, ShouldNotBeNil)

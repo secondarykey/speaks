@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	uuid "github.com/satori/go.uuid"
-	"log"
 )
 
 type Category struct {
@@ -14,11 +13,12 @@ type Category struct {
 }
 
 func createCategoryTable() error {
+	_, err := Exec("CREATE TABLE Category(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,description text)")
+	return err
+}
+
+func deleteCategoryTable() error {
 	_, err := Exec("DROP TABLE if exists Category")
-	if err != nil {
-		return err
-	}
-	_, err = Exec("CREATE TABLE Category(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,description text)")
 	return err
 }
 
@@ -58,7 +58,6 @@ func SelectAllCategory() ([]Category, error) {
 
 func SelectCategory(catId string) (Category, error) {
 	cat := Category{}
-	log.Println(catId)
 	err := inst.QueryRow("select id,key,name,description from Category where key = ?", catId).
 		Scan(&cat.Id, &cat.Key, &cat.Name, &cat.Description)
 	return cat, err
