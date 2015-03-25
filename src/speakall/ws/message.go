@@ -28,3 +28,10 @@ func createOpenMessage(clientId string) *message {
 		Content:  clientId,
 	}
 }
+
+func createBadgeMessage(categoryId string) *message {
+	return &message{
+		Type:     "Notify",
+		Category: categoryId,
+	}
+}

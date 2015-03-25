@@ -56,6 +56,9 @@ func (s *Server) sendMessage(msg *message) {
 			}()
 		} else {
 			//notify badge
+			go func() {
+				client.send(createBadgeMessage(msg.Category))
+			}()
 		}
 	}
 }

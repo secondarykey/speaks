@@ -94,7 +94,16 @@ ws.onmessage = function(e) {
     if ( msg.Type == "Open" ) {
         clientId = cId;
         return;
+    } else if ( msg.Type == "Notify" ) {
+        var catKey =  msg.Category;
+        var num = $("#" + catKey).text();
+        if (num == "") {
+            num = "0";
+        }
+        $("#" + catKey).text(Number(num)+1);
+        return;
     }
+
     addMessage(msg,cId);
     createNotify("Notify","you have speak","/static/js/alert.ico");
 }
@@ -140,8 +149,8 @@ function getCategoryList() {
 
            //<span class="badge">4</span>
            var spanTag = $('<span/>');
+           spanTag.attr('id',category.Key);
            spanTag.addClass('badge');
-           //spanTag.text("4");
 
            aTag.on("click",{key:category.Key},changeCategory);
 
