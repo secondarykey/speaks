@@ -55,10 +55,11 @@ func (s *Server) sendMessage(msg *message) {
 				client.send(msg)
 			}()
 		} else {
-			//notify badge
-			go func() {
-				client.send(createBadgeMessage(msg.Category))
-			}()
+			if msg.Type == "Message" {
+				go func() {
+					client.send(createBadgeMessage(msg.Category))
+				}()
+			}
 		}
 	}
 }

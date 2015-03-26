@@ -1,13 +1,14 @@
 package ws
 
 type message struct {
-	Type     string
-	UserId   int
-	UserName string
-	ClientId string
-	Content  string
-	Category string
-	Created  string
+	Type      string
+	MessageId int
+	UserId    int
+	UserName  string
+	ClientId  string
+	Content   string
+	Category  string
+	Created   string
 }
 
 // Type

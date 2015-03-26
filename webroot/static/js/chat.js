@@ -84,6 +84,7 @@ function createMessageTag(msg,cId) {
 	itemTag.append(iconBlockTag);
 	itemTag.append(speakBlockTag);
 	itemTag.append(footerTag);
+	itemTag.attr("id","Message-" + msg.Id);
 
     return itemTag;
 }
@@ -93,6 +94,9 @@ ws.onmessage = function(e) {
     var cId = msg.ClientId;
     if ( msg.Type == "Open" ) {
         clientId = cId;
+        return;
+    } else if ( msg.Type == "Delete" ) {
+        $("#Message-" + msg.MessageId).remove();
         return;
     } else if ( msg.Type == "Notify" ) {
         var catKey =  msg.Category;
@@ -114,6 +118,17 @@ function createChangeJson() {
     obj.UserId   = Number($("#userId").val());
     obj.Category = $("#category").val();
     obj.ClientId = clientId;
+	var json = JSON.stringify(obj);
+    return json;
+}
+
+function createDeleteJson(msgId) {
+	var obj = new Object();
+    obj.Type      = "Delete";
+    obj.MessageId = Number(msgId);
+    obj.UserId    = Number($("#userId").val());
+    obj.Category  = $("#category").val();
+    obj.ClientId  = clientId;
 	var json = JSON.stringify(obj);
     return json;
 }
@@ -227,6 +242,7 @@ function deleteMessage(evt) {
        dataType: 'json'
     }).success(function( data ) {
       //TODO: Deleting Tag & sennding delete message
+	   ws.send(createDeleteJson(msgId));
     }).error(function() {
         alert("Error!");
     });
