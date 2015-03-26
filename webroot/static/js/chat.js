@@ -105,7 +105,7 @@ ws.onmessage = function(e) {
     }
 
     addMessage(msg,cId);
-    createNotify("Notify","you have speak","/static/js/alert.ico");
+    createNotify("Notify","You got speak.","/static/images/notify.png");
 }
 
 function createChangeJson() {
@@ -198,6 +198,7 @@ function changeCategory(evt) {
        data: { },
        dataType: 'json'
     }).success(function( data ) {
+        $("#" + catKey).text("");
         // tag empty
         $(".category-speak").each(function() {
             $(this).remove();
