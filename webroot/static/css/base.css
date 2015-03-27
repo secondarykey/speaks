@@ -159,3 +159,10 @@ pre.speak-me {
    min-height: 500px;
    font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
 }
+
+.memoFix {
+    position:fixed;
+    width:40%;
+    height:100%;
+    z-index:9999;
+}
