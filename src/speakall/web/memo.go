@@ -8,6 +8,7 @@ import (
 )
 
 func memoListHandler(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func memoEditHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +31,18 @@ func memoEditHandler(w http.ResponseWriter, r *http.Request) {
 
 		setTemplates(w, tc, "memo/edit.tmpl")
 		return
+	} else if r.Method == "DELETE" {
+		err := db.DeleteMemo(key)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		rtn := map[string]string{
+			"result":  "0",
+			"message": "NO ERROR",
+		}
+		setJson(rtn, w)
+		return
 	}
 
 	name := r.FormValue("Name")
@@ -47,19 +60,24 @@ func memoViewHandler(w http.ResponseWriter, r *http.Request) {
 	//search
 	memo, err := db.SelectMemo(key)
 	if err == sql.ErrNoRows {
+		cat, err := db.SelectCategory(key)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		content := createMemoContent(key)
-		_, err = db.InsertMemo(key, "", content)
+		name := cat.Name
+		_, err = db.InsertMemo(key, name, content)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		//id, _ := result.LastInsertId()
 		//memo.Id = int(id)
+		memo.Name = name
 		memo.Key = key
 		memo.Content = content
-	}
-
-	if err != nil {
+	} else if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
