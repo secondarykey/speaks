@@ -8,6 +8,20 @@ function change() {
 }
 
 $(document).ready(function() {
+
+     var box = $('#memoForm');
+     if ( box.length != 0 ) {
+         var boxTop = box.offset().top;
+         $(window).scroll(function() {
+             if( $(window).scrollTop() >= boxTop - 30 ) {
+                 box.addClass('memoFix');
+             } else {
+                 box.removeClass('memoFix');
+             }
+         });
+     }
+
+
     marked.setOptions({
         langPrefix: ''
     });
