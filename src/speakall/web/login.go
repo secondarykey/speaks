@@ -19,6 +19,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := db.SelectUser(email, pswd)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -35,6 +37,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	saveLoginUser(r, w, nil)
+	err := saveLoginUser(r, w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	http.Redirect(w, r, "/", http.StatusFound)
 }

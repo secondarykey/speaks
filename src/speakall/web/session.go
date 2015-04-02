@@ -36,7 +36,7 @@ func getLoginUser(r *http.Request) *db.User {
 	return v.(*db.User)
 }
 
-func saveLoginUser(r *http.Request, w http.ResponseWriter, u *db.User) error {
+func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error {
 	session, err := getSession(r)
 	if err != nil {
 		return err
