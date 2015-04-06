@@ -32,6 +32,27 @@ func SelectMemo(key string) (Memo, error) {
 	return memo, err
 }
 
+func SelectArchiveMemo() ([]Memo, error) {
+
+	sql := "SELECT Memo.id,Memo.key,Memo.name,Memo.content from Memo"
+	sql += " LEFT OUTER JOIN Category ON (Memo.key = Category.key)"
+	sql += " WHERE Category.key IS NULL"
+	sql += " ORDER BY Memo.id DESC"
+
+	rows, err := inst.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	memos := make([]Memo, 0)
+	for rows.Next() {
+		memo := Memo{}
+		rows.Scan(&memo.Id, &memo.Key, &memo.Name, &memo.Content)
+		memos = append(memos, memo)
+	}
+	return memos, nil
+}
+
 func UpdateMemo(key, name, content string) error {
 	_, err := inst.Exec("update memo set name=?,content=? where key = ?",
 		name, content, key)

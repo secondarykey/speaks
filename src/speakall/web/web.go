@@ -9,7 +9,7 @@ import (
 
 func init() {
 
-	http.HandleFunc("/memo/list", memoListHandler)
+	http.HandleFunc("/memo", memoListHandler)
 	http.HandleFunc("/memo/edit/", memoEditHandler)
 	http.HandleFunc("/memo/view/", memoViewHandler)
 

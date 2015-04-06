@@ -318,6 +318,7 @@ $(document).ready(function() {
        var url = "http://" + location.host + "/memo/view/" + key;
        window.open(url, '_blank');
     });
+
 	$('#memoBtn').hide();
 	$('#deleteBtn').hide();
 

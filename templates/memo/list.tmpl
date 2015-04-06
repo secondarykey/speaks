@@ -1,0 +1,25 @@
+{{define "JavaScript"}}
+<script>
+$(document).ready(function() {
+    $(".memoBtn").click(function() {
+        var key = $(this).attr('data-id');
+        var url = "http://" + location.host + "/memo/view/" + key;
+        window.open(url, '_blank');
+    });
+});
+</script>
+{{end}}
+{{define "content"}}
+
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">ArhciveMemo List</div>
+  <table class="table">
+  {{range .MemoList}}
+  <tr> 
+    <td><button style="width:100%" type="button" class="btn btn-success memoBtn" data-id="{{.Key}}">{{.Name}}</td>
+  </tr>
+  {{end}}
+  </table>
+</div>
+{{end}}

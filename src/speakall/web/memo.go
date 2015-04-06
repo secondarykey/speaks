@@ -8,7 +8,21 @@ import (
 )
 
 func memoListHandler(w http.ResponseWriter, r *http.Request) {
+	user := getLoginUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+	memos, err := db.SelectArchiveMemo()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tc := make(map[string]interface{})
+	tc["MemoList"] = memos
+	tc["User"] = user
 
+	setTemplates(w, tc, "menu.tmpl", "memo/list.tmpl")
 }
 
 func memoEditHandler(w http.ResponseWriter, r *http.Request) {
