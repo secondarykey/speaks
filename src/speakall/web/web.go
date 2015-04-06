@@ -24,7 +24,7 @@ func init() {
 	http.HandleFunc("/category", categoryHandler)
 	http.HandleFunc("/category/list", categoryListHandler)
 	http.HandleFunc("/category/view/", categoryViewHandler)
-	//http.HandleFunc("/category/edit/", categoryHandler)
+	http.HandleFunc("/category/delete/", categoryDeleteHandler)
 
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)

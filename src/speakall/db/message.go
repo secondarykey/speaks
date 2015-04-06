@@ -48,6 +48,7 @@ func SelectMessage(category, lastedId string) ([]Message, error) {
 	}
 	return msgs, nil
 }
+
 func SelectAllMessage(category string) ([]Message, error) {
 	sql := createSQL()
 	sql += " ORDER BY Message.created ASC"
@@ -87,5 +88,10 @@ func InsertMessage(userId int, category, content, created string) (sql.Result, e
 func DeleteMessage(id string, user_id int) error {
 	_, err := inst.Exec("delete from Message where id = ? and user_id = ?",
 		id, user_id)
+	return err
+}
+
+func DeleteAllMessage(category string) error {
+	_, err := inst.Exec("delete from Message where category = ? ", category)
 	return err
 }

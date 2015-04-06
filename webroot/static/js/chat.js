@@ -202,8 +202,10 @@ function changeCategory(evt) {
 
     var catKey = evt.data.key
     if ( catKey == "Dashboard") {
+        $("#deleteBtn").hide();
         $("#memoBtn").hide();
     } else {
+        $("#deleteBtn").show();
         $("#memoBtn").show();
     }
 
@@ -241,7 +243,6 @@ function deleteMessage(evt) {
        data: { },
        dataType: 'json'
     }).success(function( data ) {
-      //TODO: Deleting Tag & sennding delete message
 	   ws.send(createDeleteJson(msgId));
     }).error(function() {
         alert("Error!");
@@ -318,6 +319,25 @@ $(document).ready(function() {
        window.open(url, '_blank');
     });
 	$('#memoBtn').hide();
+	$('#deleteBtn').hide();
+
+	$('#deleteBtn').click(function() {
+        var cat = $("#category").val();
+        var url = "/category/delete/" + cat;
+        $.ajax({
+           url: url,
+           type: 'POST',
+        }).success(function( data ) {
+            location.href="/";
+        }).error(function() {
+            alert("Error!");
+        });
+    });
+    $('#deleteBtn').popConfirm({
+        title:"Delete Category",
+        content:"Delete Category and All Message!It is recommended that you create a memo before you turn off.",
+        placement:"bottom"
+    });
 
     getMessageList("Dashboard","9999999999");
     getCategoryList()

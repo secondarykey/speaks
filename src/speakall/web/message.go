@@ -46,6 +46,7 @@ func messageDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "GETしないで><", http.StatusBadRequest)
 		return
 	}
+
 	url := r.URL.Path
 	msgS := strings.Split(url, "/")
 	if len(msgS) > 4 {

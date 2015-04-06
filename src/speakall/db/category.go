@@ -56,6 +56,11 @@ func SelectAllCategory() ([]Category, error) {
 	return cats, nil
 }
 
+func DeleteCategory(catId string) error {
+	_, err := inst.Exec("delete from Category where key = ? ", catId)
+	return err
+}
+
 func SelectCategory(catId string) (Category, error) {
 	cat := Category{}
 	err := inst.QueryRow("select id,key,name,description from Category where key = ?", catId).

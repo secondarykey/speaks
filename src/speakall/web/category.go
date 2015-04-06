@@ -73,3 +73,24 @@ func categoryViewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	setJson(cat, w)
 }
+
+func categoryDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		http.Error(w, "GETしないで><", http.StatusBadRequest)
+		return
+	}
+	url := r.URL.Path
+	pathS := strings.Split(url, "/")
+
+	err := db.DeleteCategory(pathS[3])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = db.DeleteAllMessage(pathS[3])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/", http.StatusFound)
+}
