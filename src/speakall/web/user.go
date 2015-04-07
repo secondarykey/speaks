@@ -118,6 +118,7 @@ func meHandler(w http.ResponseWriter, r *http.Request) {
 
 	tc := make(map[string]interface{})
 	tc["User"] = user
+	tc["EditUser"] = user
 	tc["URL"] = "/me"
 
 	if r.Method == "POST" {
