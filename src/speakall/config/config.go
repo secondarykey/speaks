@@ -31,5 +31,8 @@ var Config setting
 
 func Load(file string) error {
 	_, err := toml.DecodeFile(file, &Config)
+
+	//Create path?
+
 	return err
 }

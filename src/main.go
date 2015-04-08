@@ -7,6 +7,10 @@ import (
 	"speakall/config"
 )
 
+func init() {
+	log.SetFlags(log.Lshortfile)
+}
+
 func main() {
 
 	var iniFile string
@@ -35,6 +39,5 @@ func main() {
 	err = speakall.Start()
 	if err != nil {
 		log.Println(err.Error())
-		log.Println("Error: Start SpeakAll Server")
 	}
 }

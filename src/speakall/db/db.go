@@ -62,7 +62,7 @@ func Listen(path, version string) error {
 
 	cFlag := true
 	if scErr != nil {
-		log.Println("SchemaError:" + scErr.Error())
+		log.Println("SchemaError:" + scErr.Error() + "[" + path + "]")
 		if scErr.code == 0 {
 			cFlag = false
 		} else {
