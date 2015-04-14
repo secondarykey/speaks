@@ -16,6 +16,13 @@ type schemaError struct {
 	message string
 }
 
+type RecordData *string
+type Record []RecordData
+type FlexRows struct {
+	Columns []string
+	Records []Record
+}
+
 func (s *schemaError) Error() string {
 	return fmt.Sprintf("%d:%s", s.code, s.message)
 }
@@ -129,26 +136,22 @@ func insertInitTable() error {
 	defer tx.Rollback()
 
 	pwd := CreateMD5("password")
-	rslt, err := InsertUser(tx, "SpeakAll管理者", "admin@localhost", pwd)
+	rslt, err := InsertUser(tx, "SpeakAll Administrator", "admin@localhost", pwd)
 	if err != nil {
 		return err
 	}
 	userId, _ := rslt.LastInsertId()
 
-	rslt, err = insertRole(tx, "管理者", "Admin")
+	rslt, err = insertRole(tx, "Administrator", "Admin")
 	if err != nil {
 		return err
 	}
-	rslt, err = insertRole(tx, "議題編集者", "Chairman")
+	rslt, err = insertRole(tx, "Category Chairman", "Chairman")
 	if err != nil {
 		return err
 	}
 
-	rslt, err = insertRole(tx, "発言者", "Speaker")
-	if err != nil {
-		return err
-	}
-	rslt, err = insertRole(tx, "閲覧者", "Viewer")
+	rslt, err = insertRole(tx, "Speaker", "Speaker")
 	if err != nil {
 		return err
 	}
@@ -201,4 +204,40 @@ func deleteTables() error {
 
 func Exec(sql string) (sql.Result, error) {
 	return inst.Exec(sql)
+}
+
+func Query(sql string) (*FlexRows, error) {
+
+	rows, err := inst.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	flexRows := &FlexRows{}
+	flexRows.Columns, err = rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	records := make([]Record, 0)
+
+	for rows.Next() {
+		rec := make([]RecordData, len(flexRows.Columns))
+		for i, _ := range rec {
+			rec[i] = toPtr("")
+		}
+		rows.Scan(rec)
+		records = append(records, rec)
+	}
+
+	flexRows.Records = records
+	log.Println(records)
+
+	return flexRows, err
+}
+
+func toPtr(s string) *string {
+	return &s
 }

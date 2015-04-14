@@ -1,0 +1,34 @@
+{{define "JavaScript"}}
+{{end}}
+
+{{define "content"}}
+<div class="panel panel-default">
+    <div class="panel-heading">Database Console</div>
+
+    <div class="panel-body">
+      <form method="post" >
+      <textarea name="SQL" class="form-control" rows="3" placeholder="SQL"></textarea>
+      <button type="submit" class="btn btn-success form-control"><span class="glyphicon glyphicon-search" aria-hidden="true">Search</span></button>
+      </form>
+    </div>
+
+    <table class="table table-striped">
+       <thead>
+         <tr id="tableHeader">
+{{range .Columns}}
+<th>{{.}}</th>
+{{end}}
+         </tr>
+       </thead>
+       <tbody id="tableData">
+{{range .Records}}
+<tr>
+    {{range .}}
+    <td>{{.}}</td>
+    {{end}}
+</tr>
+{{end}}
+       </tbody>
+    </table>
+</div>
+{{end}}

@@ -18,8 +18,10 @@ func init() {
 
 	http.HandleFunc("/me", meHandler)
 	http.HandleFunc("/me/upload", iconRegisterHandler)
+
 	http.HandleFunc("/user", userHandler)
 	http.HandleFunc("/user/register/", userRegisterHandler)
+	http.HandleFunc("/database", databaseHandler)
 
 	http.HandleFunc("/category", categoryHandler)
 	http.HandleFunc("/category/list", categoryListHandler)

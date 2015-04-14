@@ -53,6 +53,7 @@ body {
   border: 0;
 }
 
+
 .sidebar {
   display: none;
 }
@@ -78,6 +79,13 @@ body {
   margin-right: -21px; /* 20px padding + 1px border */
   margin-bottom: 20px;
   margin-left: -20px;
+}
+
+#ManagementUL.nav-sidebar {
+  list-style: circle !important;
+  margin-right: -21px;
+  margin-bottom: 20px;
+  margin-left: 20px;
 }
 
 .nav-sidebar > li > a {
