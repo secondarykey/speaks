@@ -1,35 +1,44 @@
 this document is still a draft.
 becouse still in development,the documents is appropriate.
 
-"SpeakAll" is Simple SNS.
+"speaks" is Simple SNS.
 use of on-premises environment.
 
 ![TravisCI](https://travis-ci.org/secondarykey/SpeakAll.svg?branch=master)
 
 environment :
 
-  put the SpeakAll.ini the run dhirectory.
-
-using (go get):
-- golang.org/x/net/websocket
-- github.com/gorilla/sessions
-- github.com/mattn/go-sqlite3
-- github.com/satori/go.uuid
-- github.com/BurntSushi/toml
-- github.com/smartystreets/goconvey
+  put the speaks.ini the run directory.
 
 default setting :
 
 - http://localhost:5555
 - admin@localhost/password
 
-develop :
+run :
 
-  source activate
-  add GOPATH(root dhirectory)
-  use the 'deactive' command when ending.
+```
+package main
 
-- go run ./src/main.go
+import (
+    "fmt"
+    "os"
+
+    "github.com/secondarykey/speaks"
+)
+
+func main() {
+    err = speaks.Listen()
+    if err != nil {
+        fmt.Println(err.Error())
+        os.Exit(1)
+    }
+    os.Exit(0)
+}
+```
+
+- go run main.go
 
 test :
-- goconvey(GOPATH/bin)
+
+none test
