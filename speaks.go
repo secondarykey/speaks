@@ -1,6 +1,7 @@
 package speaks
 
 import (
+	"flag"
 	"log"
 
 	. "github.com/secondarykey/speaks/config"
@@ -10,32 +11,90 @@ import (
 )
 
 func init() {
+
+	log.SetFlag(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile)
+
 }
 
-var done chan error
+func Usage() {
+
+	// -lv log : Level debug,fatal,error,
+
+	// args[0] sub command : init start version help
+
+	// init -> create .speaks directory
+	//    [Database]
+	//    version = 0.5
+	//    path = data/speaks.db
+	//    [Web]
+	//    port = 5555
+	//    root = .speaks
+	//    upload = data/store
+	//    template = templates
+	//    [LDAP]
+	//    use = true
+	//    BASEDN
+	//    TEST
+	//    [Session]
+	//    secret -> generate
+	//    name -> User???
+
+	// args[1] init file...???
+
+}
+
+func main() {
+	flag.Parse()
+
+	args := flag.Args()
+	leng := len(args)
+	if leng != 1 {
+		log.Println("Error: speaks arguments.")
+		os.Exit(1)
+	}
+
+	sub := args[0]
+	var err error
+
+	switch sub {
+	case "init":
+		err = Init()
+	case "start":
+		err = Listen()
+	case "help":
+		err = Help()
+	case "version":
+		err = Version()
+	default:
+		log.Println("Error: speaks sub command(init | start | version | help)")
+		os.Exit(1)
+	}
+
+	if err != nil {
+		log.Println(err.Error())
+		os.Exit(1)
+	}
+
+	os.Exit(0)
+}
+
+func Help() error {
+	return fmt.Error("Not implements")
+}
+
+func Version() error {
+	return fmt.Error("Not implements")
+}
+
+func Init() error {
+	return fmt.Error("Not implements")
+}
 
 func Listen() error {
 
-	var iniFile string
-
-	flag.Parse()
-	args := flag.Args()
-	leng := len(args)
-
-	switch leng {
-	case 0:
-		iniFile = "speaks.ini"
-	case 1:
-		iniFile = args[0]
-	default:
-		log.Println("Error: too many argument.")
-		return
-	}
-
+	iniFile := ".speaks/speaks.ini"
 	err := Load(iniFile)
 	if err != nil {
-		log.Println(err.Error())
-		log.Println("Error: Loading initialize file.[" + iniFile + "]")
 		return
 	}
 

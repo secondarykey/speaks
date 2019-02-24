@@ -9,6 +9,7 @@ import (
 
 //category
 func categoryHandler(w http.ResponseWriter, r *http.Request) {
+
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
 	if len(pathS) > 2 {

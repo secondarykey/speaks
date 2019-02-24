@@ -4,16 +4,7 @@ becouse still in development,the documents is appropriate.
 "speaks" is Simple SNS.
 use of on-premises environment.
 
-![TravisCI](https://travis-ci.org/secondarykey/SpeakAll.svg?branch=master)
-
-environment :
-
-  put the speaks.ini the run directory.
-
-default setting :
-
-- http://localhost:5555
-- admin@localhost/password
+![TravisCI](https://travis-ci.org/secondarykey/speaks.svg?branch=master)
 
 run :
 
@@ -28,7 +19,7 @@ import (
 )
 
 func main() {
-    err = speaks.Listen()
+    err := speaks.Listen()
     if err != nil {
         fmt.Println(err.Error())
         os.Exit(1)
@@ -41,4 +32,14 @@ func main() {
 
 test :
 
-none test
+delete test
+
+environment :
+
+  .speaks directory
+
+
+default setting :
+
+- http://localhost:5555
+- admin@localhost/password
