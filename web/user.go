@@ -160,7 +160,7 @@ func iconRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := Config.Web.Root + "/static/images/icon/" + fmt.Sprint(user.Id)
+	path := Config.Base.Root + "/static/images/icon/" + fmt.Sprint(user.Id)
 
 	file, _, err := r.FormFile("uploadFile")
 	if err != nil {
