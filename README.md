@@ -43,3 +43,29 @@ default setting :
 
 - http://localhost:5555
 - admin@localhost/password
+
+
+Modified Template 
+
+layout.tmpl
+
+chat.tmpl
+
+database.tmpl
+
+category.tmpl
+
+login.tmpl
+
+menu.tmpl
+
+user.tmpl
+
+memo/
+
+  edit.tmpl
+
+  list.tmpl
+
+  view.tmpl
+

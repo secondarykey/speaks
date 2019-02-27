@@ -1,0 +1,70 @@
+{{define "menu"}}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+
+          <a class="navbar-brand" href="/">SpeakAll</a>
+
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+
+          <ul class="nav navbar-nav navbar-left">
+            <li><a href="/memo">Archive</a></li>
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/me">{{.User.Name}}</a></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-3 sidebar">
+          <ul class="nav nav-sidebar">
+{{if .User.IsSpeaker}}
+            <li><a href="/">Speak<span id="Dashboard" class="badge"></span></a>
+            <ul id="CategoryUL">
+            </ul>
+            </li>
+{{end}}
+
+{{if .User.IsChairman}}
+            <li><a href="/category">Catefgory<span class="sr-only">(current)</span></a></li>
+{{end}}
+
+<!--
+            <li><a href="/memo">Memo<span class="sr-only">(current)</span></a></li>
+-->
+
+{{if .User.IsAdmin}}
+            <li><a>Management</a>
+              <ul id="ManagementUL" class="nav nav-sidebar">
+                 <li><a href="/user">User</a></li>
+                 <li><a href="/database">Database</a></li>
+              </ul>
+            </li>
+{{end}}
+
+          </ul>
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+{{template "content" .}}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{{end}}

@@ -1,70 +1,53 @@
 {{define "menu"}}
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
 
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+        <header class="drawer-header">
 
-          <a class="navbar-brand" href="/">SpeakAll</a>
+          <img class="avatar" src="/static/images/icon/{{ .User.Id }}" 
+               onerror="if (this.src != '/static/images/icon/nobody.png') this.src = '/static/images/icon/nobody.png';">
 
-        </div>
+          <div class="avatar-dropdown">
+            <span>{{.User.Name}}</span>
+            <div class="mdl-layout-spacer"></div>
 
-        <div id="navbar" class="navbar-collapse collapse">
+            <button id="accbtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+              <i class="material-icons" role="presentation">arrow_drop_down</i>
+              <span class="visuallyhidden">Accounts</span>
+            </button>
 
-          <ul class="nav navbar-nav navbar-left">
-            <li><a href="/memo">Archive</a></li>
-          </ul>
-
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="/me">{{.User.Name}}</a></li>
-            <li><a href="/logout">Logout</a></li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-3 col-md-3 sidebar">
-          <ul class="nav nav-sidebar">
-{{if .User.IsSpeaker}}
-            <li><a href="/">Speak<span id="Dashboard" class="badge"></span></a>
-            <ul id="CategoryUL">
+            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
+              <li class="mdl-menu__item"><a href="/me">{{.User.Name}}</a></li>
+              <li class="mdl-menu__item"><a href="/logout">Logout</a></li>
             </ul>
-            </li>
+
+          </div>
+
+        </header>
+
+        <nav class="navigation mdl-navigation mdl-color--blue-grey-800">
+
+
+{{if .User.IsSpeaker}}
+          <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Speaks</a>
+          <ul id="CategoryUL">
+          </ul>
 {{end}}
+
+          <div class="mdl-layout-spacer"></div>
 
 {{if .User.IsChairman}}
-            <li><a href="/category">Catefgory<span class="sr-only">(current)</span></a></li>
-{{end}}
 
-<!--
-            <li><a href="/memo">Memo<span class="sr-only">(current)</span></a></li>
--->
+  <a class="mdl-navigation__link" href="/category"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>Category</a>
+
+{{end}}
 
 {{if .User.IsAdmin}}
-            <li><a>Management</a>
-              <ul id="ManagementUL" class="nav nav-sidebar">
-                 <li><a href="/user">User</a></li>
-                 <li><a href="/database">Database</a></li>
-              </ul>
-            </li>
+  <a class="mdl-navigation__link" href="/user"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>User</a>
+  <a class="mdl-navigation__link" href="/database"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>Database</a>
 {{end}}
 
-          </ul>
-        </div>
+          <div class="mdl-layout-spacer"></div>
+          <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
 
-        <div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
-{{template "content" .}}
-        </div>
-
-      </div>
-    </div>
-  </div>
+        </nav>
 
 {{end}}

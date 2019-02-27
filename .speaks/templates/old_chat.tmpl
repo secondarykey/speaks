@@ -1,0 +1,55 @@
+{{define "JavaScript"}}
+    <script src="/static/js/desktop-notify-min.js"></script>
+    <script src="/static/js/chat.js"></script>
+{{end}}
+
+{{define "content"}}
+<div class="list-group" id="speakList">
+  <div id="speakTitle" class="list-group-item active">Dashboard</div>
+
+  <div id="Description" class="list-group-item small">
+  </div>
+
+  <div class="form-group list-group-item" id="speakArea">
+    <input type="hidden" id="userId" name="userId" value="{{.User.Id}}"/>
+    <input type="hidden" id="category" name="category" value="Dashboard"/>
+    <input type="hidden" id="lastedId" name="lastedId" value=""/>
+
+    <textarea id="speakTxt" class="form-control" rows="3" placeholder="現在の課題をしゃべりましょう"></textarea>
+    <button type="button" class="btn btn-info form-control" id="speakBtn"><span class="glyphicon glyphicon-edit" aria-hidden="true">Speak</span></button>
+
+    <div class="btn-group">
+    <button type="button" class="btn btn-lg btn-default" data-toggle="modal" data-target="#uploadModal"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></button>
+    <button type="button" class="btn btn-lg btn-success" id="memoBtn"><span class="glyphicon glyphicon-list-alt"></span></button>
+    <button type="button" class="btn btn-lg btn-danger" id="deleteBtn"><span class="glyphicon glyphicon-remove-sign"></span></button>
+    </div>
+  </div>
+
+  <div class="list-group-item text-center btn btn-success" id="updateBtn">
+      <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>Update 
+  </div>
+
+  <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="uploadModalLabel">選択するとそのまま発言します</h4>
+        </div>
+
+        <div class="modal-body">
+          <form action="upload" method="post" enctype="multipart/form-data">
+            <div class="input-group">
+              <input type="file" id="uploadFile" name="uploadFile" class="form-control">
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{{end}}

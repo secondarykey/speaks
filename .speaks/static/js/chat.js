@@ -1,19 +1,22 @@
-var wActive = true;
-var canNotify = notify.isSupported ;
-var ws = new WebSocket("ws://" + location.host + "/ws/");
-var clientId;
+let wActive = true;
+let canNotify = notify.isSupported ;
+let ws = new WebSocket("ws://" + location.host + "/ws/");
+let clientId;
 
 ws.onopen = function(e) {
 }
 
 function addMessage(msg,cId) {
     var messageTag = createMessageTag(msg,cId);
-    $('#speakArea').after(messageTag);
+    var area = document.querySelector('#speakArea');
+    area.parentNode.insertBefore(messageTag,area.nextSibling);
 }
 
 function updateMessage(msg,cId) {
     var messageTag = createMessageTag(msg,cId);
-    $('#updateBtn').before(messageTag);
+
+    var btn = document.querySelector('#updateBtn');
+    btn.parentNode.insertBefore(messageTag,btn);
 }
 
 function createMessageTag(msg,cId) {
@@ -23,88 +26,85 @@ function createMessageTag(msg,cId) {
 	    suffix = "-me";
     }
 
-    var userId = Number($('#userId').val());
+    var userId = document.querySelector('#userId');
+    var userId = Number(userId.getAttribute("value"));
     if ( userId == msg.UserId ) {
 	    suffix = "-me";
     }
 
-	var itemTag = $('<div/>');
-	itemTag.addClass('list-group-item');
-	itemTag.addClass('category-speak');
+    var itemTag = document.createElement('div');
+    itemTag.setAttribute("class",'list-group-item category-speak');
 
-	var iconBlockTag = $('<div/>');
-	iconBlockTag.addClass('icon-block' + suffix);
-	var iconTag = $('<img/>');
-	iconTag.addClass('speak-icon' + suffix);
-	iconTag.addClass('userIcon');
-	iconTag.attr("src","/static/images/icon/"+msg.UserId);
-	iconBlockTag.append(iconTag);
-    iconTag.error(function() {
-        $(this).attr({
-            src: '/static/images/icon/nobody.png',
-            alt: 'no image'
-        });
-    });
+    var iconBlockTag = document.createElement('div');
+    iconBlockTag.setAttribute("class",'icon-block' + suffix);
 
-	var speakBlockTag = $('<div/>');
-	speakBlockTag.addClass('speak-block' + suffix);
-	speakBlockTag.text(msg.UserName + ' Says.');
+    var iconTag = document.createElement('img');
+    iconTag.setAttribute("class",'speak-icon' + suffix + ' avatar');
+	iconTag.setAttribute("src","/static/images/icon/"+msg.UserId);
+	iconBlockTag.appendChild(iconTag);
+    iconTag.onerror = function() {
+	  iconTag.setAttribute("src","/static/images/icon/nobody.png");
+    }
 
-	var speakTag = $('<pre/>');
-	speakTag.addClass('speak' + suffix);
+    var speakBlockTag = document.createElement('div');
+	speakBlockTag.setAttribute("class",'speak-block' + suffix);
+	speakBlockTag.textContent = msg.UserName + ' Says.';
+
+    var speakTag = document.createElement('pre');
+	speakTag.setAttribute("class",'speak' + suffix);
 
     var linkTxt = msg.Content.replace(/(http:\/\/[\x21-\x7e]+)/gi, "<a href='$1' target='_blank'>$1</a>"); 
 
-	speakTag.html(linkTxt);
-	speakBlockTag.append(speakTag);
+	speakTag.textContent = linkTxt;
+	speakBlockTag.appendChild(speakTag);
 
-	var footerTag = $('<footer/>');
-	footerTag.addClass('text-right');
-	footerTag.text(msg.Created + " ");
+    var footerTag = document.createElement('footer');
+
+	footerTag.setAttribute("class",'text-right');
+	footerTag.textContent = msg.Created + " ";
     if ( suffix == "-me" ) {
-        var delBtn = $('<button/>');
-        delBtn.addClass('btn');
-        delBtn.addClass('btn-danger');
-        delBtn.addClass('btn-xs');
-        delBtn.css('height','26px');
-        delBtn.attr('data-id',msg.Id);
-        delBtn.on("click",null,deleteMessage);
-        delBtn.popConfirm({
-                title:"Delete Message",
-                content:"Delete?",
-                placement:"left"
+
+        var delBtn = document.createElement('button');
+        delBtn.setAttribute('data-id',msg.Id);
+        delBtn.addEventListener('click', function(e) {
+            deleteMessage(msg.Id);
         });
-        var delSpn = $('<span/>');
-        delSpn.addClass('glyphicon');
-        delSpn.addClass('glyphicon-remove-sign');
-        delBtn.append(delSpn);
-	    footerTag.append(delBtn);
+
+        var delSpn = document.createElement('span');
+
+        delBtn.appendChild(delSpn);
+	    footerTag.appendChild(delBtn);
     }
 
-	itemTag.append(iconBlockTag);
-	itemTag.append(speakBlockTag);
-	itemTag.append(footerTag);
-	itemTag.attr("id","Message-" + msg.Id);
+	itemTag.appendChild(iconBlockTag);
+	itemTag.appendChild(speakBlockTag);
+	itemTag.appendChild(footerTag);
+	itemTag.setAttribute("id","Message-" + msg.Id);
 
     return itemTag;
 }
 
 ws.onmessage = function(e) {
-	var msg = $.parseJSON(e.data);
+
+    var msg = JSON.parse(e.data);
+
     var cId = msg.ClientId;
     if ( msg.Type == "Open" ) {
         clientId = cId;
         return;
     } else if ( msg.Type == "Delete" ) {
-        $("#Message-" + msg.MessageId).remove();
+        var message = document.querySelector('#Message-' + msg.MessageId);
+        message.parentNode.removeChild(message);
         return;
     } else if ( msg.Type == "Notify" ) {
         var catKey =  msg.Category;
-        var num = $("#" + catKey).text();
+
+        var numTag = document.querySelector('#' + catKey);
+        var num = numTag.textContent;
         if (num == "") {
             num = "0";
         }
-        $("#" + catKey).text(Number(num)+1);
+        numTag.textContent = Number(num) + 1;
         return;
     }
 
@@ -115,8 +115,12 @@ ws.onmessage = function(e) {
 function createChangeJson() {
 	var obj = new Object();
     obj.Type     = "Change";
-    obj.UserId   = Number($("#userId").val());
-    obj.Category = $("#category").val();
+
+    var userId = document.querySelector('#userId');
+    var category = document.querySelector('#category');
+
+    obj.UserId   = Number(userId.value);
+    obj.Category = category.value;
     obj.ClientId = clientId;
 	var json = JSON.stringify(obj);
     return json;
@@ -126,127 +130,132 @@ function createDeleteJson(msgId) {
 	var obj = new Object();
     obj.Type      = "Delete";
     obj.MessageId = Number(msgId);
-    obj.UserId    = Number($("#userId").val());
-    obj.Category  = $("#category").val();
+
+    var userId = document.querySelector('#userId');
+    var category = document.querySelector('#category');
+
+    obj.UserId    = Number(userId.value);
+    obj.Category  = category.value;
     obj.ClientId  = clientId;
 	var json = JSON.stringify(obj);
     return json;
 }
 
 function createMessageJson(msg) {
+    var userId = document.querySelector('#userId');
+    var category = document.querySelector('#category');
+
 	var obj = new Object();
     obj.Content  = msg;
     obj.Type     = "Message";
-    obj.UserId   = Number($("#userId").val());
-    obj.Category = $("#category").val();
+
+    obj.UserId   = Number(userId.getAttribute("value"));
+    obj.Category = category.getAttribute("value");
+
     obj.ClientId = clientId;
 	var json = JSON.stringify(obj);
     return json;
 }
 
 function getCategoryList() {
-    $.ajax({
-       url: "category/list",
-       type: 'POST',
-       data: { },
-       dataType: 'json'
-    }).success(function( data ) {
-       var ul = $('#CategoryUL');
-       if (data.length > 0 ) {
-           ul.empty();
-       }
 
-       $.each(data, function(i, category){
-           var li = $('<li/>');
-           var aTag = $('<a/>');
-           aTag.attr('href','#');
-           aTag.text(category.Name);
+    var formData = new FormData();
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/category/list");
+    xhr.addEventListener('load', function(e) {
 
-           //<span class="badge">4</span>
-           var spanTag = $('<span/>');
-           spanTag.attr('id',category.Key);
-           spanTag.addClass('badge');
+       var resp = JSON.parse(e.target.responseText);
+       var ul = document.querySelector('#CategoryUL');
+       while (ul.firstChild) ul.removeChild(ul.firstChild);
 
-           aTag.on("click",{key:category.Key},changeCategory);
+       for ( var idx = 0; idx < resp.length; ++idx ) {
+
+           var category = resp[idx];
+           var li = document.createElement('li');
+           var aTag = document.createElement('a');
+
+           aTag.setAttribute('href','#');
+           aTag.textContent = category.Name;
+
+           var spanTag = document.createElement('span');
+           spanTag.setAttribute('id',category.Key);
+           spanTag.setAttribute('class','badge');
+
+	       aTag.addEventListener("click",function(e) {
+               changeCategory(category.Key)
+           });
 
            li.append(aTag);
            li.append(spanTag);
-           ul.append(li);
-       });
-    }).error(function() {
-        alert("Error!");
-    });
+
+           ul.appendChild(li);
+       };
+
+    }, false);
+    xhr.send(formData);
 }
 
 function getMessageList(cat,lastedId) {
-    $.ajax({
-       url: "message/" + cat,
-       type: 'POST',
-       data: {
-           "lastedId" : lastedId
-       },
-       dataType: 'json'
-    }).success(function( data ) {
-       if (data.length > 0 ) {
-           $("#lastedId").val(data[data.length-1].Id);
+
+    var formData = new FormData();
+    formData.append("lastedId",lastedId);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/message/" + cat);
+    xhr.addEventListener('load', function(e) {
+       var resp = JSON.parse(e.target.responseText);
+       if ( resp.length > 0 ) {
+         var last = document.querySelector('#lastedId');
+         last.setAttribute("value",resp[resp.length-1].Id);
+         for ( var idx = 0; idx < resp.length; ++idx ) {
+           updateMessage(resp[idx],"");
+         }
        }
-       $.each(data, function(i, msg){
-           updateMessage(msg,"");
-       });
-    }).error(function() {
-        alert("Error!");
     });
+    xhr.send(formData);
 }
 
-function changeCategory(evt) {
+function changeCategory(catKey) {
 
-    var catKey = evt.data.key
-    if ( catKey == "Dashboard") {
-        $("#deleteBtn").hide();
-        $("#memoBtn").hide();
-    } else {
-        $("#deleteBtn").show();
-        $("#memoBtn").show();
-    }
+    var formData = new FormData();
 
-    $.ajax({
-       url: "category/view/" + catKey,
-       type: 'POST',
-       data: { },
-       dataType: 'json'
-    }).success(function( data ) {
-        $("#" + catKey).text("");
-        // tag empty
-        $(".category-speak").each(function() {
-            $(this).remove();
-        });
-        // change title 
-        $("#speakTitle").text(data.Name);
-        $("#Description").text(data.Description);
-        // change hide value 
-        $("#category").val(data.Key);
-        ws.send(createChangeJson());
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/category/view/" + catKey);
+    xhr.addEventListener('load', function(e) {
+      var resp = JSON.parse(e.target.responseText);
+      var catTag = document.querySelector('#' + catKey);
+      catTag.textContent = "";
+      
+      var speaks = document.querySelectorAll('.category-speak');
+      for (var i=0; i< speaks.length; i++) {
+          speaks[i].parentNode.removeChild(speaks[i]);
+      }
 
-        getMessageList(data.Key,"9999999999");
-    }).error(function() {
-        alert("Error!");
+      var speakTitle = document.querySelector('#speakTitle');
+      var description = document.querySelector('#Description');
+      speakTitle.textContent = resp.Name;
+      description.textContent = resp.Description;
+
+      var category = document.querySelector('#category');
+      category.value = resp.Key;
+
+      ws.send(createChangeJson());
+      getMessageList(resp.Key,"9999999999");
     });
+    xhr.send(formData);
 
     return false;
 }
 
-function deleteMessage(evt) {
-    var msgId = $(this).attr('data-id');
-    $.ajax({
-       url: "message/delete/" + msgId,
-       type: 'POST',
-       data: { },
-       dataType: 'json'
-    }).success(function( data ) {
+function deleteMessage(msgId) {
+
+    var formData = new FormData();
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/message/delete/" + msgId);
+    xhr.addEventListener('load', function(e) {
 	   ws.send(createDeleteJson(msgId));
-    }).error(function() {
-        alert("Error!");
     });
+    xhr.send(formData);
 
     return false;
 }
@@ -258,61 +267,75 @@ function createNotify(title,body,icon) {
     }
 }
 
-$(document).ready(function() {
+function insertText(name,text) {
+    let areaTag = document.querySelector(name);
+    let v = areaTag.value;
+    let cur = areaTag.selectionStart;
+    let v1 = v.substr(0,cur);
+    let v2 = v.substr(cur);
+    areaTag.value = v1 + "\n" + text + "\n" + v2;
+    return;
+}
+
+(function() {
+
     if ( canNotify ) {
         var permission = notify.permissionLevel();
         if ( permission == notify.PERMISSION_DEFAULT ) {
             notify.requestPermission();
-        //} else if ( permission == notify.PERMISSION_GRANTED ) {
-            //createNotify("Notify","Message!","alert.ico");
+        } else if ( permission == notify.PERMISSION_GRANTED ) {
+            createNotify("Notify","Message!","alert.ico");
         }
-        //notify.PERMISSION_DENIED
+        notify.PERMISSION_DENIED
     }
 
-    $(window).bind("focus",function(){  //フォーカスした
+    window.addEventListener("focus",function(){
         wActive = true;
-    }).bind("blur",function(){  //フォーカスが外れた
+    });
+
+    window.addEventListener("blur",function(){
         wActive = false;
     }); 
 
-	$('#updateBtn').click(function() {
-	    var lastedId = $('#lastedId').val();
-	    var category = $('#category').val();
-        getMessageList(category,lastedId);
-    });
-
-	$('#speakBtn').click(function() {
-	    var txt = $('#speakTxt').val()
-        if ( txt != "" ) {
-		    ws.send(createMessageJson(txt));
-	        $('#speakTxt').val('')
-        }
-        $("#speakTxt").focus();
+    var speakBtn = document.querySelector('#speakBtn');
+	speakBtn.addEventListener("click",function() {
+      var txtTag = document.querySelector('#speakTxt');
+	  var txt = txtTag.value;
+      if ( txt != "" ) {
+	    ws.send(createMessageJson(txt));
+        txtTag.value = '';
+      }
+      txtTag.focus();
 	});
 
-    $('#uploadFile').change(function() {
+    var updateBtn = document.querySelector('#updateBtn');
+	updateBtn.addEventListener("click",function() {
+        var lastedIdTag = document.querySelector('#lastedId');
+        var categoryTag = document.querySelector('#category');
+	    var lastedId = lastedIdTag.value;
+	    var category = categoryTag.value;
+        getMessageList(category,lastedId);
+	});
+
+    var updateFile = document.querySelector('#uploadFile');
+	updateFile.addEventListener("change",function() {
         var fd = new FormData();
         var files = this.files;
-        $.each(files, function(i, file){
-            fd.append('uploadFile', file);
+        fd.append('uploadFile', files[0]);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/upload");
+        xhr.addEventListener('load', function(e) {
+          var resp = JSON.parse(e.target.responseText);
+          var msg = "http://" + location.host + "/" + resp.FileName;
+
+          insertText("#speakTxt",msg);
         });
-        $.ajax({
-           url: "upload",
-           type: 'POST',
-           data: fd,
-           processData:false,
-           contentType:false,
-           dataType: 'json'
-        }).success(function( data ) {
-           var msg = "http://" + location.host + "/" + data.FileName;
-		   ws.send(createMessageJson(msg));
-        }).error(function() {
-            alert("Error!");
-        });
-        $("#uploadModal").modal("hide");
-        $("#speakTxt").focus();
+        xhr.send(fd);
     });
 
+
+/*
 	$('#memoBtn').click(function() {
        var key = $("#category").val();
        var url = "http://" + location.host + "/memo/view/" + key;
@@ -334,14 +357,19 @@ $(document).ready(function() {
             alert("Error!");
         });
     });
+
     $('#deleteBtn').popConfirm({
         title:"Delete Category",
         content:"Delete Category and All Message!It is recommended that you create a memo before you turn off.",
         placement:"bottom"
     });
+*/
 
     getMessageList("Dashboard","9999999999");
     getCategoryList()
-    $("#speakTxt").focus();
-});
+
+    var speakTxt = document.querySelector('#speakTxt');
+    speakTxt.focus();
+
+}).call(this);
 
