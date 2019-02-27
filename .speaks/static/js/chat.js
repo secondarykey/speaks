@@ -33,51 +33,46 @@ function createMessageTag(msg,cId) {
     }
 
     var itemTag = document.createElement('div');
-    itemTag.setAttribute("class",'list-group-item category-speak');
+    itemTag.setAttribute("id",'Message-' + msg.Id);
+    itemTag.setAttribute("class",'mdl-card mdl-shadow--2dp speakBox');
 
-    var iconBlockTag = document.createElement('div');
-    iconBlockTag.setAttribute("class",'icon-block' + suffix);
+    var titleTag = document.createElement('div');
+    titleTag.setAttribute("class",'mdl-card__title mdl-card--expand speakTitle');
+
+    var titleBlockTag = document.createElement('h6');
+	titleBlockTag.setAttribute("class",'mdl-card__title-text speakTitleContent');
+	titleBlockTag.textContent = msg.UserName + ' Says.';
 
     var iconTag = document.createElement('img');
-    iconTag.setAttribute("class",'speak-icon' + suffix + ' avatar');
+    iconTag.setAttribute("class",'speakIcon' + suffix + ' avatar');
 	iconTag.setAttribute("src","/static/images/icon/"+msg.UserId);
-	iconBlockTag.appendChild(iconTag);
     iconTag.onerror = function() {
 	  iconTag.setAttribute("src","/static/images/icon/nobody.png");
     }
+    titleTag.append(titleBlockTag);
+    titleTag.append(iconTag);
 
-    var speakBlockTag = document.createElement('div');
-	speakBlockTag.setAttribute("class",'speak-block' + suffix);
-	speakBlockTag.textContent = msg.UserName + ' Says.';
-
-    var speakTag = document.createElement('pre');
-	speakTag.setAttribute("class",'speak' + suffix);
+    var contentTag = document.createElement('div');
+	contentTag.setAttribute("class",'mdl-card__supporting-text speakContent');
 
     var linkTxt = msg.Content.replace(/(http:\/\/[\x21-\x7e]+)/gi, "<a href='$1' target='_blank'>$1</a>"); 
+	contentTag.textContent = linkTxt;
 
-	speakTag.textContent = linkTxt;
-	speakBlockTag.appendChild(speakTag);
+    var footerTag = document.createElement('div');
 
-    var footerTag = document.createElement('footer');
-
-	footerTag.setAttribute("class",'text-right');
+	footerTag.setAttribute("class",'text-right mdl-card__actions mdl-card--border');
 	footerTag.textContent = msg.Created + " ";
     if ( suffix == "-me" ) {
-
         var delBtn = document.createElement('button');
         delBtn.setAttribute('data-id',msg.Id);
         delBtn.addEventListener('click', function(e) {
             deleteMessage(msg.Id);
         });
-
-        var delSpn = document.createElement('span');
-
-        delBtn.appendChild(delSpn);
 	    footerTag.appendChild(delBtn);
     }
 
-	itemTag.appendChild(iconBlockTag);
-	itemTag.appendChild(speakBlockTag);
+	itemTag.appendChild(titleTag);
+	itemTag.appendChild(contentTag);
 	itemTag.appendChild(footerTag);
 	itemTag.setAttribute("id","Message-" + msg.Id);
 
@@ -181,8 +176,9 @@ function getCategoryList() {
            spanTag.setAttribute('id',category.Key);
            spanTag.setAttribute('class','badge');
 
+           aTag.data = category.Key;
 	       aTag.addEventListener("click",function(e) {
-               changeCategory(category.Key)
+               changeCategory(e.target.data)
            });
 
            li.append(aTag);
@@ -240,6 +236,13 @@ function changeCategory(catKey) {
       category.value = resp.Key;
 
       ws.send(createChangeJson());
+
+      var boxes = document.querySelectorAll('.speakBox');
+      for ( let idx = 0;idx < boxes.length ; ++idx )  {
+          let box = boxes[idx];
+          box.parentNode.removeChild(box);
+      }
+
       getMessageList(resp.Key,"9999999999");
     });
     xhr.send(formData);
