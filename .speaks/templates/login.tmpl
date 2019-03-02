@@ -1,14 +1,47 @@
+{{define "Title"}}Login{{end}}
+
 {{define "JavaScript"}}
 {{end}}	
 
 {{define "menu"}}
-	  <form class="form-signin" method="post" action="login">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" name="email">
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required="">
+{{end}}
 
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      </form>
+{{define "content"}}
+
+  <div class="mdl-cell mdl-cell--4-col">
+  </div>
+
+  <div class="mdl-cell mdl-cell--4-col">
+
+    <form class="form-signin" method="post" action="login">
+
+      <div class="mdl-card mdl-color--white mdl-shadow--2dp" id="loginBox">
+
+        <div class="mdl-card__title mdl-card--expand" id="inputBlock">
+          <h5> Please Login </h5>
+          <div class="mdl-textfield mdl-js-textfield">
+            <input class="mdl-textfield__input" type="text" id="inputEmail" name="email" autofocus>
+            <label class="mdl-textfield__label" for="inputEmail">Login ID...</label>
+          </div>
+ 
+          <div class="mdl-textfield mdl-js-textfield">
+            <input class="mdl-textfield__input" type="text" id="inputPassword" name="password">
+            <label class="mdl-textfield__label" for="inputPassword">Password...</label>
+          </div>
+
+        </div>
+        <div class="mdl-card__actions mdl-card--border text-right cardAction">
+
+          <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+          Login
+          </button>
+
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="mdl-cell mdl-cell--4-col">
+  </div>
+
 {{end}}

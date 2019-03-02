@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	"log"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -23,7 +24,7 @@ func createUserTable() error {
 	return err
 }
 
-func deleteUserTable() error {
+func dropUserTable() error {
 	_, err := Exec("DROP TABLE if exists User")
 	return err
 }
@@ -45,6 +46,7 @@ func CreateUser(u *User) error {
 	defer tx.Rollback()
 	rslt, err := InsertUser(tx, u.Name, u.Email, uuid.NewV4().String())
 	userId, _ := rslt.LastInsertId()
+
 	rslt, err = InsertUserRole(tx, int(userId), "Speaker")
 	if err != nil {
 		return err
@@ -69,18 +71,20 @@ func SelectUser(email, pswd string) (*User, error) {
 	user := &User{}
 	err := inst.QueryRow("select id, name ,email,password from user where email = ?", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	if user.Password == CreateMD5(pswd) {
 		roles, err := selectUserRole(user.Id)
 		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
+
 		user.Roles = map[string]bool{
-			"Admin":    false,
-			"Chairman": false,
-			"Speaker":  false,
+			"Administrator": false,
+			"Speaker":       false,
 		}
 		for _, elm := range roles {
 			user.Roles[elm.RoleKey] = true
@@ -126,13 +130,32 @@ func SelectAllUser() ([]*User, error) {
 }
 
 func (u *User) IsAdmin() bool {
-	return u.Roles["Admin"]
-}
-
-func (u *User) IsChairman() bool {
-	return u.Roles["Chairman"]
+	return u.Roles[RoleAdmin]
 }
 
 func (u *User) IsSpeaker() bool {
-	return u.Roles["Speaker"]
+	return u.Roles[RoleSpeaker]
+}
+
+func (u *User) Init(tx *sql.Tx) error {
+	pwd := CreateMD5("p@ssword")
+	rslt, err := InsertUser(tx, "Speaks Administrator", "admin@localhost", pwd)
+	if err != nil {
+		return err
+	}
+	userId, err := rslt.LastInsertId()
+	if err != nil {
+		return err
+	}
+	u.Id = int(userId)
+	return nil
+}
+
+func InitUser(tx *sql.Tx) (int, error) {
+	u := User{}
+	err := u.Init(tx)
+	if err != nil {
+		return -1, err
+	}
+	return u.Id, nil
 }

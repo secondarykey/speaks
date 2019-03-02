@@ -18,7 +18,7 @@ func createMessageTable() error {
 	return err
 }
 
-func deleteMessageTable() error {
+func dropMessageTable() error {
 	_, err := Exec("DROP TABLE if exists Message")
 	return err
 }

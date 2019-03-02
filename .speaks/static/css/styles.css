@@ -2,28 +2,42 @@ html, body {
   font-family: 'Roboto', 'Helvetica', sans-serif;
 }
 
+textarea {
+  padding:8px;
+  font-size:14px;
+  font-family: 'Roboto', 'Helvetica', sans-serif;
+}
+
+.mdl-card {
+  border-radius:3px;
+}
+
 .avatar {
   width: 48px;
   height: 48px;
   border-radius: 24px;
 }
+
 .layout .mdl-layout__header .mdl-layout__drawer-button {
   color: rgba(0, 0, 0, 0.54);
 }
+
 .mdl-layout__drawer .avatar {
   margin-bottom: 16px;
 }
+
 .drawer {
   border: none;
 }
-/* iOS Safari specific workaround */
+
 .drawer .mdl-menu__container {
   z-index: -1;
 }
+
 .drawer .navigation {
   z-index: -2;
 }
-/* END iOS Safari specific workaround */
+
 .drawer .mdl-menu .mdl-menu__item {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -32,6 +46,7 @@ html, body {
       -ms-flex-align: center;
           align-items: center;
 }
+
 .drawer-header {
   box-sizing: border-box;
   display: -webkit-flex;
@@ -44,8 +59,9 @@ html, body {
       -ms-flex-pack: end;
           justify-content: flex-end;
   padding: 16px;
-  height: 151px;
+  height: 100px;
 }
+
 .avatar-dropdown {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -65,6 +81,7 @@ html, body {
       -ms-flex-positive: 1;
           flex-grow: 1;
 }
+
 .layout .navigation .mdl-navigation__link {
   display: -webkit-flex !important;
   display: -ms-flexbox !important;
@@ -78,10 +95,12 @@ html, body {
   color: rgba(255, 255, 255, 0.56);
   font-weight: 500;
 }
+
 .layout .navigation .mdl-navigation__link:hover {
   background-color: #00BCD4;
   color: #37474F;
 }
+
 .navigation .mdl-navigation__link .material-icons {
   font-size: 24px;
   color: rgba(255, 255, 255, 0.56);
@@ -92,12 +111,24 @@ html, body {
   max-width: 1080px;
 }
 
+#loginBox {
+    width:100%;
+}
+
+#inputBlock {
+    display:block;
+}
+
+.cardAction {
+    padding:16px;
+}
+
 #speakList {
     width : 100%;
 } 
 
 .speakBox {
-    width : 100%;
+    width : 99%;
     min-height:100px;
     margin:2px;
 }
@@ -107,19 +138,26 @@ html, body {
 }
 
 .speakTitleContent {
+    padding-left:55px;
     font-size:12px;
+    min-height:36px;
+}
+
+.speakTitleContent-me {
+    font-size:12px;
+    min-height:36px;
 }
 
 .speakIcon {
   position : absolute;
-  right:10px;
-  top:10px;
+  left:5px;
+  top:5px;
 }
 
 .speakIcon-me {
   position : absolute;
-  right:10px;
-  top:10px;
+  right:5px;
+  top:5px;
 }
 
 .speakContent {
@@ -133,3 +171,48 @@ html, body {
     text-align:right;
 }
 
+.rightFooter {
+    font-size:12px;
+    text-align:right;
+    min-height:36px;
+}
+
+.rightFooter-me {
+    font-size:12px;
+    text-align:right;
+    padding-top:0px;
+    max-height:36px;
+}
+
+.hiddenUpload {
+    display:none;
+}
+
+#speakTxt {
+    width:94%;
+    min-height:100px;
+}
+
+#speakCard {
+    width:100%;
+    background-color:#f5f5ff;
+}
+
+#inputSpeak {
+    padding:5px;
+    width:100%;
+    min-height:100px;
+}
+
+#speakFile {
+    right:5%;
+    top:60px;
+}
+
+.red {
+    color:#FF3333;
+}
+
+#updateBtn {
+    width:100%;
+}

@@ -39,6 +39,7 @@ func init() {
 }
 
 func Listen(static, port string) error {
+
 	startSession()
 	http.Handle("/static/", http.FileServer(http.Dir(static)))
 
@@ -47,7 +48,7 @@ func Listen(static, port string) error {
 
 func setTemplates(w http.ResponseWriter, param interface{}, templateFiles ...string) {
 
-	templateDir := Config.Web.Template
+	templateDir := Config.Base.Root + "/" + Config.Web.Template
 	tmpls := make([]string, 0)
 	tmpls = append(tmpls, templateDir+"/layout.tmpl")
 

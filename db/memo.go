@@ -16,7 +16,7 @@ func createMemoTable() error {
 	return err
 }
 
-func deleteMemoTable() error {
+func dropMemoTable() error {
 	_, err := Exec("DROP TABLE if exists Memo")
 	return err
 }

@@ -15,8 +15,12 @@ type result struct {
 	FileName string
 }
 
+func basePath() string {
+	return Config.Base.Root + "/" + Config.Web.Upload
+}
+
 func storeHandler(w http.ResponseWriter, r *http.Request) {
-	path := Config.Web.Upload
+	path := basePath()
 	urlSlice := strings.Split(r.URL.Path, "/")
 
 	file := path + "/" + urlSlice[2]
@@ -30,7 +34,7 @@ func storeHandler(w http.ResponseWriter, r *http.Request) {
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
-	path := Config.Web.Upload
+	path := basePath()
 	fileId := uuid.NewV4().String()
 	path += "/" + fileId
 

@@ -39,7 +39,8 @@ func categoryHandler(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		desc := r.FormValue("description")
 		key := r.FormValue("key")
-		_, err := db.InsertCategory(key, name, desc)
+		//TODO Project
+		_, err := db.InsertCategory(key, name, "Speaks", desc)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

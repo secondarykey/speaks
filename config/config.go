@@ -2,6 +2,7 @@ package config
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -53,49 +54,51 @@ type session struct {
 
 var Config *setting
 
-func Load(file string) error {
+const DefaultInitFileName = "speaks.ini"
+
+func Load(d string) error {
+
+	file := d + "/" + DefaultInitFileName
 	_, err := toml.DecodeFile(file, &Config)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
+	//All Create
 	paths := strings.Split(Config.Database.Path, "/")
 	if len(paths) > 1 {
 		dir := strings.Join(paths[0:len(paths)-1], "/")
-		//Create path?
 		err = os.MkdirAll(dir, 0777)
 		if err != nil {
 			log.Println(err)
 			return err
 		}
 	}
-
 	return os.MkdirAll(Config.Web.Upload, 0777)
 }
 
-func Ask(reader io.Reader) error {
+func Ask(reader io.Reader, root string) error {
 
 	conf := setting{}
+
 	stdin := bufio.NewScanner(reader)
 	var err error
 
-	conf.Base.Root, err = ask(stdin, "Root Directory", ".speaks",
-		func(in string) (string, error) {
-			err := os.MkdirAll(in, 0777)
-			if err != nil {
-				fmt.Println(err)
-				return "", nil
-			}
-			return in, nil
-		})
-
+	//[Base]
+	err = os.MkdirAll(root, 0777)
 	if err != nil {
-		log.Println(err)
-		return err
+		fmt.Println(err)
+		return nil
 	}
+	conf.Base.Root = `"` + root + `"`
 
-	conf.Web.Port, err = ask(stdin, "HTTP Port Number", "5555",
+	//[Database]
+	conf.Database.Version = `"1.0.0"`
+	conf.Database.Path = `"speaks-%s.db"`
+
+	//[Web]
+	port, err := ask(stdin, "HTTP Port Number", "5555",
 		func(in string) (string, error) {
 			_, err := strconv.ParseInt(in, 10, 64)
 			if err != nil {
@@ -109,19 +112,21 @@ func Ask(reader io.Reader) error {
 		return err
 	}
 
-	conf.Database.Version = "0.2"
-	conf.Database.Path = "speaks-%s.db"
+	conf.Web.Port = `"` + port + `"`
+	conf.Web.Upload = `"data/store"`
+	conf.Web.Template = `"templates"`
 
-	conf.Web.Upload = "data/store"
-	conf.Web.Template = ".speaks/templates"
+	//TODO LDAP Ask
+	conf.LDAP.Use = false
 
-	conf.Session.Secret = "UUID-AAA"
-	conf.Session.Name = "User"
+	//TODO UUID
+	conf.Session.Secret = `"UUID-AAA"`
+	conf.Session.Name = `"User"`
 
 	//Secret
 	//User
 	Config = &conf
-	return Config.Generate(".speaks/speaks.ini")
+	return Config.Generate(root + "/" + DefaultInitFileName)
 }
 
 func ask(in *bufio.Scanner, msg string, def string, fn func(string) (string, error)) (string, error) {
@@ -183,6 +188,41 @@ func (c *setting) Generate(f string) error {
 	fs.WriteString(fmt.Sprintf("Secret=%s\n", c.Session.Secret))
 	fs.WriteString(fmt.Sprintf("name=%s\n", c.Session.Name))
 	fs.WriteString("\n")
+
+	log.Println("Generate speaks.ini")
+	names := AssetNames()
+
+	//TODO method
+	os.MkdirAll(".speaks/static/js", 0777)
+	os.MkdirAll(".speaks/static/images/icon", 0777)
+	os.MkdirAll(".speaks/static/css", 0777)
+	os.MkdirAll(".speaks/data/store", 0777)
+	os.MkdirAll(".speaks/templates/memo", 0777)
+
+	for _, name := range names {
+
+		bin, err := Asset(name)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		reader := bytes.NewReader(bin)
+		bf, err := os.Create(name)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		defer bf.Close()
+
+		_, err = io.Copy(bf, reader)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		log.Println("Generate " + name)
+	}
 
 	return nil
 }

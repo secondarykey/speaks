@@ -7,7 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
-    <title>Speaks</title>
+    <title>{{template "Title" .}}[Speaks]</title>
 
     <meta name="mobile-web-app-capable" content="yes">
     <!--
@@ -35,7 +35,7 @@
 
       <header class="header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
         <div class="mdl-layout__header-row">
-          <span class="mdl-layout-title">Home</span>
+          <span class="mdl-layout-title">{{template "Title" .}}</span>
           <div class="mdl-layout-spacer"></div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
             <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
@@ -67,11 +67,7 @@
 
         <div class="mdl-grid content">
 
-          <div class="mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-grid">
-
 {{template "content" .}}
-
-          </div>
 
         </div>
 

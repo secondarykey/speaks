@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"log"
 )
 
 type UserRole struct {
@@ -14,7 +15,7 @@ func createUserRoleTable() error {
 	return err
 }
 
-func deleteUserRoleTable() error {
+func dropUserRoleTable() error {
 	_, err := Exec("DROP TABLE if exists UserRole")
 	return err
 }
@@ -25,14 +26,14 @@ func InsertUserRole(tx *sql.Tx, userId int, roleKey string) (sql.Result, error) 
 		return nil, err
 	}
 	defer stmt.Close()
-	rslt, err := stmt.Exec(userId, roleKey)
-	return rslt, err
+	return stmt.Exec(userId, roleKey)
 }
 
 func selectUserRole(userId int) ([]UserRole, error) {
 	sql := "select role_key from UserRole where user_id = ?"
 	rows, err := inst.Query(sql, userId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -43,4 +44,19 @@ func selectUserRole(userId int) ([]UserRole, error) {
 		roles = append(roles, role)
 	}
 	return roles, nil
+}
+
+func InitUserRole(tx *sql.Tx, userId int) error {
+
+	_, err := InsertUserRole(tx, userId, RoleAdmin)
+	if err != nil {
+		return err
+	}
+
+	_, err = InsertUserRole(tx, userId, RoleSpeaker)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

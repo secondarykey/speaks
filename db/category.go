@@ -6,25 +6,68 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+const (
+	DefaultCategory = "Dashboard"
+)
+
 type Category struct {
 	Id          int
 	Key         string
+	Project     string
 	Name        string
 	Description string
 }
 
-func createCategoryTable() error {
-	_, err := Exec("CREATE TABLE Category(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,description text)")
+func (c Category) Create() error {
+	_, err := Exec("CREATE TABLE Category(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,project text,description text)")
 	return err
 }
 
-func deleteCategoryTable() error {
+func (c Category) Drop() error {
 	_, err := Exec("DROP TABLE if exists Category")
 	return err
 }
 
-func InsertCategory(key, name, desc string) (sql.Result, error) {
-	return inst.Exec("insert into Category(key,name,description) values(?, ?, ?)", key, name, desc)
+func createCategoryTable() error {
+	c := Category{}
+	return c.Create()
+}
+
+func dropCategoryTable() error {
+	c := Category{}
+	return c.Drop()
+}
+
+func (c *Category) Init(tx *sql.Tx) error {
+
+	c.Key = DefaultCategory
+	c.Name = "Dashboard"
+	c.Project = DefaultProject
+	c.Description = "Everyone First Category"
+
+	_, err := c.Insert(tx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Category) Insert(tx *sql.Tx) (sql.Result, error) {
+	stmt, err := tx.Prepare("insert into Category(key,name,project,description) values(?, ?, ?, ?)")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return stmt.Exec(c.Key, c.Name, c.Project, c.Description)
+}
+
+func InitCategory(tx *sql.Tx) error {
+	c := Category{}
+	return c.Init(tx)
+}
+
+func InsertCategory(key, name, project, desc string) (sql.Result, error) {
+	return inst.Exec("insert into Category(key,name,project,description) values(?, ?, ?, ?)", key, name, project, desc)
 }
 
 func GenerateCategoryKey() (string, error) {

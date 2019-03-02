@@ -16,13 +16,18 @@ import (
 
 const Ver = "0.5.0"
 
+var currentDir string
+var logLv string
+
 func init() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile)
+	// -lv log : Level debug,fatal,error,
+	flag.StringVar(&currentDir, "d", ".speaks", "CurrentDirectory")
+	flag.StringVar(&logLv, "lv", "WARN", "Log Level")
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 }
 
 func Usage() {
 
-	// -lv log : Level debug,fatal,error,
 	// args[0] sub command : init start version help
 
 }
@@ -54,13 +59,15 @@ func run(reader io.Reader, args []string) error {
 
 	switch sub {
 	case "init":
-		err = Init(reader)
+		err = Init(reader, currentDir)
 	case "start":
-		err = Start(".speaks/speaks.ini")
+		err = Start(currentDir)
 	case "help":
 		err = Help()
 	case "version":
 		err = Version()
+	case "release":
+		err = Release()
 	default:
 		return fmt.Errorf("Error: speaks sub command(init | start | version | help)")
 	}
@@ -81,17 +88,23 @@ func Version() error {
 	log.Printf("Speaks Version %s\n", Ver)
 	return nil
 }
+func Release() error {
 
-func Init(reader io.Reader) error {
-	log.Println("Install Speaks[.speak]")
-	err := Ask(reader)
+	//generate config/bin.go
+
+	return fmt.Errorf("Not yet implemented.")
+}
+
+func Init(reader io.Reader, dir string) error {
+	log.Println("Install Speaks[" + dir + "]")
+	err := Ask(reader, dir)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func Start(f string) error {
+func Start(d string) error {
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -104,22 +117,25 @@ func Start(f string) error {
 	}()
 
 	log.Println("######## Initialize")
-	err := Load(f)
+	err := Load(d)
 	if err != nil {
+		log.Println("Load Error:" + err.Error())
 		return err
 	}
 
 	log.Println("######## start DBServer")
-	path := Config.Database.Path
+	path := Config.Base.Root + "/" + Config.Database.Path
 	ver := Config.Database.Version
 	err = db.Listen(path, ver)
 	if err != nil {
+		log.Println("Database Listen:" + err.Error())
 		return err
 	}
 
 	log.Println("######## start WSServer")
 	err = ws.Listen("/ws/")
 	if err != nil {
+		log.Println("WebSocket Listen:" + err.Error())
 		return err
 	}
 

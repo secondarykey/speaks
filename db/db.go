@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const schemaVersion = "0.2"
+const SchemaVersion = "1.0.0"
 
 type schemaError struct {
 	code    int
@@ -19,13 +19,14 @@ type schemaError struct {
 
 type RecordData *string
 type Record []RecordData
+
 type FlexRows struct {
 	Columns []string
 	Records []Record
 }
 
 func (s *schemaError) Error() string {
-	return fmt.Sprintf("%d:%s", s.code, s.message)
+	return fmt.Sprintf("%s[%d]", s.message, s.code)
 }
 
 func NewSchemaError(code int, msg string) *schemaError {
@@ -35,7 +36,17 @@ func NewSchemaError(code int, msg string) *schemaError {
 	}
 }
 
+type Table interface {
+	Create() error
+	Init(tx *sql.Tx) error
+	Drop() error
+}
+
 var inst *sql.DB
+
+func Evolution1_0_0to0_2_0(newPath, oldPath string) error {
+	return fmt.Errorf("Not yet Implemented")
+}
 
 func checkSchemaVersion(path, ver string) (string, *schemaError) {
 
@@ -45,11 +56,11 @@ func checkSchemaVersion(path, ver string) (string, *schemaError) {
 		return "", NewSchemaError(-1, "Error:database path is '%s' requid["+path+"]")
 	}
 
-	rpath := fmt.Sprintf(path, schemaVersion)
+	rpath := fmt.Sprintf(path, SchemaVersion)
 	//exist database file
 	_, err := os.Stat(rpath)
 	//call version check
-	if ver == schemaVersion || ver == "test" {
+	if ver == SchemaVersion || ver == "test" {
 		if err == nil {
 			return rpath, nil
 		}
@@ -60,7 +71,7 @@ func checkSchemaVersion(path, ver string) (string, *schemaError) {
 		return rpath, nil
 	}
 	//code 0
-	return rpath, NewSchemaError(0, "Warning:Program version,TOML file version")
+	return rpath, NewSchemaError(0, "Warning:Program schema version,TOML file schema version")
 }
 
 func Listen(path, version string) error {
@@ -72,6 +83,9 @@ func Listen(path, version string) error {
 	if scErr != nil {
 		if scErr.code == 0 {
 			log.Println(scErr.Error() + "[" + path + "]")
+			log.Println("Program :" + SchemaVersion)
+			log.Println("File    :" + version)
+
 			cFlag = false
 		} else {
 			return scErr
@@ -87,40 +101,64 @@ func Listen(path, version string) error {
 		return nil
 	}
 
-	err = deleteTables()
+	err = dropTables()
 	if err != nil {
 		return err
 	}
 
-	err = createInitTables()
+	err = createTables()
 	if err != nil {
 		return err
 	}
 
-	return insertInitTable()
+	return initTables()
 }
 
-func createInitTables() error {
+func createTables() error {
+
+	log.Println("Create User Table")
 	err := createUserTable()
 	if err != nil {
 		return err
 	}
+
+	log.Println("Create Role Table")
 	err = createRoleTable()
 	if err != nil {
 		return err
 	}
+
+	log.Println("Create UserRole Table")
 	err = createUserRoleTable()
 	if err != nil {
 		return err
 	}
-	err = createMessageTable()
+
+	log.Println("Create Project Table")
+	err = createProjectTable()
 	if err != nil {
 		return err
 	}
+
+	log.Println("Create Member Table")
+	err = createMemberTable()
+	if err != nil {
+		return err
+	}
+
+	log.Println("Create Category Table")
 	err = createCategoryTable()
 	if err != nil {
 		return err
 	}
+
+	log.Println("Create Message Table")
+	err = createMessageTable()
+	if err != nil {
+		return err
+	}
+
+	log.Println("Create Memo Table")
 	err = createMemoTable()
 	if err != nil {
 		return err
@@ -128,7 +166,7 @@ func createInitTables() error {
 	return nil
 }
 
-func insertInitTable() error {
+func initTables() error {
 
 	tx, err := inst.Begin()
 	if err != nil {
@@ -136,67 +174,84 @@ func insertInitTable() error {
 	}
 	defer tx.Rollback()
 
-	pwd := CreateMD5("password")
-	rslt, err := InsertUser(tx, "SpeakAll Administrator", "admin@localhost", pwd)
-	if err != nil {
-		return err
-	}
-	userId, _ := rslt.LastInsertId()
-
-	rslt, err = insertRole(tx, "Administrator", "Admin")
-	if err != nil {
-		return err
-	}
-	rslt, err = insertRole(tx, "Category Chairman", "Chairman")
+	log.Println("Initialize User Table")
+	userId, err := InitUser(tx)
 	if err != nil {
 		return err
 	}
 
-	rslt, err = insertRole(tx, "Speaker", "Speaker")
+	log.Println("Initialize Role Table")
+	err = InitRole(tx)
 	if err != nil {
 		return err
 	}
 
-	rslt, err = InsertUserRole(tx, int(userId), "Admin")
+	log.Println("Initialize UserRole Table")
+	err = InitUserRole(tx, userId)
 	if err != nil {
 		return err
 	}
 
-	rslt, err = InsertUserRole(tx, int(userId), "Chairman")
+	log.Println("Initialize Project Table")
+	err = InitProject(tx)
 	if err != nil {
 		return err
 	}
 
-	rslt, err = InsertUserRole(tx, int(userId), "Speaker")
+	log.Println("Initialize Member Table")
+	err = InitMember(tx, userId)
 	if err != nil {
 		return err
 	}
 
+	log.Println("Initialize Category Table")
+	err = InitCategory(tx)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Commit")
 	return tx.Commit()
 }
 
-func deleteTables() error {
-	err := deleteUserTable()
+func dropTables() error {
+
+	err := dropUserRoleTable()
 	if err != nil {
 		return err
 	}
-	err = deleteRoleTable()
+
+	err = dropUserTable()
 	if err != nil {
 		return err
 	}
-	err = deleteUserRoleTable()
+
+	err = dropRoleTable()
 	if err != nil {
 		return err
 	}
-	err = deleteMessageTable()
+
+	err = dropMessageTable()
 	if err != nil {
 		return err
 	}
-	err = deleteCategoryTable()
+
+	err = dropCategoryTable()
 	if err != nil {
 		return err
 	}
-	err = deleteMemoTable()
+
+	err = dropMemoTable()
+	if err != nil {
+		return err
+	}
+
+	err = dropMemberTable()
+	if err != nil {
+		return err
+	}
+
+	err = dropProjectTable()
 	if err != nil {
 		return err
 	}

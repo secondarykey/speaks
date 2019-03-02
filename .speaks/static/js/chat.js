@@ -1,3 +1,4 @@
+
 let wActive = true;
 let canNotify = notify.isSupported ;
 let ws = new WebSocket("ws://" + location.host + "/ws/");
@@ -40,8 +41,14 @@ function createMessageTag(msg,cId) {
     titleTag.setAttribute("class",'mdl-card__title mdl-card--expand speakTitle');
 
     var titleBlockTag = document.createElement('h6');
-	titleBlockTag.setAttribute("class",'mdl-card__title-text speakTitleContent');
-	titleBlockTag.textContent = msg.UserName + ' Says.';
+    let titleClazz = "speakTitleContent" + suffix;
+    let who = msg.UserName;
+    if ( suffix == "-me" ) {
+        who = "You"
+    }
+
+    titleBlockTag.setAttribute("class",'mdl-card__title-text ' + titleClazz);
+	titleBlockTag.textContent = who + ' Said.';
 
     var iconTag = document.createElement('img');
     iconTag.setAttribute("class",'speakIcon' + suffix + ' avatar');
@@ -56,20 +63,31 @@ function createMessageTag(msg,cId) {
 	contentTag.setAttribute("class",'mdl-card__supporting-text speakContent');
 
     var linkTxt = msg.Content.replace(/(http:\/\/[\x21-\x7e]+)/gi, "<a href='$1' target='_blank'>$1</a>"); 
-	contentTag.textContent = linkTxt;
+	contentTag.innerHTML = linkTxt;
 
     var footerTag = document.createElement('div');
 
-	footerTag.setAttribute("class",'text-right mdl-card__actions mdl-card--border');
-	footerTag.textContent = msg.Created + " ";
+    let footerClazz = "rightFooter" + suffix;
     if ( suffix == "-me" ) {
         var delBtn = document.createElement('button');
         delBtn.setAttribute('data-id',msg.Id);
+        delBtn.setAttribute('class','mdl-button mdl-js-button red');
         delBtn.addEventListener('click', function(e) {
             deleteMessage(msg.Id);
         });
+
+        var icon = document.createElement('i');
+        icon.setAttribute("class","material-icons");
+        icon.textContent = "delete_forever";
+        delBtn.appendChild(icon);
 	    footerTag.appendChild(delBtn);
     }
+
+	footerTag.setAttribute("class",footerClazz + ' mdl-card__actions mdl-card--border');
+
+    var timeTag = document.createElement('span');
+	timeTag.textContent = msg.Created;
+    footerTag.appendChild(timeTag);
 
 	itemTag.appendChild(titleTag);
 	itemTag.appendChild(contentTag);
@@ -228,8 +246,9 @@ function changeCategory(catKey) {
       }
 
       var speakTitle = document.querySelector('#speakTitle');
-      var description = document.querySelector('#Description');
       speakTitle.textContent = resp.Name;
+
+      var description = document.querySelector('#Description');
       description.textContent = resp.Description;
 
       var category = document.querySelector('#category');
@@ -301,6 +320,13 @@ function insertText(name,text) {
     }); 
 
     var speakBtn = document.querySelector('#speakBtn');
+	speakBtn.addEventListener("keydown",function(e) {
+        if ( e.keyCode === 13 ) {
+            e.preventDefault();
+            speakBtn.click();
+        }
+        return false;
+	});
 	speakBtn.addEventListener("click",function() {
       var txtTag = document.querySelector('#speakTxt');
 	  var txt = txtTag.value;
@@ -309,6 +335,7 @@ function insertText(name,text) {
         txtTag.value = '';
       }
       txtTag.focus();
+      return false;
 	});
 
     var updateBtn = document.querySelector('#updateBtn');
@@ -337,35 +364,22 @@ function insertText(name,text) {
         xhr.send(fd);
     });
 
+    var speakFile = document.querySelector('#speakFile');
+	speakFile.addEventListener("keydown",function(e) {
+        if ( e.keyCode === 13 ) {
+            e.preventDefault();
+            speakFile.click();
+        }
+        return false;
+	});
+	speakFile.addEventListener("click",function() {
+        uploadFile.click();
+    });
+
 
 /*
-	$('#memoBtn').click(function() {
-       var key = $("#category").val();
-       var url = "http://" + location.host + "/memo/view/" + key;
-       window.open(url, '_blank');
-    });
-
-	$('#memoBtn').hide();
-	$('#deleteBtn').hide();
-
-	$('#deleteBtn').click(function() {
-        var cat = $("#category").val();
-        var url = "/category/delete/" + cat;
-        $.ajax({
-           url: url,
-           type: 'POST',
-        }).success(function( data ) {
-            location.href="/";
-        }).error(function() {
-            alert("Error!");
-        });
-    });
-
-    $('#deleteBtn').popConfirm({
-        title:"Delete Category",
-        content:"Delete Category and All Message!It is recommended that you create a memo before you turn off.",
-        placement:"bottom"
-    });
+    var url = "http://" + location.host + "/memo/view/" + key;
+    var url = "/category/delete/" + cat;
 */
 
     getMessageList("Dashboard","9999999999");

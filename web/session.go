@@ -31,7 +31,7 @@ func getLoginUser(r *http.Request) *db.User {
 	if err != nil {
 		return nil
 	}
-	v := session.Values["User"]
+	v := session.Values[Config.Session.Name]
 	if v == nil {
 		return nil
 	}
@@ -43,6 +43,6 @@ func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error 
 	if err != nil {
 		return err
 	}
-	session.Values["User"] = u
+	session.Values[Config.Session.Name] = u
 	return session.Save(r, w)
 }

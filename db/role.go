@@ -11,10 +11,8 @@ type Role struct {
 }
 
 const (
-	ADMIN    = "Admin"
-	CHAIRMAN = "Chairman"
-	SPEAKER  = "Speaker"
-	VIEWER   = "Viewer"
+	RoleAdmin   = "Administrator"
+	RoleSpeaker = "Speaker"
 )
 
 func createRoleTable() error {
@@ -22,7 +20,7 @@ func createRoleTable() error {
 	return err
 }
 
-func deleteRoleTable() error {
+func dropRoleTable() error {
 	_, err := Exec("DROP TABLE if exists Role")
 	return err
 }
@@ -34,4 +32,16 @@ func insertRole(tx *sql.Tx, name string, key string) (sql.Result, error) {
 	}
 	defer stmt.Close()
 	return stmt.Exec(name, key)
+}
+
+func InitRole(tx *sql.Tx) error {
+	_, err := insertRole(tx, "Administrator", RoleAdmin)
+	if err != nil {
+		return err
+	}
+	_, err = insertRole(tx, "Speaker", RoleSpeaker)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -1,7 +1,4 @@
 *.swp
-pkg/
-data/
-webroot/static/images/icon/
-src/github.com/
-src/golang.org/
-bin/
+work
+.speaks
+data

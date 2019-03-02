@@ -8,64 +8,34 @@ use of on-premises environment.
 
 run :
 
-```
-package main
+go get -u github.com/secondarykey/speaks
+go install
 
-import (
-    "fmt"
-    "os"
-
-    "github.com/secondarykey/speaks"
-)
-
-func main() {
-    err := speaks.Listen()
-    if err != nil {
-        fmt.Println(err.Error())
-        os.Exit(1)
-    }
-    os.Exit(0)
-}
-```
-
-- go run main.go
-
-test :
-
-delete test
+speaks init
+speaks start
 
 environment :
 
-  .speaks directory
-
+  .speaks 
 
 default setting :
 
 - http://localhost:5555
-- admin@localhost/password
+- admin@localhost/p@ssword
+
+```
+
+go-bindata.exe -pkg=config -o=./config/binary.go .speaks/...
+```
 
 
-Modified Template 
-
-layout.tmpl
-
-chat.tmpl
+not yet Modified Template for 0.5.0
 
 database.tmpl
-
 category.tmpl
-
-login.tmpl
-
-menu.tmpl
-
 user.tmpl
-
 memo/
-
   edit.tmpl
-
   list.tmpl
-
   view.tmpl
 
