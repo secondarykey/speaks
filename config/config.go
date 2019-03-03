@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	uuid "github.com/satori/go.uuid"
 )
 
 type setting struct {
@@ -119,14 +120,14 @@ func Ask(reader io.Reader, root string) error {
 	//TODO LDAP Ask
 	conf.LDAP.Use = false
 
-	//TODO UUID
-	conf.Session.Secret = `"UUID-AAA"`
-	conf.Session.Name = `"User"`
+	secret := uuid.NewV4().String()
+	conf.Session.Secret = `"` + secret + `"`
+	conf.Session.Name = `"User102"`
 
 	//Secret
 	//User
 	Config = &conf
-	return Config.Generate(root + "/" + DefaultInitFileName)
+	return Config.Generate(root, DefaultInitFileName)
 }
 
 func ask(in *bufio.Scanner, msg string, def string, fn func(string) (string, error)) (string, error) {
@@ -155,9 +156,10 @@ func ask(in *bufio.Scanner, msg string, def string, fn func(string) (string, err
 	return "", fmt.Errorf("Input Error[%v]", err)
 }
 
-func (c *setting) Generate(f string) error {
+func (c *setting) Generate(d, f string) error {
 
-	fs, err := os.Create(f)
+	path := d + "/" + f
+	fs, err := os.Create(path)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -193,11 +195,11 @@ func (c *setting) Generate(f string) error {
 	names := AssetNames()
 
 	//TODO method
-	os.MkdirAll(".speaks/static/js", 0777)
-	os.MkdirAll(".speaks/static/images/icon", 0777)
-	os.MkdirAll(".speaks/static/css", 0777)
-	os.MkdirAll(".speaks/data/store", 0777)
-	os.MkdirAll(".speaks/templates/memo", 0777)
+	os.MkdirAll(d+"/static/js", 0777)
+	os.MkdirAll(d+"/static/images/icon", 0777)
+	os.MkdirAll(d+"/static/css", 0777)
+	os.MkdirAll(d+"/data/store", 0777)
+	os.MkdirAll(d+"/templates/memo", 0777)
 
 	for _, name := range names {
 
@@ -208,7 +210,7 @@ func (c *setting) Generate(f string) error {
 		}
 
 		reader := bytes.NewReader(bin)
-		bf, err := os.Create(name)
+		bf, err := os.Create(d + "/" + name)
 		if err != nil {
 			log.Println(err)
 			return err

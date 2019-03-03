@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"log"
 	"time"
 
 	"github.com/secondarykey/speaks/db"
@@ -12,6 +13,7 @@ import (
 type client struct {
 	Id       string
 	Category string
+	Project  string
 	ws       *websocket.Conn
 }
 
@@ -34,7 +36,11 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 			} else if msg.Type != "Change" {
 				t := time.Now()
 				msg.Created = t.Format("2006/01/02 15:04:05")
-				go db.InsertMessage(msg.UserId, msg.Category, msg.Content, msg.Created)
+
+				log.Println("Message")
+				log.Println(msg)
+				go db.InsertMessage(msg.UserId, msg.Project, msg.Category, msg.Content, msg.Created)
+
 				msgCh <- msg
 			} else {
 				c.Category = msg.Category

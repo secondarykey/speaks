@@ -39,11 +39,15 @@ func dropCategoryTable() error {
 }
 
 func (c *Category) Init(tx *sql.Tx) error {
+	return c.InsertDefaultCategory(tx, DefaultProject)
+}
+
+func (c *Category) InsertDefaultCategory(tx *sql.Tx, project string) error {
 
 	c.Key = DefaultCategory
 	c.Name = "Dashboard"
-	c.Project = DefaultProject
-	c.Description = "Everyone First Category"
+	c.Project = project
+	c.Description = "First Category"
 
 	_, err := c.Insert(tx)
 	if err != nil {
@@ -66,10 +70,6 @@ func InitCategory(tx *sql.Tx) error {
 	return c.Init(tx)
 }
 
-func InsertCategory(key, name, project, desc string) (sql.Result, error) {
-	return inst.Exec("insert into Category(key,name,project,description) values(?, ?, ?, ?)", key, name, project, desc)
-}
-
 func GenerateCategoryKey() (string, error) {
 	for {
 		genKey := uuid.NewV4().String()
@@ -84,9 +84,10 @@ func GenerateCategoryKey() (string, error) {
 	}
 }
 
-func SelectAllCategory() ([]Category, error) {
-	sql := "select id,key,name,description from Category"
-	rows, err := inst.Query(sql)
+func SelectProjectCategories(project string) ([]Category, error) {
+
+	sql := "select id,key,name,description from Category where project = ? and key != ?"
+	rows, err := inst.Query(sql, project, DefaultCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +101,9 @@ func SelectAllCategory() ([]Category, error) {
 	return cats, nil
 }
 
-func DeleteCategory(catId string) error {
-	_, err := inst.Exec("delete from Category where key = ? ", catId)
+//TODO Tx
+func DeleteCategory(catKey string) error {
+	_, err := inst.Exec("delete from Category where key = ? ", catKey)
 	return err
 }
 
@@ -110,4 +112,17 @@ func SelectCategory(catId string) (Category, error) {
 	err := inst.QueryRow("select id,key,name,description from Category where key = ?", catId).
 		Scan(&cat.Id, &cat.Key, &cat.Name, &cat.Description)
 	return cat, err
+}
+
+func InsertCategory(cat Category) error {
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = cat.Insert(tx)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }

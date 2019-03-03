@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -8,92 +9,95 @@ import (
 )
 
 //category
-func categoryHandler(w http.ResponseWriter, r *http.Request) {
+func categoryHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	url := r.URL.Path
-	pathS := strings.Split(url, "/")
-	if len(pathS) > 2 {
-		http.Error(w, url+" is Not Found.", http.StatusNotFound)
-		return
-	}
-
+	// /manage/category/
 	if r.Method == "GET" {
-		user := getLoginUser(r)
-		if user == nil {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-
-		tc := make(map[string]interface{})
-		tc["User"] = user
 
 		key, err := db.GenerateCategoryKey()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
-		tc["CategoryKey"] = key
+		data["CategoryKey"] = key
 
-		setTemplates(w, tc, "menu.tmpl", "category.tmpl")
+		//TODO カテゴリリストを作成
+
+		return "manage/category.tmpl", nil
+
 	} else {
+
 		name := r.FormValue("name")
 		desc := r.FormValue("description")
 		key := r.FormValue("key")
-		//TODO Project
-		_, err := db.InsertCategory(key, name, "Speaks", desc)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+
+		u := data["User"].(*db.User)
+		c := db.Category{
+			Key:         key,
+			Name:        name,
+			Project:     u.CurrentProject.Key,
+			Description: desc,
 		}
-		//DashboardにURLを教える
-		http.Redirect(w, r, "/", http.StatusFound)
+
+		err := db.InsertCategory(c)
+		if err != nil {
+			return "", err
+		}
+
+		return "/manage/category/", NewRedirect("/manage/category/")
 	}
 }
 
-func categoryListHandler(w http.ResponseWriter, r *http.Request) {
+func categoryListHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
 	if r.Method == "GET" {
-		http.Error(w, "GETしないで><", http.StatusBadRequest)
-		return
+		return "", fmt.Errorf("NotSupport Method")
 	}
-	cats, err := db.SelectAllCategory()
+
+	u := data["User"].(*db.User)
+	p := u.CurrentProject
+
+	cats, err := db.SelectProjectCategories(p.Key)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return "", err
 	}
-	setJson(cats, w)
+
+	data["CategoryList"] = cats
+	return "", nil
 }
 
-func categoryViewHandler(w http.ResponseWriter, r *http.Request) {
+func categoryViewHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 	if r.Method == "GET" {
-		http.Error(w, "GETしないで><", http.StatusBadRequest)
-		return
+		return "", fmt.Errorf("NotSupport Method")
 	}
+
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
 
 	cat, err := db.SelectCategory(pathS[3])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return "", err
 	}
-	setJson(cat, w)
+
+	data["Category"] = cat
+	return "", nil
 }
 
-func categoryDeleteHandler(w http.ResponseWriter, r *http.Request) {
+func categoryDeleteHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
 	if r.Method == "GET" {
-		http.Error(w, "GETしないで><", http.StatusBadRequest)
-		return
+		return "", fmt.Errorf("GET Method Error")
 	}
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
 
-	err := db.DeleteCategory(pathS[3])
+	//TODO tx
+	err := db.DeleteAllMessage(pathS[3])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
-	err = db.DeleteAllMessage(pathS[3])
+	err = db.DeleteCategory(pathS[3])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
+	return "/maange/category/", NewRedirect("/manage/category/")
 }

@@ -12,7 +12,7 @@ type Memo struct {
 }
 
 func createMemoTable() error {
-	_, err := Exec("CREATE TABLE Memo(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,name text,content text)")
+	_, err := Exec("CREATE TABLE Memo(id INTEGER PRIMARY KEY AUTOINCREMENT,key text,project text,name text,content text)")
 	return err
 }
 

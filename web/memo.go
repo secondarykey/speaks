@@ -9,8 +9,8 @@ import (
 )
 
 func memoListHandler(w http.ResponseWriter, r *http.Request) {
-	user := getLoginUser(r)
-	if user == nil {
+	user, err := getLoginUser(r)
+	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
@@ -23,12 +23,12 @@ func memoListHandler(w http.ResponseWriter, r *http.Request) {
 	tc["MemoList"] = memos
 	tc["User"] = user
 
-	setTemplates(w, tc, "menu.tmpl", "memo/list.tmpl")
+	setTemplates(w, tc, "memo/list.tmpl")
 }
 
 func memoEditHandler(w http.ResponseWriter, r *http.Request) {
-	user := getLoginUser(r)
-	if user == nil {
+	user, err := getLoginUser(r)
+	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}

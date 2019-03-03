@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/gob"
+	"fmt"
 	"net/http"
 
 	. "github.com/secondarykey/speaks/config"
@@ -26,19 +27,22 @@ func getSession(r *http.Request) (*sessions.Session, error) {
 	return store.Get(r, Config.Session.Name)
 }
 
-func getLoginUser(r *http.Request) *db.User {
+func getLoginUser(r *http.Request) (*db.User, error) {
+
 	session, err := getSession(r)
 	if err != nil {
-		return nil
+		return nil, err
 	}
+
 	v := session.Values[Config.Session.Name]
 	if v == nil {
-		return nil
+		return nil, fmt.Errorf("NotFound SessionKey[%s]", Config.Session.Name)
 	}
-	return v.(*db.User)
+	return v.(*db.User), nil
 }
 
 func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error {
+
 	session, err := getSession(r)
 	if err != nil {
 		return err

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 
 	. "github.com/secondarykey/speaks/config"
 	"github.com/secondarykey/speaks/db"
@@ -88,26 +89,35 @@ func Version() error {
 	log.Printf("Speaks Version %s\n", Ver)
 	return nil
 }
+
 func Release() error {
 
-	//generate config/bin.go
+	// delete ini file
+	// delete db file
+
+	// cd .speaks
+	// call go-bindata
+
+	//
+	// go-bindata.exe -pkg=config -o=../config/binary.go .
 
 	return fmt.Errorf("Not yet implemented.")
 }
 
 func Init(reader io.Reader, dir string) error {
+
 	log.Println("Install Speaks[" + dir + "]")
 	err := Ask(reader, dir)
 	if err != nil {
 		return err
 	}
-	return nil
+	return db.Init()
 }
 
 func Start(d string) error {
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		for sig := range c {
 			fmt.Println("シグナル来た", sig)
@@ -124,9 +134,7 @@ func Start(d string) error {
 	}
 
 	log.Println("######## start DBServer")
-	path := Config.Base.Root + "/" + Config.Database.Path
-	ver := Config.Database.Version
-	err = db.Listen(path, ver)
+	err = db.Listen()
 	if err != nil {
 		log.Println("Database Listen:" + err.Error())
 		return err

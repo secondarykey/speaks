@@ -29,7 +29,25 @@ func InsertUserRole(tx *sql.Tx, userId int, roleKey string) (sql.Result, error) 
 	return stmt.Exec(userId, roleKey)
 }
 
-func selectUserRole(userId int) ([]UserRole, error) {
+func SelectAdminUsers() ([]UserRole, error) {
+	sql := "select user_id from UserRole where role_key = ?"
+	rows, err := inst.Query(sql, RoleAdmin)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+	roles := make([]UserRole, 0)
+	for rows.Next() {
+		role := UserRole{}
+		rows.Scan(&role.UserId)
+		roles = append(roles, role)
+	}
+	return roles, nil
+}
+
+func SelectUserRole(userId int) ([]UserRole, error) {
 	sql := "select role_key from UserRole where user_id = ?"
 	rows, err := inst.Query(sql, userId)
 	if err != nil {

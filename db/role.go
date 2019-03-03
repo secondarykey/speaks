@@ -15,6 +15,13 @@ const (
 	RoleSpeaker = "Speaker"
 )
 
+func NewRoleMap() RoleMap {
+	return map[string]bool{
+		RoleAdmin:   false,
+		RoleSpeaker: false,
+	}
+}
+
 func createRoleTable() error {
 	_, err := Exec("CREATE TABLE Role(key text PRIMARY KEY,name text)")
 	return err

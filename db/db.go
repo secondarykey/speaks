@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
+	. "github.com/secondarykey/speaks/config"
 )
 
 const SchemaVersion = "1.0.0"
@@ -29,7 +30,7 @@ func (s *schemaError) Error() string {
 	return fmt.Sprintf("%s[%d]", s.message, s.code)
 }
 
-func NewSchemaError(code int, msg string) *schemaError {
+func NewSchemaError(code int, msg string) error {
 	return &schemaError{
 		code:    code,
 		message: msg,
@@ -39,6 +40,9 @@ func NewSchemaError(code int, msg string) *schemaError {
 type Table interface {
 	Create() error
 	Init(tx *sql.Tx) error
+
+	Insert(tx *sql.Tx) error
+
 	Drop() error
 }
 
@@ -48,70 +52,98 @@ func Evolution1_0_0to0_2_0(newPath, oldPath string) error {
 	return fmt.Errorf("Not yet Implemented")
 }
 
-func checkSchemaVersion(path, ver string) (string, *schemaError) {
+func checkSchemaVersion(path, ver string) error {
 
 	//%s be
 	pArr := strings.Split(path, "%s")
 	if len(pArr) != 2 {
-		return "", NewSchemaError(-1, "Error:database path is '%s' requid["+path+"]")
+		return NewSchemaError(-1, "Error:database path is '%s' requid["+path+"]")
 	}
 
 	rpath := fmt.Sprintf(path, SchemaVersion)
 	//exist database file
 	_, err := os.Stat(rpath)
 	//call version check
-	if ver == SchemaVersion || ver == "test" {
+	if ver == fmt.Sprintf(`"%s"`, SchemaVersion) || ver == "test" {
 		if err == nil {
-			return rpath, nil
+			return nil
 		}
-		return rpath, NewSchemaError(0, "Create database")
+		return NewSchemaError(0, "Create database")
 	}
 
 	if err == nil {
-		return rpath, nil
+		return nil
 	}
 	//code 0
-	return rpath, NewSchemaError(0, "Warning:Program schema version,TOML file schema version")
+	return NewSchemaError(0, "Warning:Program schema version,TOML file schema version")
 }
 
-func Listen(path, version string) error {
+func getPath(ver string) string {
 
-	var err error
-	rp, scErr := checkSchemaVersion(path, version)
+	path := Config.Base.Root + "/" + Config.Database.Path
+	if ver != "" {
+		path = fmt.Sprintf(path, ver)
+	}
 
-	cFlag := true
-	if scErr != nil {
-		if scErr.code == 0 {
-			log.Println(scErr.Error() + "[" + path + "]")
-			log.Println("Program :" + SchemaVersion)
-			log.Println("File    :" + version)
+	return strings.ReplaceAll(path, `"`, "")
+}
 
-			cFlag = false
+func Init() error {
+
+	cver := Config.Database.Version
+	path := getPath("")
+
+	err := checkSchemaVersion(path, cver)
+	if err != nil {
+
+		if se, ok := err.(*schemaError); ok {
+			if se.code != 0 {
+				log.Println(err.Error() + "[" + path + "]")
+				log.Println("Program :" + SchemaVersion)
+				log.Println("Config  :" + cver)
+				return err
+			}
 		} else {
-			return scErr
+
+			return err
 		}
 	}
 
-	inst, err = sql.Open("sqlite3", rp)
+	err = Listen()
 	if err != nil {
 		return err
 	}
-
-	if cFlag {
-		return nil
-	}
-
 	err = dropTables()
 	if err != nil {
 		return err
 	}
 
+	//dbファイルが存在するか？
 	err = createTables()
 	if err != nil {
 		return err
 	}
+	err = initTables()
+	if err != nil {
+		return err
+	}
 
-	return initTables()
+	inst.Close()
+	return nil
+}
+
+func Listen() error {
+
+	var err error
+	path := getPath(SchemaVersion)
+
+	log.Println("Database:" + path)
+
+	inst, err = sql.Open("sqlite3", path)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func createTables() error {

@@ -14,7 +14,7 @@ type Message struct {
 }
 
 func createMessageTable() error {
-	_, err := Exec("CREATE TABLE Message(id INTEGER PRIMARY KEY AUTOINCREMENT,category text,user_id integer,content text,created text)")
+	_, err := Exec("CREATE TABLE Message(id INTEGER PRIMARY KEY AUTOINCREMENT,project text,category text,user_id integer,content text,created text)")
 	return err
 }
 
@@ -23,7 +23,7 @@ func dropMessageTable() error {
 	return err
 }
 
-func SelectMessage(category, lastedId string) ([]Message, error) {
+func SelectMessages(project, category, lastedId string) ([]Message, error) {
 
 	sql := createSQL()
 	if lastedId != "" {
@@ -33,7 +33,7 @@ func SelectMessage(category, lastedId string) ([]Message, error) {
 	}
 	sql += " ORDER BY Message.created DESC LIMIT 10"
 
-	rows, err := inst.Query(sql, category, lastedId)
+	rows, err := inst.Query(sql, category, project, lastedId)
 	if err != nil {
 		return nil, err
 	}
@@ -77,12 +77,12 @@ func createSQL() string {
 		"Message.created," +
 		"User.Name" +
 		" from Message INNER JOIN User ON Message.user_id = User.id" +
-		" Where category = ?"
+		" Where category = ? and project = ?"
 	return sql
 }
 
-func InsertMessage(userId int, category, content, created string) (sql.Result, error) {
-	return inst.Exec("insert into Message(user_id,category,content,created) values(?, ?, ?, ?)", userId, category, content, created)
+func InsertMessage(userId int, project, category, content, created string) (sql.Result, error) {
+	return inst.Exec("insert into Message(user_id,project,category,content,created) values(?, ?,?, ?, ?)", userId, project, category, content, created)
 }
 
 func DeleteMessage(id string, user_id int) error {

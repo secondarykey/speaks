@@ -11,12 +11,18 @@ import (
 )
 
 type RoleMap map[string]bool
+type ProjectRoleMap map[string]RoleMap
+
 type User struct {
 	Id       int
 	Name     string
 	Email    string
 	Password string
-	Roles    RoleMap
+
+	CurrentProject Project
+	Roles          RoleMap
+	Projects       []Project
+	ProjectRoles   ProjectRoleMap
 }
 
 func createUserTable() error {
@@ -75,24 +81,12 @@ func SelectUser(email, pswd string) (*User, error) {
 		return nil, err
 	}
 
-	if user.Password == CreateMD5(pswd) {
-		roles, err := selectUserRole(user.Id)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-
-		user.Roles = map[string]bool{
-			"Administrator": false,
-			"Speaker":       false,
-		}
-		for _, elm := range roles {
-			user.Roles[elm.RoleKey] = true
-		}
-		return user, nil
+	if user.Password != CreateMD5(pswd) {
+		log.Println(err)
+		return nil, errors.New("パスワードが違うよ")
 	}
 
-	return nil, errors.New("パスワードが違うよ")
+	return user, nil
 }
 
 func SelectPassword(pswd string) (*User, error) {
@@ -135,6 +129,19 @@ func (u *User) IsAdmin() bool {
 
 func (u *User) IsSpeaker() bool {
 	return u.Roles[RoleSpeaker]
+}
+
+func (u *User) See(projectKey string) bool {
+	_, ok := u.ProjectRoles[projectKey]
+	return ok
+}
+
+func (u *User) IsManager() bool {
+	roles, ok := u.ProjectRoles[u.CurrentProject.Key]
+	if !ok {
+		return false
+	}
+	return roles[MemberManager]
 }
 
 func (u *User) Init(tx *sql.Tx) error {

@@ -7,10 +7,10 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
-func databaseHandler(w http.ResponseWriter, r *http.Request) {
+func manageHandler(w http.ResponseWriter, r *http.Request) {
 
-	user := getLoginUser(r)
-	if user == nil {
+	user, err := getLoginUser(r)
+	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
@@ -32,7 +32,6 @@ func databaseHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println(&val)
 			}
 		}
-
 		tc["Columns"] = rows.Columns
 		tc["Records"] = rows.Records
 	}
@@ -40,6 +39,6 @@ func databaseHandler(w http.ResponseWriter, r *http.Request) {
 	tc["User"] = user
 	tc["SQL"] = sql
 
-	setTemplates(w, tc, "menu.tmpl", "database.tmpl")
+	setTemplates(w, tc, "database.tmpl")
 	return
 }

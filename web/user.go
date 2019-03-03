@@ -11,13 +11,30 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
-func userHandler(w http.ResponseWriter, r *http.Request) {
+func switchHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	user := getLoginUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+	user := data["User"].(*db.User)
+
+	//[/project/switch/{Key}]
+	path := r.URL.Path
+	pathS := strings.Split(path, "/")
+	if len(pathS) != 4 {
+		return "", fmt.Errorf("URL Error[%s].", path)
 	}
+
+	key := pathS[3]
+	for _, elm := range user.Projects {
+		if elm.Key == key {
+			user.CurrentProject = elm
+			saveLoginUser(r, w, user)
+			return "/", NewRedirect("/")
+		}
+	}
+
+	return "", fmt.Errorf("NotFound Project[%s].", key)
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	if r.Method == "POST" {
 		//新規登録
@@ -29,20 +46,16 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			u.Email = email
 			err := db.CreateUser(u)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+				return "", err
 			}
 		}
 	}
 
 	ulist, err := db.SelectAllUser()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
-	tc := make(map[string]interface{})
-	tc["URL"] = "/user"
 	for _, elm := range ulist {
 		if strings.Contains(elm.Password, "-") {
 			elm.Password = "/user/register/" + elm.Password
@@ -51,14 +64,12 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tc["User"] = user
-	tc["UserList"] = ulist
+	data["UserList"] = ulist
 
-	setTemplates(w, tc, "menu.tmpl", "user.tmpl")
-	return
+	return "admin/user.tmpl", nil
 }
 
-func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
+func userRegisterHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	//URLからユーザを特定
 	url := r.URL.Path
@@ -67,18 +78,11 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	u, err := db.SelectPassword(userKey)
 	if err != nil {
-		http.Error(w, "Bad URL", http.StatusNotFound)
-		return
+		return "", err
 	}
 
-	//パスワードからユーザを設定
-	tc := make(map[string]interface{})
-	tc["User"] = u
-	tc["URL"] = url
-
 	if r.Method == "GET" {
-		setTemplates(w, tc, "menu.tmpl", "user.tmpl")
-		return
+		return "admin/user.tmpl", nil
 	}
 
 	//Form値を取得
@@ -88,13 +92,11 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	veri := r.FormValue("verifiedPassword")
 
 	if email == "" {
-		http.Error(w, "Empty Email", http.StatusBadRequest)
-		return
+		return "", fmt.Errorf("Empty Email")
 	}
 
 	if pwd == "" || pwd != veri {
-		http.Error(w, "Bad Password", http.StatusBadRequest)
-		return
+		return "", fmt.Errorf("Bad Request")
 	}
 
 	u.Name = name
@@ -103,24 +105,16 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = db.UpdateUser(u)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
+
+	return "/", NewRedirect("/")
 }
 
-func meHandler(w http.ResponseWriter, r *http.Request) {
+func meHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	user := getLoginUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-
-	tc := make(map[string]interface{})
-	tc["User"] = user
-	tc["EditUser"] = user
-	tc["URL"] = "/me"
+	user := data["User"].(*db.User)
+	data["EditUser"] = user
 
 	if r.Method == "POST" {
 
@@ -136,50 +130,43 @@ func meHandler(w http.ResponseWriter, r *http.Request) {
 				user.Password = db.CreateMD5(pwd)
 			}
 		}
+
 		//update
 		err := db.UpdateUser(user)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
+
 		err = saveLoginUser(r, w, user)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
 	}
 
-	setTemplates(w, tc, "menu.tmpl", "user.tmpl")
+	return "admin/user.tmpl", nil
 }
 
-func iconRegisterHandler(w http.ResponseWriter, r *http.Request) {
+func iconRegisterHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	user := getLoginUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-
+	user := data["User"].(*db.User)
+	//TODO static
 	path := Config.Base.Root + "/static/images/icon/" + fmt.Sprint(user.Id)
 
 	file, _, err := r.FormFile("uploadFile")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 	defer file.Close()
 
 	out, err := os.Create(path)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 	defer out.Close()
 	_, err = io.Copy(out, file)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	return "/", NewRedirect("/")
 }

@@ -5,6 +5,7 @@ type message struct {
 	MessageId int
 	UserId    int
 	UserName  string
+	Project   string
 	ClientId  string
 	Content   string
 	Category  string

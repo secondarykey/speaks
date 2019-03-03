@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type Project struct {
@@ -25,7 +27,7 @@ func (p Project) Create() error {
 }
 
 func (p Project) Drop() error {
-	_, err := Exec("DROP TABLE if exists Role")
+	_, err := Exec("DROP TABLE if exists Project")
 	return err
 }
 
@@ -61,4 +63,54 @@ func dropProjectTable() error {
 func InitProject(tx *sql.Tx) error {
 	p := Project{}
 	return p.Init(tx)
+}
+
+func SelectProjects() ([]Project, error) {
+
+	rows, err := inst.Query("select key,name,description from Project order by seq asc")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	projects := make([]Project, 0)
+	for rows.Next() {
+		p := Project{}
+		rows.Scan(&p.Key, &p.Name, &p.Description)
+		projects = append(projects, p)
+	}
+	return projects, nil
+}
+
+func InsertProject(name, desc string) error {
+
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	p := Project{}
+	p.Key = uuid.NewV4().String()
+	p.Name = name
+	p.Seq = 1
+	p.Description = desc
+
+	_, err = p.Insert(tx)
+	if err != nil {
+		return err
+	}
+
+	err = InsertDefaultMember(tx, p.Key)
+	if err != nil {
+		return err
+	}
+
+	c := Category{}
+	err = c.InsertDefaultCategory(tx, p.Key)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
