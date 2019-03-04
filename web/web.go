@@ -72,32 +72,55 @@ func NewHTMLRouter() *htmlRouter {
 	//Manage
 	router.pattern["/manage/category/"] = categoryHandler
 	router.pattern["/manage/category/delete/"] = categoryDeleteHandler
-	router.pattern["/manage/project/member"] = projectHandler
+	router.pattern["/manage/project/member"] = memberHandler
 
 	//Admin
 	router.pattern["/admin/project/"] = projectHandler
 	router.pattern["/admin/user"] = userHandler
-	router.pattern["/admin/user/register"] = userRegisterHandler
+	//router.pattern["/admin/user/register"] = userRegisterHandler
 
+	router.pattern["/user/register/"] = userRegisterHandler
 	return &router
+}
+
+func ignore(path string) bool {
+	if strings.Index(path, "/user/register/") == 0 ||
+		strings.Index(path, "/login") == 0 {
+		return true
+	}
+
+	return false
 }
 
 func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	//login,logout は使わない
-
-	//Login
+	path := r.URL.Path
 	u, err := getLoginUser(r)
-	if err != nil {
-		//Redirect
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+
+	if !ignore(path) {
+		//Login
+		if err != nil {
+			//Redirect
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+	} else if strings.Index(path, "/user/register/") == 0 {
+		/*
+			pathS := strings.Split(path, "/")
+			u, err = db.SelectPassword(pathS[3])
+			if err != nil {
+				log.Println(err)
+				http.Redirect(w, r, "/login", http.StatusFound)
+				return
+			}
+			obj["EditUser"] = u
+		*/
 	}
 
 	obj := make(map[string]interface{})
 	obj["User"] = u
 
-	path := r.URL.Path
 	obj["URL"] = path
 	obj["Type"] = NewType(path)
 
@@ -225,6 +248,7 @@ func Listen(static, port string) error {
 	http.Handle("/static/", http.FileServer(http.Dir(static)))
 
 	router := NewHTMLRouter()
+	http.Handle("/user/", router)
 	http.Handle("/category/", router)
 	http.Handle("/project/", router)
 	http.Handle("/admin/", router)

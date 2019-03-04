@@ -13,14 +13,14 @@ type Member struct {
 const (
 	MemberManager = "Manager"
 	MemberEditor  = "Editor"
-	MemberSpeaker = "Speaker"
+	MemberViewer  = "Viewer"
 )
 
 func NewMemberRole() RoleMap {
 	return map[string]bool{
 		MemberManager: false,
 		MemberEditor:  false,
-		MemberSpeaker: false,
+		MemberViewer:  false,
 	}
 }
 
@@ -51,7 +51,8 @@ func (m *Member) Init(tx *sql.Tx) error {
 	if err != nil {
 		return err
 	}
-	m.Role = MemberSpeaker
+
+	m.Role = MemberViewer
 	_, err = m.Insert(tx)
 	if err != nil {
 		return err
@@ -105,6 +106,22 @@ func InitMember(tx *sql.Tx, id int) error {
 	p.Project = DefaultProject
 	p.UserId = id
 	return p.Init(tx)
+}
+
+func SelectProjectMember(key string) ([]Member, error) {
+	rows, err := inst.Query("select user_id,role from Member Where project = ?", key)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	members := make([]Member, 0)
+	for rows.Next() {
+		mem := Member{}
+		rows.Scan(&mem.UserId, &mem.Role)
+		members = append(members, mem)
+	}
+	return members, nil
 }
 
 func SelectMember(id int) ([]Member, error) {

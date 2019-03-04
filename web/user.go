@@ -44,6 +44,7 @@ func userHandler(w http.ResponseWriter, r *http.Request, data map[string]interfa
 			u := &db.User{}
 			u.Name = name
 			u.Email = email
+
 			err := db.CreateUser(u)
 			if err != nil {
 				return "", err
@@ -82,6 +83,8 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request, data map[string
 	}
 
 	if r.Method == "GET" {
+		data["User"] = u
+		data["EditUser"] = u
 		return "admin/user.tmpl", nil
 	}
 

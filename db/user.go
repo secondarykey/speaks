@@ -50,6 +50,7 @@ func CreateUser(u *User) error {
 		return err
 	}
 	defer tx.Rollback()
+
 	rslt, err := InsertUser(tx, u.Name, u.Email, uuid.NewV4().String())
 	userId, _ := rslt.LastInsertId()
 
@@ -57,6 +58,17 @@ func CreateUser(u *User) error {
 	if err != nil {
 		return err
 	}
+
+	m := Member{}
+	m.Project = DefaultProject
+	m.UserId = int(userId)
+	m.Role = MemberViewer
+
+	_, err = m.Insert(tx)
+	if err != nil {
+		return err
+	}
+
 	return tx.Commit()
 }
 
@@ -142,6 +154,22 @@ func (u *User) IsManager() bool {
 		return false
 	}
 	return roles[MemberManager]
+}
+
+func (u *User) IsEditor() bool {
+	roles, ok := u.ProjectRoles[u.CurrentProject.Key]
+	if !ok {
+		return false
+	}
+	return roles[MemberEditor]
+}
+
+func (u *User) IsViewer() bool {
+	roles, ok := u.ProjectRoles[u.CurrentProject.Key]
+	if !ok {
+		return false
+	}
+	return roles[MemberViewer]
 }
 
 func (u *User) Init(tx *sql.Tx) error {

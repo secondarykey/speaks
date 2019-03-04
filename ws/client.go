@@ -37,7 +37,6 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 				t := time.Now()
 				msg.Created = t.Format("2006/01/02 15:04:05")
 
-				log.Println("Message")
 				log.Println(msg)
 				go db.InsertMessage(msg.UserId, msg.Project, msg.Category, msg.Content, msg.Created)
 

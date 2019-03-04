@@ -11,6 +11,9 @@ import (
 //category
 func categoryHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
+	u := data["User"].(*db.User)
+	p := u.CurrentProject
+
 	// /manage/category/
 	if r.Method == "GET" {
 
@@ -20,7 +23,11 @@ func categoryHandler(w http.ResponseWriter, r *http.Request, data map[string]int
 		}
 		data["CategoryKey"] = key
 
-		//TODO カテゴリリストを作成
+		cats, err := db.SelectProjectCategories(p.Key)
+		if err != nil {
+			return "", err
+		}
+		data["CategoryList"] = cats
 
 		return "manage/category.tmpl", nil
 
@@ -30,11 +37,10 @@ func categoryHandler(w http.ResponseWriter, r *http.Request, data map[string]int
 		desc := r.FormValue("description")
 		key := r.FormValue("key")
 
-		u := data["User"].(*db.User)
 		c := db.Category{
 			Key:         key,
 			Name:        name,
-			Project:     u.CurrentProject.Key,
+			Project:     p.Key,
 			Description: desc,
 		}
 
@@ -66,6 +72,7 @@ func categoryListHandler(w http.ResponseWriter, r *http.Request, data map[string
 }
 
 func categoryViewHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
 	if r.Method == "GET" {
 		return "", fmt.Errorf("NotSupport Method")
 	}
@@ -73,7 +80,9 @@ func categoryViewHandler(w http.ResponseWriter, r *http.Request, data map[string
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
 
-	cat, err := db.SelectCategory(pathS[3])
+	// /api/category/view/{id}
+
+	cat, err := db.SelectCategory(pathS[4])
 	if err != nil {
 		return "", err
 	}

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -194,13 +195,6 @@ func (c *setting) Generate(d, f string) error {
 	log.Println("Generate speaks.ini")
 	names := AssetNames()
 
-	//TODO method
-	os.MkdirAll(d+"/static/js", 0777)
-	os.MkdirAll(d+"/static/images/icon", 0777)
-	os.MkdirAll(d+"/static/css", 0777)
-	os.MkdirAll(d+"/data/store", 0777)
-	os.MkdirAll(d+"/templates/memo", 0777)
-
 	for _, name := range names {
 
 		bin, err := Asset(name)
@@ -209,8 +203,16 @@ func (c *setting) Generate(d, f string) error {
 			return err
 		}
 
+		f := d + "/" + name
+		m, err := filepath.Abs(filepath.Clean(f))
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		os.MkdirAll(m, 0777)
+
 		reader := bytes.NewReader(bin)
-		bf, err := os.Create(d + "/" + name)
+		bf, err := os.Create(f)
 		if err != nil {
 			log.Println(err)
 			return err
@@ -222,9 +224,8 @@ func (c *setting) Generate(d, f string) error {
 			log.Println(err)
 			return err
 		}
-
-		log.Println("Generate " + name)
 	}
+	log.Println("Generate static file")
 
 	return nil
 }

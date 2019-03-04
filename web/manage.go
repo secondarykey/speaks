@@ -7,38 +7,57 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
-func manageHandler(w http.ResponseWriter, r *http.Request) {
+func memberHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	user, err := getLoginUser(r)
+	//ユーザを作成
+	users, err := db.SelectAllUser()
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
+		return "", err
 	}
 
-	tc := make(map[string]interface{})
-	sql := ""
-	if r.Method == "POST" {
-		sql = r.FormValue("SQL")
-		rows, err := db.Query(sql)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	u := data["User"].(*db.User)
+	key := u.CurrentProject.Key
 
-		for _, elm := range rows.Records {
-			for _, val := range elm {
-				log.Println(val)
-				log.Println(*val)
-				log.Println(&val)
+	member, err := db.SelectProjectMember(key)
+	if err != nil {
+		return "", err
+	}
+
+	for _, mem := range member {
+		var target *db.User
+		for _, elm := range users {
+			if mem.UserId == elm.Id {
+				target = elm
+				break
 			}
 		}
-		tc["Columns"] = rows.Columns
-		tc["Records"] = rows.Records
+
+		if target == nil {
+			log.Println("Error no target")
+			continue
+		}
+
+		target.CurrentProject = u.CurrentProject
+
+		pr := target.ProjectRoles
+		if pr == nil {
+			pr = make(map[string]db.RoleMap)
+		}
+
+		rm := pr[key]
+		if rm == nil {
+			rm = db.NewMemberRole()
+		}
+
+		rm[mem.Role] = true
+
+		pr[key] = rm
+		target.ProjectRoles = pr
 	}
 
-	tc["User"] = user
-	tc["SQL"] = sql
+	//全ユーザのロールを設定
 
-	setTemplates(w, tc, "database.tmpl")
-	return
+	data["UserList"] = users
+
+	return "manage/member.tmpl", nil
 }
