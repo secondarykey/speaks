@@ -112,10 +112,7 @@ func Ask(reader io.Reader, root string) error {
 	conf.LDAP.Use = false
 	ldap, err := ask(stdin, "Use LDAP?", "Y/n",
 		func(in string) (string, error) {
-			if in == "Y" {
-				return "Y", nil
-			}
-			return "N", nil
+			return in, nil
 		})
 	if err != nil {
 		log.Println(err)
@@ -230,10 +227,10 @@ func (c *setting) Generate(d, f string) error {
 
 	fs.WriteString("[LDAP]\n")
 	fs.WriteString(fmt.Sprintf("use=%t\n", c.LDAP.Use))
-	fs.WriteString(fmt.Sprintf("host=%t\n", c.LDAP.Host))
-	fs.WriteString(fmt.Sprintf("baseDN=%t\n", c.LDAP.BaseDN))
-	fs.WriteString(fmt.Sprintf("bindUser=%t\n", c.LDAP.BindDN))
-	fs.WriteString(fmt.Sprintf("bindPassword=%t\n", c.LDAP.BindPassword))
+	fs.WriteString(fmt.Sprintf(`host="%s"`+"\n", c.LDAP.Host))
+	fs.WriteString(fmt.Sprintf(`baseDN="%s"`+"\n", c.LDAP.BaseDN))
+	fs.WriteString(fmt.Sprintf(`bindUser="%s"`+"\n", c.LDAP.BindDN))
+	fs.WriteString(fmt.Sprintf(`bindPassword="%s"`+"\n", c.LDAP.BindPassword))
 
 	fs.WriteString("\n")
 
@@ -254,12 +251,9 @@ func (c *setting) Generate(d, f string) error {
 		}
 
 		f := d + "/" + name
-		m, err := filepath.Abs(filepath.Clean(f))
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		os.MkdirAll(m, 0777)
+		mkd := filepath.Dir(f)
+		os.MkdirAll(mkd, 0777)
+		log.Println(mkd)
 
 		reader := bytes.NewReader(bin)
 		bf, err := os.Create(f)
