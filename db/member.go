@@ -70,6 +70,40 @@ func (p Member) Insert(tx *sql.Tx) (sql.Result, error) {
 	return stmt.Exec(p.Project, p.UserId, p.Role)
 }
 
+func DeleteProjectMembers(project string) error {
+
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare("delete from Member where project = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(project)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func InsertMembers(m []Member) error {
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+
+	for _, mem := range m {
+		mem.Insert(tx)
+	}
+
+	return tx.Commit()
+}
+
 func InsertDefaultMember(tx *sql.Tx, project string) error {
 
 	uroles, err := SelectAdminUsers()

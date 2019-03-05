@@ -14,21 +14,6 @@ import (
 
 func init() {
 
-	//All
-	http.HandleFunc("/login", loginHandler)
-	http.HandleFunc("/logout", logoutHandler)
-
-	//Speaker
-	http.HandleFunc("/", chatHandler)
-	http.HandleFunc("/upload", uploadHandler)
-	http.HandleFunc("/store/", storeHandler)
-
-	http.HandleFunc("/message/delete/", messageDeleteHandler)
-
-	//Editor
-	http.HandleFunc("/memo", memoListHandler)
-	http.HandleFunc("/memo/edit/", memoEditHandler)
-	http.HandleFunc("/memo/view/", memoViewHandler)
 }
 
 type handler func(http.ResponseWriter, *http.Request, map[string]interface{}) (string, error)
@@ -73,11 +58,25 @@ func NewHTMLRouter() *htmlRouter {
 	router.pattern["/manage/category/"] = categoryHandler
 	router.pattern["/manage/category/delete/"] = categoryDeleteHandler
 	router.pattern["/manage/project/member"] = memberHandler
+	router.pattern["/manage/project/member/update"] = memberUpdateHandler
 
 	//Admin
 	router.pattern["/admin/project/"] = projectHandler
 	router.pattern["/admin/user"] = userHandler
 	//router.pattern["/admin/user/register"] = userRegisterHandler
+
+	//All
+	router.pattern["/login"] = loginHandler
+	router.pattern["/logout"] = logoutHandler
+
+	//Speaker
+	router.pattern["/"] = chatHandler
+	router.pattern["/store/"] = storeHandler
+
+	//Editor
+	router.pattern["/memo"] = memoListHandler
+	router.pattern["/memo/edit/"] = memoEditHandler
+	router.pattern["/memo/view/"] = memoViewHandler
 
 	router.pattern["/user/register/"] = userRegisterHandler
 	return &router
@@ -105,17 +104,8 @@ func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-	} else if strings.Index(path, "/user/register/") == 0 {
-		/*
-			pathS := strings.Split(path, "/")
-			u, err = db.SelectPassword(pathS[3])
-			if err != nil {
-				log.Println(err)
-				http.Redirect(w, r, "/login", http.StatusFound)
-				return
-			}
-			obj["EditUser"] = u
-		*/
+	} else if path == "/login" {
+		u = new(db.User)
 	}
 
 	obj := make(map[string]interface{})
@@ -140,6 +130,10 @@ func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if _, ok := err.(*NoWrite); ok {
+			return
+		}
+
 		tmpl = "error.tmpl"
 		obj["Error"] = err
 		log.Println(err)
@@ -156,10 +150,13 @@ func NewJSONRouter() *jsonRouter {
 	router := jsonRouter{}
 	router.pattern = NewURLPattern()
 
+	router.pattern["/api/message/delete/"] = messageDeleteHandler
 	router.pattern["/api/message/"] = messageHandler
 
 	router.pattern["/api/category/list"] = categoryListHandler
 	router.pattern["/api/category/view/"] = categoryViewHandler
+
+	router.pattern["/api/upload"] = uploadHandler
 	return &router
 }
 
@@ -226,7 +223,16 @@ func (t templateType) prefixPattern(prefix string) bool {
 	return false
 }
 
+type NoWrite string
 type Redirect string
+
+func NewNoWrite(path string) *NoWrite {
+	r := NoWrite(path)
+	return &r
+}
+func (r *NoWrite) Error() string {
+	return "NoWrite type is not Error."
+}
 
 func NewRedirect(path string) *Redirect {
 	r := Redirect(path)
@@ -241,22 +247,21 @@ func (r *Redirect) Path() string {
 	return string(*r)
 }
 
-func Listen(static, port string) error {
+func Listen(root, port string) error {
 
 	startSession()
-	//TODO Static
-	http.Handle("/static/", http.FileServer(http.Dir(static)))
 
-	router := NewHTMLRouter()
-	http.Handle("/user/", router)
-	http.Handle("/category/", router)
-	http.Handle("/project/", router)
-	http.Handle("/admin/", router)
-	http.Handle("/manage/", router)
-	http.Handle("/me", router)
+	pub := http.Dir(root + "/" + Config.Web.Public)
+	s := http.FileServer(pub)
+	http.Handle("/js/", s)
+	http.Handle("/css/", s)
+	http.Handle("/images/", s)
 
 	api := NewJSONRouter()
 	http.Handle("/api/", api)
+
+	router := NewHTMLRouter()
+	http.Handle("/", router)
 
 	return http.ListenAndServe(":"+port, nil)
 }

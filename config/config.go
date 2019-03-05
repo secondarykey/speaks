@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/BurntSushi/toml"
 	uuid "github.com/satori/go.uuid"
@@ -36,17 +35,15 @@ type web struct {
 	Port     string
 	Upload   string
 	Template string
+	Public   string
 }
 
 type ldap struct {
-	Use      bool
-	Server   string
-	Protocol string
-	Port     string
-	BindDN   string
-	BindPW   string
-	BaseDn   string
-	Filter   string
+	Use          bool
+	Host         string
+	BaseDN       string
+	BindDN       string
+	BindPassword string
 }
 
 type session struct {
@@ -68,16 +65,8 @@ func Load(d string) error {
 	}
 
 	//All Create
-	paths := strings.Split(Config.Database.Path, "/")
-	if len(paths) > 1 {
-		dir := strings.Join(paths[0:len(paths)-1], "/")
-		err = os.MkdirAll(dir, 0777)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-	}
-	return os.MkdirAll(Config.Web.Upload, 0777)
+
+	return nil
 }
 
 func Ask(reader io.Reader, root string) error {
@@ -115,16 +104,35 @@ func Ask(reader io.Reader, root string) error {
 	}
 
 	conf.Web.Port = `"` + port + `"`
-	conf.Web.Upload = `"data/store"`
+	conf.Web.Upload = `"data"`
 	conf.Web.Template = `"templates"`
+	conf.Web.Public = `"public"`
 
-	//TODO LDAP Ask
+	//[LDAP]
 	conf.LDAP.Use = false
+	ldap, err := ask(stdin, "Use LDAP?", "Y/n",
+		func(in string) (string, error) {
+			if in == "Y" {
+				return "Y", nil
+			}
+			return "N", nil
+		})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	if ldap == "Y" {
+		err = askLDAP(&conf, stdin)
+		if err != nil {
+			return err
+		}
+	}
 
 	secret := uuid.NewV4().String()
 	conf.Session.Secret = `"` + secret + `"`
-	conf.Session.Name = `"User102"`
+	conf.Session.Name = `"User105"`
 
+	//[Session]
 	//Secret
 	//User
 	Config = &conf
@@ -157,6 +165,44 @@ func ask(in *bufio.Scanner, msg string, def string, fn func(string) (string, err
 	return "", fmt.Errorf("Input Error[%v]", err)
 }
 
+func askLDAP(c *setting, stdin *bufio.Scanner) error {
+
+	c.LDAP.Host = "localhost"
+	c.LDAP.BaseDN = "(dc=sample,dc=com)"
+	c.LDAP.BindDN = "user@sample.com"
+	c.LDAP.BindPassword = "***"
+
+	host, err := ask(stdin, "LDAP Host", c.LDAP.Host,
+		func(in string) (string, error) { return in, nil })
+	if err != nil {
+		return err
+	}
+	c.LDAP.Host = host
+
+	base, err := ask(stdin, "LDAP BaseDN", c.LDAP.BaseDN,
+		func(in string) (string, error) { return in, nil })
+	if err != nil {
+		return err
+	}
+	c.LDAP.BaseDN = base
+
+	dn, err := ask(stdin, "LDAP Bind User", c.LDAP.BindDN,
+		func(in string) (string, error) { return in, nil })
+	if err != nil {
+		return err
+	}
+	c.LDAP.BindDN = dn
+
+	pwd, err := ask(stdin, "LDAP Bind User Password", c.LDAP.BindPassword,
+		func(in string) (string, error) { return in, nil })
+	if err != nil {
+		return err
+	}
+	c.LDAP.BindPassword = pwd
+
+	return nil
+}
+
 func (c *setting) Generate(d, f string) error {
 
 	path := d + "/" + f
@@ -184,6 +230,10 @@ func (c *setting) Generate(d, f string) error {
 
 	fs.WriteString("[LDAP]\n")
 	fs.WriteString(fmt.Sprintf("use=%t\n", c.LDAP.Use))
+	fs.WriteString(fmt.Sprintf("host=%t\n", c.LDAP.Host))
+	fs.WriteString(fmt.Sprintf("baseDN=%t\n", c.LDAP.BaseDN))
+	fs.WriteString(fmt.Sprintf("bindUser=%t\n", c.LDAP.BindDN))
+	fs.WriteString(fmt.Sprintf("bindPassword=%t\n", c.LDAP.BindPassword))
 
 	fs.WriteString("\n")
 

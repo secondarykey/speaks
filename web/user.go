@@ -152,8 +152,7 @@ func meHandler(w http.ResponseWriter, r *http.Request, data map[string]interface
 func iconRegisterHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	user := data["User"].(*db.User)
-	//TODO static
-	path := Config.Base.Root + "/static/images/icon/" + fmt.Sprint(user.Id)
+	path := Config.Base.Root + Config.Web.Public + "/images/icon/" + fmt.Sprint(user.Id)
 
 	file, _, err := r.FormFile("uploadFile")
 	if err != nil {

@@ -8,30 +8,19 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
-func memoListHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := getLoginUser(r)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
+func memoListHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
+	//user, err := getLoginUser(r)
 	memos, err := db.SelectArchiveMemo()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
-	tc := make(map[string]interface{})
-	tc["MemoList"] = memos
-	tc["User"] = user
 
-	setTemplates(w, tc, "memo/list.tmpl")
+	data["MemoList"] = memos
+	return "memo/list.tmpl", nil
 }
 
-func memoEditHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := getLoginUser(r)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
+func memoEditHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
@@ -39,53 +28,51 @@ func memoEditHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		memo, _ := db.SelectMemo(key)
+		data["Memo"] = memo
+		return "memo/edit.tmpl", nil
 
-		tc := make(map[string]interface{})
-		tc["User"] = user
-		tc["Memo"] = memo
-
-		setTemplates(w, tc, "memo/edit.tmpl")
-		return
 	} else if r.Method == "DELETE" {
+
+		//API化
 		err := db.DeleteMemo(key)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
 		rtn := map[string]string{
 			"result":  "0",
 			"message": "NO ERROR",
 		}
 		setJson(rtn, w)
-		return
+		return "", NewNoWrite("Memo Delete")
 	}
 
 	name := r.FormValue("Name")
 	content := r.FormValue("Content")
 	db.UpdateMemo(key, name, content)
 
-	http.Redirect(w, r, "/memo/view/"+key, http.StatusFound)
+	return "", NewRedirect("/memo/view/" + key)
+
 }
 
-func memoViewHandler(w http.ResponseWriter, r *http.Request) {
+func memoViewHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
 	var err error
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
 	key := pathS[3]
+
 	//search
 	memo, err := db.SelectMemo(key)
 	if err == sql.ErrNoRows {
 		cat, err := db.SelectCategory(key)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
 		content := createMemoContent(key)
 		name := cat.Name
 		_, err = db.InsertMemo(key, name, content)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
 		//id, _ := result.LastInsertId()
 		//memo.Id = int(id)
@@ -93,14 +80,12 @@ func memoViewHandler(w http.ResponseWriter, r *http.Request) {
 		memo.Key = key
 		memo.Content = content
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
-	tc := make(map[string]interface{})
-	tc["Memo"] = memo
+	data["Memo"] = memo
 
-	setTemplates(w, tc, "memo/view.tmpl")
+	return "memo/view.tmpl", nil
 }
 
 func createMemoContent(key string) string {

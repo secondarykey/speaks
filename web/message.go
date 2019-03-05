@@ -42,29 +42,24 @@ func messageHandler(w http.ResponseWriter, r *http.Request, data map[string]inte
 	return "", nil
 }
 
-func messageDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := getLoginUser(r)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
+func messageDeleteHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	if r.Method == "GET" {
-		http.Error(w, "GETしないで><", http.StatusBadRequest)
-		return
+		return "", fmt.Errorf("Get Method Error")
 	}
 
 	url := r.URL.Path
 	msgS := strings.Split(url, "/")
-	if len(msgS) > 4 {
-		http.Error(w, "存在しません", http.StatusNotFound)
-		return
+	if len(msgS) != 4 {
+		return "", fmt.Errorf("Argument Error")
 	}
+
 	msgId := msgS[3]
-	err = db.DeleteMessage(msgId, user.Id)
+	user := data["User"].(*db.User)
+
+	err := db.DeleteMessage(msgId, user.Id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
 	rtn := map[string]string{
@@ -72,5 +67,7 @@ func messageDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "NO ERROR",
 	}
 
-	setJson(rtn, w)
+	data["Result"] = rtn
+
+	return "", nil
 }

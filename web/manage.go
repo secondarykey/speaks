@@ -3,6 +3,8 @@ package web
 import (
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/secondarykey/speaks/db"
 )
@@ -36,7 +38,6 @@ func memberHandler(w http.ResponseWriter, r *http.Request, data map[string]inter
 			log.Println("Error no target")
 			continue
 		}
-
 		target.CurrentProject = u.CurrentProject
 
 		pr := target.ProjectRoles
@@ -60,4 +61,39 @@ func memberHandler(w http.ResponseWriter, r *http.Request, data map[string]inter
 	data["UserList"] = users
 
 	return "manage/member.tmpl", nil
+}
+
+func memberUpdateHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
+	//カンマ区切り(ロール名-ユーザID)
+	roles := r.FormValue("roleMember")
+	slice := strings.Split(roles, ",")
+
+	u := data["User"].(*db.User)
+	key := u.CurrentProject.Key
+
+	//TODO tx
+	//全メンバの削除
+	err := db.DeleteProjectMembers(key)
+	if err != nil {
+		return "", err
+	}
+
+	var members []db.Member
+	//全メンバの追加
+	for _, v := range slice {
+		roleId := strings.Split(v, "-")
+		m := db.Member{}
+		m.Role = roleId[0]
+		m.UserId, _ = strconv.Atoi(roleId[1])
+		m.Project = key
+		members = append(members, m)
+	}
+
+	err = db.InsertMembers(members)
+	if err != nil {
+		return "", err
+	}
+
+	return "/manage/project/member", NewRedirect("/manage/project/member")
 }

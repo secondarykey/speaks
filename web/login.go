@@ -10,11 +10,10 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func loginHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	if r.Method == "GET" {
-		setTemplates(w, nil, "login.tmpl")
-		return
+		return "login.tmpl", nil
 	}
 
 	email := r.FormValue("email")
@@ -32,48 +31,40 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
+			return "", err
 		} else {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return "", err
 		}
 	}
 
 	err = setUserRole(user)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
 	err = setProjectRole(user)
 	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
 	err = setCurrentProject(user, "Speaks")
 	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
 	err = saveLoginUser(r, w, user)
 	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	return "/", NewRedirect("/")
 }
 
 //ERROR PAGES
 func loginLDAP(id, pass string) (*db.User, error) {
+
 	return nil, fmt.Errorf("LDAP Login Not yet Implemented.")
 }
 
@@ -142,11 +133,10 @@ func setCurrentProject(u *db.User, key string) error {
 	return fmt.Errorf("Not Found")
 }
 
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
+func logoutHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 	err := saveLoginUser(r, w, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
+	return "", NewRedirect("/")
 }

@@ -19,7 +19,7 @@ func basePath() string {
 	return Config.Base.Root + "/" + Config.Web.Upload
 }
 
-func storeHandler(w http.ResponseWriter, r *http.Request) {
+func storeHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 	path := basePath()
 	urlSlice := strings.Split(r.URL.Path, "/")
 
@@ -30,9 +30,10 @@ func storeHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.ServeFile(w, r, file)
 	}
+	return "", NewNoWrite("Write Binary")
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func uploadHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	path := basePath()
 	fileId := uuid.NewV4().String()
@@ -40,26 +41,25 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, _, err := r.FormFile("uploadFile")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 	defer file.Close()
 
 	out, err := os.Create(path)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 	defer out.Close()
+
 	_, err = io.Copy(out, file)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
 	ret := &result{
 		FileName: "store/" + fileId,
 	}
 
-	setJson(ret, w)
+	data["Result"] = ret
+	return "", nil
 }
