@@ -2,30 +2,57 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type Message struct {
 	Id       int
 	Category string
+	Project  string
 	UserId   int
 	UserName string
 	Content  string
 	Created  string
 }
 
-func createMessageTable() error {
+func (m Message) Create(tx *sql.Tx) error {
 	_, err := Exec("CREATE TABLE Message(id INTEGER PRIMARY KEY AUTOINCREMENT,project text,category text,user_id integer,content text,created text)")
 	return err
 }
 
-func dropMessageTable() error {
+func (m Message) Drop(tx *sql.Tx) error {
 	_, err := Exec("DROP TABLE if exists Message")
 	return err
 }
 
+func (m Message) Init(tx *sql.Tx) error {
+	return fmt.Errorf("Not yet Implemented")
+}
+
+func (m Message) Insert(tx *sql.Tx) (sql.Result, error) {
+
+	sql := "INSERT INTO Message(user_id,project,category,content,created) values(?, ?, ?, ?, ?)"
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return stmt.Exec(m.Id, m.Project, m.Category, m.Content, m.Created)
+}
+
+func createMessageTable() error {
+	msg := Message{}
+	return msg.Create(nil)
+}
+
+func dropMessageTable() error {
+	msg := Message{}
+	return msg.Drop(nil)
+}
+
 func SelectMessages(project, category, lastedId string) ([]Message, error) {
 
-	sql := createSQL()
+	sql := createMessageSQL()
 	if lastedId != "" {
 		sql += " AND Message.id < ?"
 	} else {
@@ -49,10 +76,10 @@ func SelectMessages(project, category, lastedId string) ([]Message, error) {
 	return msgs, nil
 }
 
-func SelectAllMessage(category string) ([]Message, error) {
-	sql := createSQL()
+func SelectAllMessage(category, project string) ([]Message, error) {
+	sql := createMessageSQL()
 	sql += " ORDER BY Message.created ASC"
-	rows, err := inst.Query(sql, category)
+	rows, err := inst.Query(sql, category, project)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +89,12 @@ func SelectAllMessage(category string) ([]Message, error) {
 		msg := Message{}
 		rows.Scan(&msg.Id, &msg.UserId, &msg.Category,
 			&msg.Content, &msg.Created, &msg.UserName)
-
 		msgs = append(msgs, msg)
 	}
 	return msgs, nil
 }
 
-func createSQL() string {
+func createMessageSQL() string {
 	sql := "select " +
 		"Message.id," +
 		"Message.user_id," +
@@ -81,17 +107,78 @@ func createSQL() string {
 	return sql
 }
 
-func InsertMessage(userId int, project, category, content, created string) (sql.Result, error) {
-	return inst.Exec("insert into Message(user_id,project,category,content,created) values(?, ?,?, ?, ?)", userId, project, category, content, created)
+func InsertMessage(userId int, project, category, content, created string) error {
+
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+
+	msg := Message{}
+	msg.Id = userId
+	msg.Project = project
+	msg.Category = category
+	msg.Content = content
+	msg.Created = created
+
+	_, err = msg.Insert(tx)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func DeleteMessage(id string, user_id int) error {
-	_, err := inst.Exec("delete from Message where id = ? and user_id = ?",
-		id, user_id)
-	return err
+func DeleteMessage(id int) error {
+
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	sql := "delete from Message where id = ?"
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
-func DeleteAllMessage(category string) error {
-	_, err := inst.Exec("delete from Message where category = ? ", category)
-	return err
+func DeleteAllMessage(tx *sql.Tx, category string) (sql.Result, error) {
+	stmt, err := tx.Prepare("delete from Message where category = ?")
+	if err != nil {
+		return nil, err
+	}
+
+	defer stmt.Close()
+	return stmt.Exec(category)
+}
+
+func createMemoContent(key, project string) (string, error) {
+
+	msgs, err := SelectAllMessage(key, project)
+	if err != nil {
+		return "", err
+	}
+
+	content := ""
+	for _, elm := range msgs {
+		content += elm.UserName + ":" + elm.Created
+		content += "\n"
+		content += elm.Content
+		content += "\n\n"
+	}
+	return content, nil
 }

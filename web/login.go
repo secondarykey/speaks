@@ -8,6 +8,7 @@ import (
 
 	. "github.com/secondarykey/speaks/config"
 	"github.com/secondarykey/speaks/db"
+	"github.com/secondarykey/speaks/logic"
 )
 
 func loginHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
@@ -65,7 +66,54 @@ func loginHandler(w http.ResponseWriter, r *http.Request, data map[string]interf
 //ERROR PAGES
 func loginLDAP(id, pass string) (*db.User, error) {
 
-	return nil, fmt.Errorf("LDAP Login Not yet Implemented.")
+	ldap := logic.NewLDAP(
+		Config.LDAP.Host,
+		Config.LDAP.BaseDN,
+		Config.LDAP.BindDN,
+		Config.LDAP.BindPassword)
+	var err error
+	var result *logic.LDAPResult
+
+	if true {
+		result, err = ldap.Login(id, pass)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = nil
+		result = &logic.LDAPResult{
+			LoginName: "LDAPUser",
+			Name:      "Name",
+		}
+	}
+
+	key := result.LoginName
+	u, err := db.SelectUser(key, "")
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, err
+		}
+	}
+
+	if u != nil {
+		return u, nil
+	}
+
+	err = db.InsertLDAPUser(result)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err = db.SelectUser(key, "")
+	if err != nil {
+		return nil, err
+	}
+
+	if u == nil {
+		return nil, fmt.Errorf("Not Register User")
+	}
+
+	return u, nil
 }
 
 func loginDB(id, pass string) (*db.User, error) {

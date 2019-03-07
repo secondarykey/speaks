@@ -101,7 +101,7 @@ func InsertProject(name, desc string) error {
 		return err
 	}
 
-	err = InsertDefaultMember(tx, p.Key)
+	err = InsertDefaultAdminMember(tx, p.Key)
 	if err != nil {
 		return err
 	}

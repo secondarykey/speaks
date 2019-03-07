@@ -8,13 +8,12 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
-//category
+// /manage/category/
 func categoryHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	u := data["User"].(*db.User)
 	p := u.CurrentProject
 
-	// /manage/category/
 	if r.Method == "GET" {
 
 		key, err := db.GenerateCategoryKey()
@@ -53,6 +52,7 @@ func categoryHandler(w http.ResponseWriter, r *http.Request, data map[string]int
 	}
 }
 
+// /api/category/list
 func categoryListHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	if r.Method == "GET" {
@@ -71,18 +71,23 @@ func categoryListHandler(w http.ResponseWriter, r *http.Request, data map[string
 	return "", nil
 }
 
+// /api/category/view/{id}
 func categoryViewHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	if r.Method == "GET" {
-		return "", fmt.Errorf("NotSupport Method")
+		return "", fmt.Errorf("Method Error")
 	}
 
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
+	if len(pathS) != 5 {
+		return "", fmt.Errorf("URL Error[%s]", url)
+	}
 
-	// /api/category/view/{id}
+	u := data["User"].(*db.User)
+	key := pathS[4]
 
-	cat, err := db.SelectCategory(pathS[4])
+	cat, err := db.SelectCategory(key, u.CurrentProject.Key)
 	if err != nil {
 		return "", err
 	}
@@ -91,20 +96,20 @@ func categoryViewHandler(w http.ResponseWriter, r *http.Request, data map[string
 	return "", nil
 }
 
+// /manage/category/delete/{id}
 func categoryDeleteHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	if r.Method == "GET" {
-		return "", fmt.Errorf("GET Method Error")
-	}
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
-
-	//TODO tx
-	err := db.DeleteAllMessage(pathS[3])
-	if err != nil {
-		return "", err
+	if len(pathS) != 5 {
+		return "", fmt.Errorf("URL Error[%s]", url)
 	}
-	err = db.DeleteCategory(pathS[3])
+	cat := pathS[4]
+
+	u := data["User"].(*db.User)
+	pro := u.CurrentProject
+
+	err := db.DeleteCategory(pro.Key, cat)
 	if err != nil {
 		return "", err
 	}

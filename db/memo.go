@@ -21,25 +21,30 @@ func dropMemoTable() error {
 	return err
 }
 
-func InsertMemo(key, name, content string) (sql.Result, error) {
-	return inst.Exec("insert into Memo(key,name,content) values(?, ?, ?)", key, name, content)
+func InsertMemo(tx *sql.Tx, key, project, name, content string) (sql.Result, error) {
+	//tx
+	stmt, err := tx.Prepare("insert into Memo(key,project,name,content) values(?, ?, ?, ?)")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return stmt.Exec(key, project, name, content)
+
 }
 
-func SelectMemo(key string) (Memo, error) {
+func SelectMemo(key, project string) (Memo, error) {
 	memo := Memo{}
-	err := inst.QueryRow("select id,key,name,content from Memo where key = ?", key).
+	err := inst.QueryRow("select id,key,name,content from Memo where key = ? and project = ?", key, project).
 		Scan(&memo.Id, &memo.Key, &memo.Name, &memo.Content)
 	return memo, err
 }
 
-func SelectArchiveMemo() ([]Memo, error) {
+func SelectProjectMemo(project string) ([]Memo, error) {
 
-	sql := "SELECT Memo.id,Memo.key,Memo.name,Memo.content from Memo"
-	sql += " LEFT OUTER JOIN Category ON (Memo.key = Category.key)"
-	sql += " WHERE Category.key IS NULL"
-	sql += " ORDER BY Memo.id DESC"
+	sql := "SELECT id,key,name,content from Memo"
+	sql += " WHERE project = ?"
 
-	rows, err := inst.Query(sql)
+	rows, err := inst.Query(sql, project)
 	if err != nil {
 		return nil, err
 	}
@@ -53,14 +58,14 @@ func SelectArchiveMemo() ([]Memo, error) {
 	return memos, nil
 }
 
-func UpdateMemo(key, name, content string) error {
-	_, err := inst.Exec("update memo set name=?,content=? where key = ?",
-		name, content, key)
+func UpdateMemo(key, project, name, content string) error {
+	_, err := inst.Exec("update memo set name=?,content=? where key = ? and project = ?",
+		name, content, key, project)
 	return err
 }
 
-func DeleteMemo(key string) error {
-	_, err := inst.Exec("delete from memo where key = ?",
-		key)
+func DeleteMemo(key, project string) error {
+	_, err := inst.Exec("delete from memo where key = ? and project = ?",
+		key, project)
 	return err
 }

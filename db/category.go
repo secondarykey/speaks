@@ -28,6 +28,19 @@ func (c Category) Drop() error {
 	return err
 }
 
+func (c *Category) Init(tx *sql.Tx) error {
+	return c.InsertDefaultCategory(tx, DefaultProject)
+}
+
+func (c *Category) Insert(tx *sql.Tx) (sql.Result, error) {
+	stmt, err := tx.Prepare("insert into Category(key,name,project,description) values(?, ?, ?, ?)")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return stmt.Exec(c.Key, c.Name, c.Project, c.Description)
+}
+
 func createCategoryTable() error {
 	c := Category{}
 	return c.Create()
@@ -36,10 +49,6 @@ func createCategoryTable() error {
 func dropCategoryTable() error {
 	c := Category{}
 	return c.Drop()
-}
-
-func (c *Category) Init(tx *sql.Tx) error {
-	return c.InsertDefaultCategory(tx, DefaultProject)
 }
 
 func (c *Category) InsertDefaultCategory(tx *sql.Tx, project string) error {
@@ -54,15 +63,6 @@ func (c *Category) InsertDefaultCategory(tx *sql.Tx, project string) error {
 		return err
 	}
 	return nil
-}
-
-func (c *Category) Insert(tx *sql.Tx) (sql.Result, error) {
-	stmt, err := tx.Prepare("insert into Category(key,name,project,description) values(?, ?, ?, ?)")
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-	return stmt.Exec(c.Key, c.Name, c.Project, c.Description)
 }
 
 func InitCategory(tx *sql.Tx) error {
@@ -101,15 +101,55 @@ func SelectProjectCategories(project string) ([]Category, error) {
 	return cats, nil
 }
 
-//TODO Tx
-func DeleteCategory(catKey string) error {
-	_, err := inst.Exec("delete from Category where key = ? ", catKey)
-	return err
+func DeleteCategory(project, catKey string) error {
+
+	//create Memo Content
+	content, err := createMemoContent(catKey, project)
+	if err != nil {
+		return err
+	}
+
+	cat, err := SelectCategory(catKey, project)
+	if err != nil {
+		return err
+	}
+
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	//Create Memo
+	_, err = InsertMemo(tx, catKey, project, cat.Name, content)
+	if err != nil {
+		return err
+	}
+
+	//delete message
+	_, err = DeleteAllMessage(tx, catKey)
+	if err != nil {
+		return err
+	}
+
+	//delete category
+	stmt, err := tx.Prepare("delete from Category where key = ? and project = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(catKey, project)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
-func SelectCategory(catId string) (Category, error) {
+func SelectCategory(catId string, project string) (Category, error) {
 	cat := Category{}
-	err := inst.QueryRow("select id,key,name,description from Category where key = ?", catId).
+	err := inst.QueryRow("select id,key,name,description from Category where key = ? and project = ?", catId, project).
 		Scan(&cat.Id, &cat.Key, &cat.Name, &cat.Description)
 	return cat, err
 }

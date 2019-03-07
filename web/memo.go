@@ -1,106 +1,103 @@
 package web
 
 import (
-	"database/sql"
+	"fmt"
+	"html/template"
 	"net/http"
 	"strings"
 
+	. "github.com/secondarykey/speaks/config"
 	"github.com/secondarykey/speaks/db"
 )
 
 func memoListHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	//user, err := getLoginUser(r)
-	memos, err := db.SelectArchiveMemo()
+	u := data["User"].(*db.User)
+	memos, err := db.SelectProjectMemo(u.CurrentProject.Key)
 	if err != nil {
 		return "", err
 	}
-
 	data["MemoList"] = memos
 	return "memo/list.tmpl", nil
 }
 
-func memoEditHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+func memoUpdateHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	url := r.URL.Path
 	pathS := strings.Split(url, "/")
-	key := pathS[3]
 
-	if r.Method == "GET" {
-		memo, _ := db.SelectMemo(key)
-		data["Memo"] = memo
-		return "memo/edit.tmpl", nil
-
-	} else if r.Method == "DELETE" {
-
-		//API化
-		err := db.DeleteMemo(key)
-		if err != nil {
-			return "", err
-		}
-		rtn := map[string]string{
-			"result":  "0",
-			"message": "NO ERROR",
-		}
-		setJson(rtn, w)
-		return "", NewNoWrite("Memo Delete")
+	// /api/memo/edit/{key}
+	if len(pathS) != 5 {
+		return "", fmt.Errorf("URL Error." + url)
 	}
+
+	key := pathS[4]
 
 	name := r.FormValue("Name")
 	content := r.FormValue("Content")
-	db.UpdateMemo(key, name, content)
 
-	return "", NewRedirect("/memo/view/" + key)
+	u := data["User"].(*db.User)
+	err := db.UpdateMemo(key, u.CurrentProject.Key, name, content)
+	if err != nil {
+		return "", err
+	}
+	return "", nil
+}
 
+func memoDeleteHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+	url := r.URL.Path
+	pathS := strings.Split(url, "/")
+	// /api/memo/delete/{key}
+	if len(pathS) != 5 {
+		return "", fmt.Errorf("URL Error." + url)
+	}
+	key := pathS[4]
+	u := data["User"].(*db.User)
+	err := db.DeleteMemo(key, u.CurrentProject.Key)
+	if err != nil {
+		return "", err
+	}
+	return "", nil
+}
+
+func memoHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+
+	url := r.URL.Path
+	pathS := strings.Split(url, "/")
+
+	if len(pathS) != 4 {
+		return "", fmt.Errorf("URL Error." + url)
+	}
+	key := pathS[3]
+
+	u := data["User"].(*db.User)
+	memo, _ := db.SelectMemo(key, u.CurrentProject.Key)
+	data["Memo"] = memo
+	return "memo/edit.tmpl", nil
 }
 
 func memoViewHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	var err error
 	url := r.URL.Path
-	pathS := strings.Split(url, "/")
-	key := pathS[3]
 
-	//search
-	memo, err := db.SelectMemo(key)
-	if err == sql.ErrNoRows {
-		cat, err := db.SelectCategory(key)
-		if err != nil {
-			return "", err
-		}
-		content := createMemoContent(key)
-		name := cat.Name
-		_, err = db.InsertMemo(key, name, content)
-		if err != nil {
-			return "", err
-		}
-		//id, _ := result.LastInsertId()
-		//memo.Id = int(id)
-		memo.Name = name
-		memo.Key = key
-		memo.Content = content
-	} else if err != nil {
+	pathS := strings.Split(url, "/")
+	key := pathS[2]
+
+	u := data["User"].(*db.User)
+	memo, err := db.SelectMemo(key, u.CurrentProject.Key)
+	if err != nil {
 		return "", err
 	}
-
 	data["Memo"] = memo
 
-	return "memo/view.tmpl", nil
-}
+	templateDir := Config.Base.Root + "/" + Config.Web.Template
+	tmplFile := templateDir + "/memo/full.tmpl"
 
-func createMemoContent(key string) string {
+	tmpl := template.Must(template.ParseFiles(tmplFile))
 
-	msgs, err := db.SelectAllMessage(key)
-	if err != nil {
-		return err.Error()
+	if err := tmpl.Execute(w, data); err != nil {
+		return "", err
 	}
-
-	content := ""
-	for _, elm := range msgs {
-		content += elm.UserName + ":" + elm.Created
-		content += "\n"
-		content += elm.Content
-		content += "\n\n"
-	}
-	return content
+	return "", NewNoWrite("Memo Full Mode")
 }

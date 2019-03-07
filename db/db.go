@@ -39,11 +39,9 @@ func NewSchemaError(code int, msg string) error {
 
 type Table interface {
 	Create() error
-	Init(tx *sql.Tx) error
-
-	Insert(tx *sql.Tx) error
-
 	Drop() error
+	Init(tx *sql.Tx) error
+	Insert(tx *sql.Tx) (sql.Result, error)
 }
 
 var inst *sql.DB

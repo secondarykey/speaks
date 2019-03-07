@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/secondarykey/speaks/db"
@@ -50,24 +51,23 @@ func messageDeleteHandler(w http.ResponseWriter, r *http.Request, data map[strin
 
 	url := r.URL.Path
 	msgS := strings.Split(url, "/")
-	if len(msgS) != 4 {
+	if len(msgS) != 5 {
 		return "", fmt.Errorf("Argument Error")
 	}
 
-	msgId := msgS[3]
-	user := data["User"].(*db.User)
-
-	err := db.DeleteMessage(msgId, user.Id)
+	msgId := msgS[4]
+	intVal, err := strconv.Atoi(msgId)
 	if err != nil {
 		return "", err
 	}
 
-	rtn := map[string]string{
-		"result":  "0",
-		"message": "NO ERROR",
+	err = db.DeleteMessage(intVal)
+	if err != nil {
+		return "", err
 	}
 
-	data["Result"] = rtn
+	//data["Result"] = "0"
+	//data["Message"] = "No Error"
 
 	return "", nil
 }

@@ -104,7 +104,20 @@ func InsertMembers(m []Member) error {
 	return tx.Commit()
 }
 
-func InsertDefaultMember(tx *sql.Tx, project string) error {
+func InsertDefaultMember(tx *sql.Tx, userId int) error {
+
+	m := Member{}
+	m.Project = DefaultProject
+	m.UserId = userId
+	m.Role = MemberViewer
+	_, err := m.Insert(tx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func InsertDefaultAdminMember(tx *sql.Tx, project string) error {
 
 	uroles, err := SelectAdminUsers()
 	if err != nil {

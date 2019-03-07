@@ -35,7 +35,7 @@ func memberHandler(w http.ResponseWriter, r *http.Request, data map[string]inter
 		}
 
 		if target == nil {
-			log.Println("Error no target")
+			log.Println("Error no target[%d]", mem.UserId)
 			continue
 		}
 		target.CurrentProject = u.CurrentProject

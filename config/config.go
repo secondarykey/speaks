@@ -82,11 +82,11 @@ func Ask(reader io.Reader, root string) error {
 		fmt.Println(err)
 		return nil
 	}
-	conf.Base.Root = `"` + root + `"`
+	conf.Base.Root = root
 
 	//[Database]
-	conf.Database.Version = `"1.0.0"`
-	conf.Database.Path = `"speaks-%s.db"`
+	conf.Database.Version = "1.0.0"
+	conf.Database.Path = "speaks-%s.db"
 
 	//[Web]
 	port, err := ask(stdin, "HTTP Port Number", "5555",
@@ -103,10 +103,10 @@ func Ask(reader io.Reader, root string) error {
 		return err
 	}
 
-	conf.Web.Port = `"` + port + `"`
-	conf.Web.Upload = `"data"`
-	conf.Web.Template = `"templates"`
-	conf.Web.Public = `"public"`
+	conf.Web.Port = port
+	conf.Web.Upload = "data"
+	conf.Web.Template = "templates"
+	conf.Web.Public = "public"
 
 	//[LDAP]
 	conf.LDAP.Use = false
@@ -126,8 +126,8 @@ func Ask(reader io.Reader, root string) error {
 	}
 
 	secret := uuid.NewV4().String()
-	conf.Session.Secret = `"` + secret + `"`
-	conf.Session.Name = `"User105"`
+	conf.Session.Secret = secret
+	conf.Session.Name = "User050"
 
 	//[Session]
 	//Secret
@@ -165,7 +165,7 @@ func ask(in *bufio.Scanner, msg string, def string, fn func(string) (string, err
 func askLDAP(c *setting, stdin *bufio.Scanner) error {
 
 	c.LDAP.Host = "localhost"
-	c.LDAP.BaseDN = "(dc=sample,dc=com)"
+	c.LDAP.BaseDN = "dc=sample,dc=com"
 	c.LDAP.BindDN = "user@sample.com"
 	c.LDAP.BindPassword = "***"
 
@@ -211,18 +211,19 @@ func (c *setting) Generate(d, f string) error {
 	defer fs.Close()
 
 	fs.WriteString("[Base]\n")
-	fs.WriteString(fmt.Sprintf("root=%s\n", c.Base.Root))
+	fs.WriteString(fmt.Sprintf(`root="%s"`+"\n", c.Base.Root))
 	fs.WriteString("\n")
 
 	fs.WriteString("[Database]\n")
-	fs.WriteString(fmt.Sprintf("version=%s\n", c.Database.Version))
-	fs.WriteString(fmt.Sprintf("path=%s\n", c.Database.Path))
+	fs.WriteString(fmt.Sprintf(`version="%s"`+"\n", c.Database.Version))
+	fs.WriteString(fmt.Sprintf(`path="%s"`+"\n", c.Database.Path))
 	fs.WriteString("\n")
 
 	fs.WriteString("[Web]\n")
-	fs.WriteString(fmt.Sprintf("port=%s\n", c.Web.Port))
-	fs.WriteString(fmt.Sprintf("upload=%s\n", c.Web.Upload))
-	fs.WriteString(fmt.Sprintf("template=%s\n", c.Web.Template))
+	fs.WriteString(fmt.Sprintf(`port="%s"`+"\n", c.Web.Port))
+	fs.WriteString(fmt.Sprintf(`upload="%s"`+"\n", c.Web.Upload))
+	fs.WriteString(fmt.Sprintf(`template="%s"`+"\n", c.Web.Template))
+	fs.WriteString(fmt.Sprintf(`public="%s"`+"\n", c.Web.Public))
 	fs.WriteString("\n")
 
 	fs.WriteString("[LDAP]\n")
@@ -235,8 +236,8 @@ func (c *setting) Generate(d, f string) error {
 	fs.WriteString("\n")
 
 	fs.WriteString("[Session]\n")
-	fs.WriteString(fmt.Sprintf("Secret=%s\n", c.Session.Secret))
-	fs.WriteString(fmt.Sprintf("name=%s\n", c.Session.Name))
+	fs.WriteString(fmt.Sprintf(`Secret="%s"`+"\n", c.Session.Secret))
+	fs.WriteString(fmt.Sprintf(`name="%s"`+"\n", c.Session.Name))
 	fs.WriteString("\n")
 
 	log.Println("Generate speaks.ini")
@@ -269,6 +270,10 @@ func (c *setting) Generate(d, f string) error {
 			return err
 		}
 	}
+
+	dataDir := d + "/" + Config.Web.Upload
+	os.MkdirAll(dataDir, 0777)
+
 	log.Println("Generate static file")
 
 	return nil

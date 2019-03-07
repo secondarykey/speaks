@@ -48,11 +48,11 @@ func (l *LDAP) Login(u string, p string) (*LDAPResult, error) {
 	account := fmt.Sprintf("(sAMAccountName=%s)", u)
 	rtnType := []string{"sAMAccountName", "displayName"}
 
-	req := ldap.NewSearchRequest(l.BindDN, ldap.ScopeWholeSubtree,
+	req := ldap.NewSearchRequest(l.BaseDN, ldap.ScopeWholeSubtree,
 		ldap.NeverDerefAliases, 0, 0, false,
-		account, retType, nil)
+		account, rtnType, nil)
 
-	sr, err := l.Search(req)
+	sr, err := s.Search(req)
 	if err != nil {
 		return nil, fmt.Errorf("Search Error[%v]", err)
 	}
@@ -60,11 +60,11 @@ func (l *LDAP) Login(u string, p string) (*LDAPResult, error) {
 	if len(sr.Entries) == 0 {
 		return nil, fmt.Errorf("Not Found:%s", u)
 	} else if len(sr.Entries) > 1 {
-		return nil, fmt.Errorf("many found... user: %s", username)
+		return nil, fmt.Errorf("many found... user: %s", u)
 	}
 
 	entity := sr.Entries[0]
-	err = s.Bind(entity.DN, password)
+	err = s.Bind(entity.DN, p)
 	if err != nil {
 		return nil, fmt.Errorf("Authorization Error[%s]", u)
 	}

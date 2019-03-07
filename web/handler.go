@@ -36,12 +36,20 @@ func (p urlPattern) getHandle(path string) (handler, bool) {
 	if ok {
 		return hand, true
 	}
+
+	leng := 0
+	rtn := false
 	for key, elm := range p {
 		if strings.Index(path, key) == 0 {
-			return elm, true
+			if len(key) > leng {
+				hand = elm
+				rtn = true
+				leng = len(key)
+				log.Println("Pattern:" + key)
+			}
 		}
 	}
-	return hand, false
+	return hand, rtn
 }
 
 func NewHTMLRouter() *htmlRouter {
@@ -75,8 +83,8 @@ func NewHTMLRouter() *htmlRouter {
 
 	//Editor
 	router.pattern["/memo"] = memoListHandler
-	router.pattern["/memo/edit/"] = memoEditHandler
-	router.pattern["/memo/view/"] = memoViewHandler
+	router.pattern["/memo/edit/"] = memoHandler
+	router.pattern["/memo/"] = memoViewHandler
 
 	router.pattern["/user/register/"] = userRegisterHandler
 	return &router
@@ -93,7 +101,6 @@ func ignore(path string) bool {
 
 func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	//login,logout は使わない
 	path := r.URL.Path
 	u, err := getLoginUser(r)
 
@@ -115,7 +122,6 @@ func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	obj["Type"] = NewType(path)
 
 	tmpl := ""
-	log.Println("Path:" + path)
 
 	handle, ok := route.pattern.getHandle(path)
 	if ok {
@@ -131,12 +137,14 @@ func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if _, ok := err.(*NoWrite); ok {
+			log.Println(err.Error())
 			return
 		}
 
 		tmpl = "error.tmpl"
 		obj["Error"] = err
-		log.Println(err)
+
+		log.Printf("Path[%s]:%s\n", path, err)
 	}
 
 	//Template Write
@@ -157,6 +165,9 @@ func NewJSONRouter() *jsonRouter {
 	router.pattern["/api/category/view/"] = categoryViewHandler
 
 	router.pattern["/api/upload"] = uploadHandler
+
+	router.pattern["/api/memo/delete/"] = memoDeleteHandler
+	router.pattern["/api/memo/edit/"] = memoUpdateHandler
 	return &router
 }
 
@@ -166,7 +177,6 @@ func (route jsonRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var u *db.User
 
 	path := r.URL.Path
-	log.Println("Path:" + path)
 
 	data := make(map[string]interface{})
 	//Login
@@ -184,7 +194,7 @@ func (route jsonRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Println(err)
+		log.Printf("Path[%s]:%s\n", path, err)
 		data["Error"] = err.Error()
 	}
 
@@ -231,7 +241,7 @@ func NewNoWrite(path string) *NoWrite {
 	return &r
 }
 func (r *NoWrite) Error() string {
-	return "NoWrite type is not Error."
+	return string(*r)
 }
 
 func NewRedirect(path string) *Redirect {
@@ -256,6 +266,7 @@ func Listen(root, port string) error {
 	http.Handle("/js/", s)
 	http.Handle("/css/", s)
 	http.Handle("/images/", s)
+	http.HandleFunc("/favicon.ico", faviconHandler)
 
 	api := NewJSONRouter()
 	http.Handle("/api/", api)
@@ -264,6 +275,11 @@ func Listen(root, port string) error {
 	http.Handle("/", router)
 
 	return http.ListenAndServe(":"+port, nil)
+}
+
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	path := fmt.Sprintf("%s/%s/images/favicon.ico", Config.Base.Root, Config.Web.Public)
+	http.ServeFile(w, r, path)
 }
 
 func setTemplates(w http.ResponseWriter, param interface{}, templateFile string) error {

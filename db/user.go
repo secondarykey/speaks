@@ -4,10 +4,12 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
-	"errors"
+	"fmt"
 	"log"
 
 	uuid "github.com/satori/go.uuid"
+	. "github.com/secondarykey/speaks/config"
+	"github.com/secondarykey/speaks/logic"
 )
 
 type RoleMap map[string]bool
@@ -52,19 +54,17 @@ func CreateUser(u *User) error {
 	defer tx.Rollback()
 
 	rslt, err := InsertUser(tx, u.Name, u.Email, uuid.NewV4().String())
+	if err != nil {
+		return err
+	}
 	userId, _ := rslt.LastInsertId()
 
-	rslt, err = InsertUserRole(tx, int(userId), "Speaker")
+	_, err = InsertUserRole(tx, int(userId), DefaultProject)
 	if err != nil {
 		return err
 	}
 
-	m := Member{}
-	m.Project = DefaultProject
-	m.UserId = int(userId)
-	m.Role = MemberViewer
-
-	_, err = m.Insert(tx)
+	err = InsertDefaultMember(tx, int(userId))
 	if err != nil {
 		return err
 	}
@@ -76,6 +76,35 @@ func CreateMD5(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func InsertLDAPUser(result *logic.LDAPResult) error {
+
+	tx, err := inst.Begin()
+	if err != nil {
+		return err
+	}
+
+	//User
+	rslt, err := InsertUser(tx, result.Name, result.LoginName, "")
+	if err != nil {
+		return err
+	}
+	userId, _ := rslt.LastInsertId()
+
+	//Role
+	_, err = InsertUserRole(tx, int(userId), RoleSpeaker)
+	if err != nil {
+		return err
+	}
+
+	//Speaks Project Member
+	err = InsertDefaultMember(tx, int(userId))
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func UpdateUser(u *User) error {
@@ -93,9 +122,13 @@ func SelectUser(email, pswd string) (*User, error) {
 		return nil, err
 	}
 
+	if Config.LDAP.Use {
+		return user, nil
+	}
+
 	if user.Password != CreateMD5(pswd) {
 		log.Println(err)
-		return nil, errors.New("パスワードが違うよ")
+		return nil, fmt.Errorf("Auth Error")
 	}
 
 	return user, nil
@@ -135,41 +168,66 @@ func SelectAllUser() ([]*User, error) {
 	return users, nil
 }
 
+func (u *User) IsLogin() bool {
+	if u == nil || u.Name == "" {
+		return false
+	}
+	return true
+}
+
 func (u *User) IsAdmin() bool {
-	return u.Roles[RoleAdmin]
+	if u.IsLogin() {
+		return u.Roles[RoleAdmin]
+	}
+	return false
 }
 
 func (u *User) IsSpeaker() bool {
-	return u.Roles[RoleSpeaker]
+	if u.IsLogin() {
+		return u.Roles[RoleSpeaker]
+	}
+	return false
 }
 
 func (u *User) See(projectKey string) bool {
-	_, ok := u.ProjectRoles[projectKey]
-	return ok
+	if u.IsLogin() {
+		_, ok := u.ProjectRoles[projectKey]
+		return ok
+	}
+	return false
 }
 
 func (u *User) IsManager() bool {
-	roles, ok := u.ProjectRoles[u.CurrentProject.Key]
-	if !ok {
-		return false
+	if u.IsLogin() {
+		roles, ok := u.ProjectRoles[u.CurrentProject.Key]
+		if !ok {
+			return false
+		}
+		return roles[MemberManager]
 	}
-	return roles[MemberManager]
+	return false
 }
 
 func (u *User) IsEditor() bool {
-	roles, ok := u.ProjectRoles[u.CurrentProject.Key]
-	if !ok {
-		return false
+	if u.IsLogin() {
+		roles, ok := u.ProjectRoles[u.CurrentProject.Key]
+		if !ok {
+			return false
+		}
+		return roles[MemberEditor]
 	}
-	return roles[MemberEditor]
+	return false
 }
 
 func (u *User) IsViewer() bool {
-	roles, ok := u.ProjectRoles[u.CurrentProject.Key]
-	if !ok {
-		return false
+	if u.IsLogin() {
+		roles, ok := u.ProjectRoles[u.CurrentProject.Key]
+		if !ok {
+			return false
+		}
+		return roles[MemberViewer]
 	}
-	return roles[MemberViewer]
+	return false
 }
 
 func (u *User) Init(tx *sql.Tx) error {
