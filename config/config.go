@@ -110,7 +110,7 @@ func Ask(reader io.Reader, root string) error {
 
 	//[LDAP]
 	conf.LDAP.Use = false
-	ldap, err := ask(stdin, "Use LDAP?", "Y/n",
+	ldap, err := ask(stdin, "Use LDAP(ActiveDirectory)?", "Y/n",
 		func(in string) (string, error) {
 			return in, nil
 		})
@@ -163,6 +163,8 @@ func ask(in *bufio.Scanner, msg string, def string, fn func(string) (string, err
 }
 
 func askLDAP(c *setting, stdin *bufio.Scanner) error {
+
+	c.LDAP.Use = true
 
 	c.LDAP.Host = "localhost"
 	c.LDAP.BaseDN = "dc=sample,dc=com"
@@ -230,7 +232,7 @@ func (c *setting) Generate(d, f string) error {
 	fs.WriteString(fmt.Sprintf("use=%t\n", c.LDAP.Use))
 	fs.WriteString(fmt.Sprintf(`host="%s"`+"\n", c.LDAP.Host))
 	fs.WriteString(fmt.Sprintf(`baseDN="%s"`+"\n", c.LDAP.BaseDN))
-	fs.WriteString(fmt.Sprintf(`bindUser="%s"`+"\n", c.LDAP.BindDN))
+	fs.WriteString(fmt.Sprintf(`bindDN="%s"`+"\n", c.LDAP.BindDN))
 	fs.WriteString(fmt.Sprintf(`bindPassword="%s"`+"\n", c.LDAP.BindPassword))
 
 	fs.WriteString("\n")
