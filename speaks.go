@@ -15,15 +15,17 @@ import (
 	"github.com/secondarykey/speaks/ws"
 )
 
-const Ver = "0.5.0"
+const Ver = "0.5.1"
 
 var currentDir string
 var logLv string
+var logger *log.Logger
 
 func init() {
 	// -lv log : Level debug,fatal,error,
 	flag.StringVar(&currentDir, "d", ".speaks", "CurrentDirectory")
-	flag.StringVar(&logLv, "lv", "WARN", "Log Level")
+	flag.StringVar(&logLv, "v", "WARN", "Log Level")
+
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 }
 

@@ -9,24 +9,32 @@ run :
 go get -u github.com/secondarykey/speaks
 go install
 
+
+Initialize :
+
+```
 speaks init
+```
+
+create current directory ".speaks"
+
+
+
+
 speaks start
+
+
+
 
 environment :
 
-  .speaks 
 
-default setting :
 
-- http://localhost:5555
+
+
+default user :
+
 - admin@localhost/p@ssword
 
-not yet Modified Template for 0.5.0
 
-category.tmpl
-
-memo/
-  edit.tmpl
-  list.tmpl
-  view.tmpl
 

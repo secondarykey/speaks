@@ -11,14 +11,16 @@ type Role struct {
 }
 
 const (
-	RoleAdmin   = "Administrator"
-	RoleSpeaker = "Speaker"
+	RoleSuperUser = "SuperUser"
+	RoleAdmin     = "Administrator"
+	RoleSpeaker   = "Speaker"
 )
 
 func NewRoleMap() RoleMap {
 	return map[string]bool{
-		RoleAdmin:   false,
-		RoleSpeaker: false,
+		RoleSuperUser: false,
+		RoleAdmin:     false,
+		RoleSpeaker:   false,
 	}
 }
 

@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/gob"
 	"fmt"
+	"log"
 	"net/http"
 
 	. "github.com/secondarykey/speaks/config"
@@ -31,6 +32,7 @@ func getLoginUser(r *http.Request) (*db.User, error) {
 
 	session, err := getSession(r)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -45,6 +47,7 @@ func saveLoginUser(r *http.Request, w http.ResponseWriter, u interface{}) error 
 
 	session, err := getSession(r)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	session.Values[Config.Session.Name] = u

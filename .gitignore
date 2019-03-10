@@ -1,6 +1,3 @@
 *.swp
-work
 .speaks
-data
-backup.tar
-backup.tar.gz
+*.tar.gz

@@ -23,7 +23,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request, data map[string]interf
 	var err error
 	var user *db.User
 
-	if Config.LDAP.Use {
+	if Config.LDAP.Use && email != db.SuperUser {
 		user, err = loginLDAP(email, pswd)
 	} else {
 		user, err = loginDB(email, pswd)

@@ -12,6 +12,8 @@ import (
 	"github.com/secondarykey/speaks/logic"
 )
 
+const SuperUser = "admin@localhost"
+
 type RoleMap map[string]bool
 type ProjectRoleMap map[string]RoleMap
 
@@ -232,7 +234,7 @@ func (u *User) IsViewer() bool {
 
 func (u *User) Init(tx *sql.Tx) error {
 	pwd := CreateMD5("p@ssword")
-	rslt, err := InsertUser(tx, "Speaks Administrator", "admin@localhost", pwd)
+	rslt, err := InsertUser(tx, "Speaks Administrator", SuperUser, pwd)
 	if err != nil {
 		return err
 	}

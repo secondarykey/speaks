@@ -66,7 +66,12 @@ func SelectUserRole(userId int) ([]UserRole, error) {
 
 func InitUserRole(tx *sql.Tx, userId int) error {
 
-	_, err := InsertUserRole(tx, userId, RoleAdmin)
+	_, err := InsertUserRole(tx, userId, RoleSuperUser)
+	if err != nil {
+		return err
+	}
+
+	_, err = InsertUserRole(tx, userId, RoleAdmin)
 	if err != nil {
 		return err
 	}
