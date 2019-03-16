@@ -11,7 +11,7 @@ import (
 
 	. "github.com/secondarykey/speaks/config"
 	"github.com/secondarykey/speaks/db"
-	"github.com/secondarykey/speaks/web"
+	"github.com/secondarykey/speaks/http"
 	"github.com/secondarykey/speaks/ws"
 )
 
@@ -121,8 +121,7 @@ func Start(d string) error {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
-		for sig := range c {
-			fmt.Println("シグナル来た", sig)
+		for _ = range c {
 			close(c)
 			os.Exit(0)
 		}
@@ -153,5 +152,5 @@ func Start(d string) error {
 	port := Config.Web.Port
 	dir := Config.Base.Root
 
-	return web.Listen(dir, port)
+	return http.Listen(dir, port)
 }
