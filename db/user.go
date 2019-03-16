@@ -61,7 +61,7 @@ func CreateUser(u *User) error {
 	}
 	userId, _ := rslt.LastInsertId()
 
-	_, err = InsertUserRole(tx, int(userId), DefaultProject)
+	_, err = InsertUserRole(tx, int(userId), RoleSpeaker)
 	if err != nil {
 		return err
 	}
