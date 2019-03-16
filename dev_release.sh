@@ -20,16 +20,15 @@ case $answer in
     echo "Remove db file"
     rm *.db
 
-    case $? in
-      0)
-        echo "generate binary.go"
-        go-bindata.exe -pkg config -o ../config/binary.go ./...
-        echo "Success!"
-      ;;
-      1)
-        echo "DB remove error"
-      ;;
-    esac
+    echo "Remove Icon file"
+    rm -r public/images/icon
+
+    echo "Remove Upload file"
+    rm -r data
+
+    echo "generate binary.go"
+    go-bindata.exe -pkg config -o ../config/binary.go ./...
+    echo "Success!"
 
     cd ..
 

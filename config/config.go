@@ -63,9 +63,6 @@ func Load(d string) error {
 		log.Println(err)
 		return err
 	}
-
-	//All Create
-
 	return nil
 }
 
@@ -256,7 +253,6 @@ func (c *setting) Generate(d, f string) error {
 		f := d + "/" + name
 		mkd := filepath.Dir(f)
 		os.MkdirAll(mkd, 0777)
-		log.Println(mkd)
 
 		reader := bytes.NewReader(bin)
 		bf, err := os.Create(f)
@@ -274,6 +270,9 @@ func (c *setting) Generate(d, f string) error {
 	}
 
 	dataDir := d + "/" + Config.Web.Upload
+	os.MkdirAll(dataDir, 0777)
+
+	dataDir = d + "/" + Config.Web.Public + "/images/icon"
 	os.MkdirAll(dataDir, 0777)
 
 	log.Println("Generate static file")

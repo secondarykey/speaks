@@ -118,15 +118,6 @@ func Init(reader io.Reader, dir string) error {
 
 func Start(d string) error {
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go func() {
-		for _ = range c {
-			close(c)
-			os.Exit(0)
-		}
-	}()
-
 	log.Println("######## Initialize")
 	err := Load(d)
 	if err != nil {
@@ -152,5 +143,15 @@ func Start(d string) error {
 	port := Config.Web.Port
 	dir := Config.Base.Root
 
-	return http.Listen(dir, port)
+	err = http.Listen(dir, port)
+
+	if err == nil {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		for _ = range c {
+			close(c)
+		}
+	}
+
+	return err
 }
