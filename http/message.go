@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -31,8 +30,6 @@ func messageHandler(w http.ResponseWriter, r *http.Request, data map[string]inte
 	cat := catS[3]
 	id := r.FormValue("lastedId")
 	project := u.CurrentProject.Key
-
-	log.Println(project)
 
 	msgs, err := db.SelectMessages(project, cat, id)
 	if err != nil {

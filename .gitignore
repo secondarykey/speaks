@@ -1,3 +1,5 @@
 *.swp
 .speaks
 *.tar.gz
+key.pem
+cert.pem

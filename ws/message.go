@@ -31,9 +31,26 @@ func createOpenMessage(clientId string) *message {
 	}
 }
 
-func createBadgeMessage(categoryId string) *message {
+func createBadgeMessage(projectId, categoryId string) *message {
 	return &message{
 		Type:     "Notify",
+		Project:  projectId,
 		Category: categoryId,
+	}
+}
+
+func createAddUserMessage(userId int, clientId string, userName string) *message {
+	return &message{
+		Type:     "AddUser",
+		UserId:   userId,
+		UserName: userName,
+		ClientId: clientId,
+	}
+}
+
+func createDeleteUserMessage(clientId string) *message {
+	return &message{
+		Type:     "DeleteUser",
+		ClientId: clientId,
 	}
 }

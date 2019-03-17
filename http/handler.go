@@ -45,7 +45,6 @@ func (p urlPattern) getHandle(path string) (handler, bool) {
 				hand = elm
 				rtn = true
 				leng = len(key)
-				log.Println("Pattern:" + key)
 			}
 		}
 	}
@@ -137,7 +136,6 @@ func (route htmlRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if _, ok := err.(*NoWrite); ok {
-			log.Println(err.Error())
 			return
 		}
 
@@ -198,7 +196,7 @@ func (route jsonRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		data["Error"] = err.Error()
 	}
 
-	err = setJson(data, w)
+	err = setJSON(data, w)
 	if err != nil {
 		log.Println(err)
 	}
@@ -275,6 +273,8 @@ func Listen(root, port string) error {
 	http.Handle("/", router)
 
 	return http.ListenAndServe(":"+port, nil)
+
+	//return http.ListenAndServeTLS(":"+port, "cert.pem", "key.pem", nil)
 }
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -297,7 +297,7 @@ func setTemplates(w http.ResponseWriter, param interface{}, templateFile string)
 	return nil
 }
 
-func setJson(s interface{}, w http.ResponseWriter) error {
+func setJSON(s interface{}, w http.ResponseWriter) error {
 	res, err := json.Marshal(s)
 	if err != nil {
 		return err
