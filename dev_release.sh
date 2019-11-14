@@ -27,7 +27,7 @@ case $answer in
     rm -r data
 
     echo "generate binary.go"
-    go-bindata.exe -pkg config -o ../config/binary.go ./...
+    statik.exe -src=.speaks
     echo "Success!"
 
     cd ..

@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/sessions v1.1.3
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/rakyll/statik v0.1.6
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/net v0.0.0-20190225153610-fe579d43d832
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
