@@ -27,7 +27,7 @@ case $answer in
     rm -r data
 
     echo "generate binary.go"
-    statik.exe -src=.speaks
+    statik -src=.speaks
     echo "Success!"
 
     cd ..
