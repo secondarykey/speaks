@@ -2,15 +2,14 @@ package config
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/BurntSushi/toml"
+	statik "github.com/rakyll/statik/fs"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -240,34 +239,45 @@ func (c *setting) Generate(d, f string) error {
 	fs.WriteString("\n")
 
 	log.Println("Generate speaks.ini")
-	names := AssetNames()
 
-	for _, name := range names {
-
-		bin, err := Asset(name)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-
-		f := d + "/" + name
-		mkd := filepath.Dir(f)
-		os.MkdirAll(mkd, 0777)
-
-		reader := bytes.NewReader(bin)
-		bf, err := os.Create(f)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		defer bf.Close()
-
-		_, err = io.Copy(bf, reader)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
+	statikFS, err := statik.New()
+	if err != nil {
+		return err
 	}
+
+	statik.Walk(statikFS, "/", func(path string, info os.FileInfo, err error) error {
+
+		name := d + path
+
+		log.Println(name)
+
+		if info.IsDir() {
+			os.MkdirAll(name, 0777)
+		} else {
+
+			bf, err := os.Create(name)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+			defer bf.Close()
+
+			fp, err := statikFS.Open(path)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+			defer fp.Close()
+
+			_, err = io.Copy(bf, fp)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+		}
+
+		return nil
+	})
 
 	dataDir := d + "/" + Config.Web.Upload
 	os.MkdirAll(dataDir, 0777)

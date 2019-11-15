@@ -15,7 +15,7 @@ import (
 	"github.com/secondarykey/speaks/ws"
 )
 
-const Ver = "0.5.1"
+const Ver = "0.7.0"
 
 var currentDir string
 var logLv string

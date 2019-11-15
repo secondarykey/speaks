@@ -26,8 +26,9 @@ case $answer in
     echo "Remove Upload file"
     rm -r data
 
-    echo "generate binary.go"
-    statik -src=.speaks
+    cd ..
+    echo "generate statik.go"
+    statik.exe -src=.speaks -p config -f
     echo "Success!"
 
     cd ..
