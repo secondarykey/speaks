@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"io"
 	"log"
 	"strconv"
 	"strings"
@@ -44,9 +45,6 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 		err := websocket.JSON.Receive(c.ws, msg)
 
 		if err == nil {
-
-			log.Println(msg.Type)
-
 			if msg.Type == "Delete" {
 				msgCh <- msg
 			} else if msg.Type != "Change" {
@@ -59,9 +57,9 @@ func (c *client) start(msgCh chan *message, removeCh chan *client) {
 				c.Category = msg.Category
 			}
 		} else {
-
-			log.Println(err)
-
+			if err != io.EOF {
+				log.Printf("%+v", err)
+			}
 			removeCh <- c
 			return
 		}

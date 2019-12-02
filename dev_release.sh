@@ -28,7 +28,7 @@ case $answer in
 
     cd ..
     echo "generate statik.go"
-    statik.exe -src=.speaks -p config -f
+    ~/go/bin/statik.exe -src=.speaks -p config -f
     echo "Success!"
 
     cd ..
