@@ -11,6 +11,7 @@ import (
 	"github.com/secondarykey/speaks/db"
 )
 
+//プロジェクトの変更
 func switchHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
 	user := data["User"].(*db.User)
