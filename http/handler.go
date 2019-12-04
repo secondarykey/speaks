@@ -272,6 +272,8 @@ func Listen(root, port string) error {
 	router := NewHTMLRouter()
 	http.Handle("/", router)
 
+	log.Println(":" + port)
+
 	return http.ListenAndServe(":"+port, nil)
 
 	//return http.ListenAndServeTLS(":"+port, "cert.pem", "key.pem", nil)
