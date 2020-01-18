@@ -26,8 +26,11 @@ func switchHandler(w http.ResponseWriter, r *http.Request, data map[string]inter
 	key := pathS[3]
 	for _, elm := range user.Projects {
 		if elm.Key == key {
+
 			user.CurrentProject = elm
+			user.CurrentCategory = "Dashboard"
 			saveLoginUser(r, w, user)
+
 			return "/", NewRedirect("/")
 		}
 	}

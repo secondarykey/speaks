@@ -23,10 +23,11 @@ type User struct {
 	Email    string
 	Password string
 
-	CurrentProject Project
-	Roles          RoleMap
-	Projects       []Project
-	ProjectRoles   ProjectRoleMap
+	CurrentProject  Project
+	CurrentCategory string
+	Roles           RoleMap
+	Projects        []Project
+	ProjectRoles    ProjectRoleMap
 }
 
 func createUserTable() error {

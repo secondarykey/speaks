@@ -54,7 +54,7 @@ func run(reader io.Reader, args []string) error {
 
 	leng := len(args)
 	if leng != 1 {
-		return fmt.Errorf("speaks Agument required sub command.")
+		return fmt.Errorf("speaks Arguments required sub command(init,start,help,vertion,release).")
 	}
 
 	sub := args[0]

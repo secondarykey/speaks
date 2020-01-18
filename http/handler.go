@@ -158,6 +158,7 @@ func NewJSONRouter() *jsonRouter {
 
 	router.pattern["/api/message/delete/"] = messageDeleteHandler
 	router.pattern["/api/message/"] = messageHandler
+	router.pattern["/api/search"] = messageSearchHandler
 
 	router.pattern["/api/category/list"] = categoryListHandler
 	router.pattern["/api/category/view/"] = categoryViewHandler

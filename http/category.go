@@ -92,7 +92,14 @@ func categoryViewHandler(w http.ResponseWriter, r *http.Request, data map[string
 		return "", err
 	}
 
+	u.CurrentCategory = cat.Key
+	err = saveLoginUser(r, w, u)
+	if err != nil {
+		return "", err
+	}
+
 	data["Category"] = cat
+
 	return "", nil
 }
 

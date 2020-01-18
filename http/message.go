@@ -68,3 +68,30 @@ func messageDeleteHandler(w http.ResponseWriter, r *http.Request, data map[strin
 
 	return "", nil
 }
+
+func messageSearchHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
+	if r.Method == "GET" {
+		return "", fmt.Errorf("GET Message")
+	}
+
+	u := data["User"].(*db.User)
+	project := u.CurrentProject.Key
+
+	cat := r.FormValue("category")
+	page := r.FormValue("page")
+	val := r.FormValue("search")
+
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	msgs, err := db.SearchMessages(project, cat, val, p)
+	if err != nil {
+		return "", err
+	}
+
+	data["MessageList"] = msgs
+
+	return "", nil
+}

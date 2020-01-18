@@ -7,16 +7,14 @@ import (
 //表示用の
 func chatHandler(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (string, error) {
 
-	//今いるカテゴリにできるか？
-	q := r.URL.Query()
-
-	cat := "Dashboard"
-	catS := q["cat"]
-	if catS != nil || len(catS) > 0 {
-		cat = catS[0]
+	u, err := getLoginUser(r)
+	if err != nil {
+	}
+	if u.CurrentCategory == "" {
+		u.CurrentCategory = "DashBoard"
 	}
 
-	data["Category"] = cat
+	data["Category"] = u.CurrentCategory
 
 	return "chat.tmpl", nil
 }

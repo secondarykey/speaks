@@ -94,6 +94,34 @@ func SelectAllMessage(category, project string) ([]Message, error) {
 	return msgs, nil
 }
 
+func SearchMessages(project, category, text string, page int) ([]Message, error) {
+
+	limit := 10
+	offset := (page - 1) * limit
+
+	sql := createSearchMessageSQL()
+	if offset <= 0 {
+		sql += fmt.Sprintf(" ORDER BY Message.created DESC LIMIT %d", limit)
+	} else {
+		sql += fmt.Sprintf(" ORDER BY Message.created DESC LIMIT %d OFFSET %d", limit, offset)
+	}
+
+	rows, err := inst.Query(sql, category, project, "%"+text+"%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	msgs := make([]Message, 0)
+	for rows.Next() {
+		msg := Message{}
+		rows.Scan(&msg.Id, &msg.UserId, &msg.Category,
+			&msg.Content, &msg.Created, &msg.UserName)
+		msgs = append(msgs, msg)
+	}
+	return msgs, nil
+
+}
+
 func createMessageSQL() string {
 	sql := "select " +
 		"Message.id," +
@@ -104,6 +132,19 @@ func createMessageSQL() string {
 		"User.Name" +
 		" from Message INNER JOIN User ON Message.user_id = User.id" +
 		" Where category = ? and project = ?"
+	return sql
+}
+
+func createSearchMessageSQL() string {
+	sql := "select " +
+		"Message.id," +
+		"Message.user_id," +
+		"Message.category," +
+		"Message.content," +
+		"Message.created," +
+		"User.Name" +
+		" from Message INNER JOIN User ON Message.user_id = User.id" +
+		" Where category = ? and project = ? and content like ?"
 	return sql
 }
 

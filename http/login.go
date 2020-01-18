@@ -175,6 +175,7 @@ func setCurrentProject(u *db.User, key string) error {
 	for _, p := range u.Projects {
 		if p.Key == key {
 			u.CurrentProject = p
+			u.CurrentCategory = "Dashboard"
 			return nil
 		}
 	}
