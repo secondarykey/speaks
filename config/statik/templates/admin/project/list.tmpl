@@ -1,0 +1,80 @@
+{{define "Title"}}
+    Project Management
+{{end}}
+
+{{define "JavaScript"}}
+<script>
+  var memberList = document.querySelectorAll('.memberBtn');
+  for ( let idx = 0; idx < memberList.length; ++idx ) {
+    memberList[idx].addEventListener("click",function(e) {
+      let pKey = e.target.getAttribute("data-id");
+      alert("Not yet implemented");
+    });
+  }
+
+  var deleteList = document.querySelectorAll('.deleteBtn');
+  for ( let idx = 0; idx < deleteList.length; ++idx ) {
+    deleteList[idx].addEventListener("click",function(e) {
+      let pKey = e.target.getAttribute("data-id");
+      alert("Not yet implemented");
+    });
+  }
+
+</script>
+{{end}}
+
+{{define "content"}}
+
+<form action="{{.URL}}" method="post">
+
+  <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="text" name="dispName" id="pname" value="{{ .Project.Name }}" required>
+    <label class="mdl-textfield__label" for="pname">Name...</label>
+  </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="text" name="desc" id="desc" value="{{ .Project.Description}}">
+    <label class="mdl-textfield__label" for="desc">Description...</label>
+  </div>
+
+  <div class="mdl-cell mdl-cell--6-col">
+    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+    Create
+    </button>
+  </div>
+
+  <div class="mdl-cell mdl-cell--12-col">
+    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+      <thead>
+        <tr>
+          <th class="mdl-data-table__cell--non-numeric"></th>
+          <th class="mdl-data-table__cell--non-numeric">Name</th>
+          <th class="mdl-data-table__cell--non-numeric">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+  {{range .ProjectList}}
+        <tr>
+          <td class="mdl-data-table__cell--non-numeric">
+            <button data-id="{{.Key}}" type="button" class="memberBtn mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+            Edit
+            </button>
+          </td>
+
+          <td class="mdl-data-table__cell--non-numeric">{{.Name}}</td>
+          <td class="mdl-data-table__cell--non-numeric">{{.Description}}</td>
+
+          <td class="mdl-data-table__cell--non-numeric">
+            <button data-id="{{.Key}}" type="button" class="deleteBtn mdl-button mdl-js-button mdl-button--raised red">
+            Delete
+            </button>
+          </td>
+        </tr>
+  {{end}}
+      </tbody>
+    </table>
+  </div>
+
+</form>
+
+{{end}}

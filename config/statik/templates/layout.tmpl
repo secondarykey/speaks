@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>{{template "Title" .}}[Speaks]</title>
+
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/monokai.min.css" />
+
+    <!--
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue_grey-indigo.min.css" />
+    -->
+
+    <link rel="stylesheet" href="/css/material.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+  </head>
+  <body>
+
+    <div class="layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+
+      <header class="header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
+        <div class="mdl-layout__header-row">
+          <span class="mdl-layout-title">{{template "Title" .}}</span>
+
+{{if .User.IsLogin}}
+          <nav class="mdl-navigation">
+  {{if .User.IsManager}}
+            <a class="mdl-navigation__link topMenuLink" href="/manage/category/">Management</a>
+  {{ end }}
+            <a class="mdl-navigation__link topMenuLink" href="/memo">Archive</a>
+          </nav>
+
+          <div class="mdl-layout-spacer"></div>
+
+          <div class="search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width">
+            <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field">
+              <i class="material-icons">search</i>
+            </label>
+            <div class="mdl-textfield__expandable-holder">
+              <input class="mdl-textfield__input" type="text" id="search-field">
+            </div>
+          </div>
+
+
+          <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="hdrbtn">
+            <i class="material-icons">more_vert</i>
+          </button>
+
+          <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="hdrbtn">
+            <li class="mdl-menu__item"><a href="/me">{{.User.Name}}</a></li>
+            <li class="mdl-menu__item"><a href="/logout">Logout</a></li>
+          </ul>
+{{ end }}
+
+        </div>
+      </header>
+
+      <div class="drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+
+    {{template "menu" .}}
+
+      </div>
+
+      <main class="mdl-layout__content mdl-color--grey-100">
+
+        <div class="mdl-grid content">
+
+{{template "content" .}}
+
+        </div>
+
+      </main>
+    </div>
+
+    <dialog id="alertDialog" class="mdl-dialog">
+      <h5 class="mdl-dialog__title">Alert</h5>
+      <div class="mdl-dialog__content">
+        <p class="alertMsg"></p>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button close">OK</button>
+      </div>
+    </dialog>
+
+    <dialog id="confirmDialog" class="mdl-dialog">
+      <h5 class="mdl-dialog__title">Confirmation</h5>
+      <div class="mdl-dialog__content">
+        <p class="confirmMsg"></p>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button agree">Agree</button>
+        <button type="button" class="mdl-button close">Disagree</button>
+      </div>
+    </dialog>
+
+    <div id="toast" class="mdl-js-snackbar mdl-snackbar">
+      <div class="mdl-snackbar__text" id="toastMsg"></div>
+      <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+{{template "JavaScript" .}}
+
+    <script>
+
+let handler = (function(){
+    var events = {},
+    key = 0;
+ 
+    return {
+        addListener: function(target, type, listener, capture) {
+            target.addEventListener(type, listener, capture);
+            events[key] = {
+                target: target,
+                type: type,
+                listener: listener,
+                capture: capture
+            };
+            return key++;
+        },
+        removeListener: function(key) {
+            if(key in events) {
+                var e = events[key];
+                e.target.removeEventListener(e.type, e.listener, e.capture);
+            }
+        }
+    };
+}());
+
+function alertSpeaks(msg) {
+  var dialog = document.querySelector('#alertDialog');
+  if (!dialog.showModal) {
+    dialogPolyfill.registerDialog(dialog);
+  }
+
+  dialog.querySelector('.alertMsg').textContent = msg + "一度ログアウトしてみてください";
+  dialog.showModal();
+
+  let close = dialog.querySelector('.close');
+  let closeKey = handler.addListener(close,'click', function() {
+      removeDialog(dialog);
+  });
+}
+
+function confirmSpeaks(msg,callback,obj) {
+
+  var dialog = document.querySelector('#confirmDialog');
+  if (!dialog.showModal) {
+    dialogPolyfill.registerDialog(dialog);
+  }
+
+  dialog.querySelector('.confirmMsg').textContent = msg;
+  dialog.showModal();
+
+  let agree = dialog.querySelector('.agree');
+  let close = dialog.querySelector('.close');
+
+  let agreeKey = handler.addListener(agree,'click', function() {
+    callback(obj);
+    removeDialog(dialog);
+  });
+
+  let closeKey = handler.addListener(close,'click', function() {
+      removeDialog(dialog);
+  });
+  registerDialog(dialog,agreeKey,closeKey)
+}
+
+function registerDialog(dialog,agreeKey,closeKey) {
+  dialog.agreeKey = agreeKey;
+  dialog.closeKey = closeKey;
+}
+
+function removeDialog(dialog) {
+  dialog.close();
+  handler.removeListener(dialog.agreeKey);
+  handler.removeListener(dialog.closeKey);
+}
+
+function toast(msg) {
+  var snackbarContainer = document.querySelector('#toast');
+  var data = {message: msg};
+  snackbarContainer.MaterialSnackbar.showSnackbar(data); 
+}
+
+    </script>
+
+
+  </body>
+</html>

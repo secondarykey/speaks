@@ -1,0 +1,68 @@
+{{define "Title"}}
+Arhcives
+{{end}}
+
+{{define "JavaScript"}}
+<script>
+
+  var editList = document.querySelectorAll('.editBtn');
+  for ( let idx = 0; idx < editList.length; ++idx ) {
+    editList[idx].addEventListener("click",function(e) {
+      let pKey = e.target.getAttribute("data-id");
+      location.href = "/memo/edit/" + pKey;
+    });
+  }
+
+  var deleteList = document.querySelectorAll('.deleteBtn');
+  for ( let idx = 0; idx < deleteList.length; ++idx ) {
+    deleteList[idx].addEventListener("click",function(e) {
+      let pKey = e.target.getAttribute("data-id");
+      confirmSpeaks("Delete?",function() {
+        location.href = "/memo/delete/" + pKey;
+      });
+    });
+  }
+
+</script>
+{{end}}
+
+{{define "content"}}
+
+<ul class="mdl-list">
+
+  {{range .MemoList}}
+  <li class="mdl-list__item">
+
+{{ if $.User.IsEditor }}
+    <span class="mdl-list__item-secondary-action">
+
+      <button data-id="{{.Key}}" class="editBtn mdl-button mdl-js-button">
+        <i class="material-icons">edit</i>
+      </button> 
+
+    </span>
+{{ end }}
+
+{{ if $.User.IsViewer }}
+    <span class="mdl-list__item-primary-content" style="min-width:300px;">
+      <a href="/memo/{{.Key}}" target="_blank">{{.Name}}</a>
+    </span>
+{{ end }}
+
+{{ if $.User.IsEditor }}
+    <span class="mdl-list__item-secondary-action">
+
+      <button data-id="{{.Key}}" class="deleteBtn mdl-button mdl-js-button red">
+        <i class="material-icons">delete_forever</i>
+      </button> 
+
+    </span>
+
+{{ end }}
+
+  </li>
+  {{end}}
+
+</ul>
+
+{{end}}

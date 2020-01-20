@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{{.Memo.Name}}</title>
+    <link href="/css/github.css" rel="stylesheet">
+    <script src="/js/marked.min.js"></script>
+    <script src="/js/highlight.pack.js"></script>
+  </head>
+  <body>
+    <input type="hidden" id="editor" value="{{.Memo.Content}}"/>
+    <div id="result" width="100%" height="100%"></div>
+    <script src="/js/markdown.js"></script>
+  </body>
+</html>

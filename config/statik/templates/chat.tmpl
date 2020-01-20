@@ -1,0 +1,83 @@
+{{define "Title"}}
+{{ .User.CurrentProject.Name }}
+{{end}}
+
+{{define "JavaScript"}}
+
+  {{ if .User.IsViewer }}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/highlight.min.js'></script>
+    <script src="/js/desktop-notify-min.js"></script>
+    <script src="/js/chat.js"></script>
+  {{ end }}
+
+{{end}}
+
+{{define "content"}}
+
+  {{ if .User.IsViewer }}
+
+<div id="speakCard" class="mdl-card mdl-shadow--2dp">
+  <div class="mdl-card__title speakTitle">
+    <h2 class="mdl-card__title-text" id="speakTitle">Dashboard</h2>
+    <span for="speakTitle" class="mdl-tooltip"id="Description">適当に喋りましょう！</span>
+  </div>
+
+  <div class="mdl-card__supporting-text" id="inputSpeak">
+    <textarea id="speakTxt" class="form-control" rows="3" placeholder="現在の課題をしゃべりましょう" tabindex="1"></textarea>
+  </div>
+
+  <div class="mdl-card__supporting-text speakContent" style="display:none;" id="previewSpeak"></div>
+
+  <div class="mdl-card__actions mdl-card--border rightFooter">
+    <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="speakBtn" tabindex="2">
+      <i class="material-icons">chat</i>Speak
+    </a>
+  </div>
+
+  <div class="mdl-card__menu" id="speakFile">
+    <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" tabindex="3">
+      <i class="material-icons">attach_file</i>
+    </button>
+  </div>
+
+  <div class="mdl-card__menu" id="speakPreview">
+    <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="switchPreview" tabindex="4">
+      <i class="material-icons">remove_red_eye</i>
+    </button>
+  </div>
+
+</div>
+
+<h2 class="mdl-card__title-text" id="searchResult" style="display:none;"></h2>
+
+<input type="hidden" id="userId" name="userId" value="{{.User.Id}}"/>
+<input type="hidden" id="projectKey" name="projectKey" value="{{.User.CurrentProject.Key}}"/>
+<input type="hidden" id="category" name="category" value="{{.User.CurrentCategory}}"/>
+<input type="hidden" id="lastedId" name="lastedId" value=""/>
+
+<input type="hidden" id="searchWord" name="searchWord" value=""/>
+
+<div class="list-group" id="speakList">
+
+  <div id="speakArea"></div>
+
+  <button class="mdl-button mdl-js-button mdl-button--colored" id="updateBtn">
+    <i class="material-icons">autorenew</i>
+  </button>
+
+  <span for="updateBtn" class="mdl-tooltip mdl-tooltip--top">もっと古いものを読み込みます</span>
+
+  <button class="mdl-button mdl-js-button mdl-button--colored" id="searchBtn" style="display:none;">
+    <i class="material-icons">autorenew</i>
+  </button>
+
+  <span for="searchBtn" class="mdl-tooltip mdl-tooltip--top">さらに検索結果を表示する</span>
+
+</div>
+
+<input type="file" id="uploadFile" name="uploadFile" class="hiddenUpload">
+
+  {{ end }}
+
+{{end}}

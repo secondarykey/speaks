@@ -1,0 +1,108 @@
+{{define "Title"}}
+  Member Management
+{{end}}
+
+{{define "JavaScript"}}
+<script>
+  var updateList = document.querySelectorAll('.updateBtn');
+  for ( let idx = 0; idx < updateList.length; ++idx ) {
+    updateList[idx].addEventListener("click",function(e) {
+
+      let userList = [];
+      {{range .UserList}}
+      userList.push({{.Id}});
+      {{end}}
+
+      let roleList = ["Viewer","Editor","Manager"]
+      let valueList = [];
+
+      userList.forEach(function(v) {
+        roleList.forEach(function(r) {
+          let id = r + "-" + v;
+          console.log(id);
+          let toggle = document.querySelector("#" + id);
+          if ( toggle.checked ) {
+            valueList.push(id);
+          }
+        });
+      });
+
+      let valueCSV = "";
+      valueList.forEach(function(v) {
+        if ( valueCSV != "" ) {
+          valueCSV += ",";
+        }
+        valueCSV += v;
+      });
+
+      console.log(valueCSV);
+      let mem = document.querySelector("#roleMember");
+      mem.value = valueCSV;
+
+      let form = document.querySelector("#updateForm");
+      form.submit();
+
+    });
+  }
+</script>
+{{end}}
+
+{{define "content"}}
+
+<button type="button" class="updateBtn mdl-button mdl-js-button mdl-button--raised mdl-button--colored view-ne">
+Update
+</button>
+
+<form id="updateForm" action="/manage/project/member/update" method="post">
+  <input id="roleMember" type="hidden" name="roleMember" value=""/>
+
+<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp mdl-cell mdl-cell--12-col">
+  <thead>
+    <tr>
+      <th class="mdl-data-table__cell--non-numeric">Name</th>
+      <th class="mdl-data-table__cell--non-numeric">Viewer</th>
+      <th class="mdl-data-table__cell--non-numeric">Editor</th>
+      <th class="mdl-data-table__cell--non-numeric">Manager</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  {{range .UserList}}
+    <tr>
+
+      <td class="mdl-data-table__cell--non-numeric">{{.Name}}</td>
+      <td class="mdl-data-table__cell--non-numeric">
+
+<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Viewer-{{.Id}}">
+  <input type="checkbox" id="Viewer-{{.Id}}" class="mdl-switch__input" {{if .IsViewer }}checked{{end}}>
+  <span class="mdl-switch__label"></span>
+</label>
+
+      </td>
+      <td class="mdl-data-table__cell--non-numeric">
+<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Editor-{{.Id}}">
+  <input type="checkbox" id="Editor-{{.Id}}" class="mdl-switch__input" {{if .IsEditor }}checked{{end}}>
+  <span class="mdl-switch__label"></span>
+</label>
+      </td>
+
+      <td class="mdl-data-table__cell--non-numeric">
+<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="Manager-{{.Id}}">
+  <input type="checkbox" id="Manager-{{.Id}}" class="mdl-switch__input" {{if .IsManager }}checked{{end}}>
+  <span class="mdl-switch__label"></span>
+</label>
+      </td>
+    </tr>
+
+  {{end}}
+
+  </tbody>
+</table>
+
+</form>
+
+<button type="button" class="updateBtn mdl-button mdl-js-button mdl-button--raised mdl-button--colored view-se">
+   Update
+</button>
+
+{{end}}

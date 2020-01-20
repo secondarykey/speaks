@@ -1,0 +1,33 @@
+{{define "Title"}}Error{{end}}
+
+{{define "JavaScript"}}
+{{end}}	
+
+{{define "content"}}
+
+  <div class="mdl-cell mdl-cell--4-col">
+  </div>
+
+  <div class="mdl-cell mdl-cell--4-col">
+
+    <form class="form-signin" method="post" action="login">
+
+      <div class="mdl-card mdl-color--white mdl-shadow--2dp" id="loginBox">
+
+        <div class="mdl-card__title mdl-card--expand" id="inputBlock">
+          <h5> 
+{{ .Error }}
+
+<a href="/"> Back </a>
+          </h5>
+        </div>
+
+      </div>
+
+    </form>
+  </div>
+
+  <div class="mdl-cell mdl-cell--4-col">
+  </div>
+
+{{end}}

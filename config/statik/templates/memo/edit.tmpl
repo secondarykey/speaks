@@ -1,0 +1,53 @@
+{{define "Title"}}
+Arhcive Edit
+{{end}}
+
+{{define "JavaScript"}}
+<link href="/css/github.css" rel="stylesheet">
+<script src="/js/marked.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script src="/js/markdown.js"></script>
+<script>
+let btn = document.querySelector("#editBtn");
+btn.addEventListener("click",function(e) {
+
+  let xhr = new XMLHttpRequest();
+  let key = "{{.Memo.Key}}";
+  var formData = new FormData();
+
+  let name = document.querySelector("#Name");
+  let content = document.querySelector("#editor");
+  formData.append("Name",name.value);
+  formData.append("Content",content.value);
+
+  xhr.open("POST", "/api/memo/edit/" + key);
+  xhr.addEventListener('load', function(e) {
+    var resp = JSON.parse(e.target.responseText);
+    console.log(resp);
+  }, false);
+
+  xhr.send(formData);
+});
+</script>
+
+{{end}}
+
+{{define "content"}}
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="text" id="Name" name="Name" value="{{.Memo.Name}}">
+    <label class="mdl-textfield__label" for="Name">Name...</label>
+  </div>
+
+  <button data-id="{{.Memo.Key}}" type="button" id="viewer" class="view-ne mdl-button mdl-js-button mdl-button--raised">
+    <i class="material-icons">open_in_new</i>
+  </button>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col" style="min-height:400px;">
+    <textarea class="mdl-textfield__input" type="text" id="editor" name="Content">{{.Memo.Content}}</textarea>
+  </div>
+
+  <button data-id="{{.Memo.Key}}" type="button" id="editBtn" class="view-se mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+    <i class="material-icons">edit</i>
+  </button>
+
+{{end}}

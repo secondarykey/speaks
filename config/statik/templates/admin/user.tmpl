@@ -1,0 +1,107 @@
+{{define "Title"}}
+  {{if .Type.IsMe }}
+    Account Setting
+  {{else}}
+    User Management
+  {{end}}
+{{end}}
+
+{{define "JavaScript"}}
+{{end}}
+
+{{define "content"}}
+
+
+<form action="{{.URL}}" method="post">
+  <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="text" name="dispName" id="name" value="{{.EditUser.Name}}">
+    <label class="mdl-textfield__label" for="Name">Name...</label>
+  </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="text" name="email" id="email" value="{{.EditUser.Email}}" {{if .Type.IsMe}}readonly{{end}}>
+    <label class="mdl-textfield__label" for="email">Email...</label>
+  </div>
+
+{{if eq .Type.IsAdmin false }}
+  <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="password" name="password" id="inputPassword" >
+    <label class="mdl-textfield__label" for="Name">Password...</label>
+  </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--6-col">
+    <input class="mdl-textfield__input" type="password" name="verifiedPassword" id="verifiedPassword" >
+    <label class="mdl-textfield__label" for="verifiedPassword">Password...</label>
+  </div>
+
+{{end}}
+
+  <div class="mdl-cell mdl-cell--6-col">
+    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+      Create
+    </button>
+  </div>
+
+</form>
+
+
+{{if .Type.IsMe }}
+
+<div class="view-ne">
+<!-- Icon Register -->
+<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab" id="iconBtn">
+  <i class="material-icons">attach_file</i>
+</button>
+
+<form id="iconForm" action="/me/upload" method="post" enctype="multipart/form-data" style="display:none">
+  <div class="input-group">
+    <input type="file" id="iconFile" name="uploadFile" class="form-control">
+    <span class="input-group-btn">
+      <button type="submit" class="btn btn-primary">Upload</button>
+    </span>
+  </div>
+</form>
+
+<script>
+  var iconBtn = document.querySelector('#iconBtn');
+  var updateFile = document.querySelector('#iconFile');
+  iconBtn.addEventListener("click",function() {
+    updateFile.click();
+  });
+  updateFile.addEventListener("change",function() {
+    var iconForm = document.querySelector('#iconForm');
+    iconForm.submit();
+  });
+</script>
+</div>
+
+{{end}}
+
+
+{{if .Type.IsAdmin }}
+<div class="mdl-cell mdl-cell--12-col">
+
+<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+  <thead>
+    <tr>
+      <th class="mdl-data-table__cell--non-numeric">Name</th>
+      <th class="mdl-data-table__cell--non-numeric">Email</th>
+      <th class="mdl-data-table__cell--non-numeric">Register URL</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{range .UserList}}
+    <tr>
+      <td class="mdl-data-table__cell--non-numeric">{{.Name}}</td>
+      <td class="mdl-data-table__cell--non-numeric">{{.Email}}</td>
+      <td class="mdl-data-table__cell--non-numeric">{{.Password}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+
+</div>
+
+{{end}}
+
+{{end}}
