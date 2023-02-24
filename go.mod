@@ -9,7 +9,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/rakyll/statik v0.1.6
 	github.com/satori/go.uuid v1.2.0
-	golang.org/x/net v0.0.0-20190225153610-fe579d43d832
+	golang.org/x/net v0.7.0
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/ldap.v3 v3.0.2
